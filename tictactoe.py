@@ -1,6 +1,6 @@
 from collections import deque
 from random import choice
-from typing import Deque, Optional, Set, Tuple
+from typing import ClassVar, Deque, FrozenSet, Optional, Set, Tuple
 
 Side = Tuple[str, str, str]
 
@@ -15,10 +15,16 @@ class Player:
 
     """
 
-    def __init__(self, mark: str, *, ai: bool = False, level: str = 'easy') -> None:
+    supported_types: ClassVar[FrozenSet[str]] = frozenset(("user", "easy"))
+
+    def __init__(self, mark: str, *, type_: str = "user") -> None:
+        if type_ not in Player.supported_types:
+            raise ValueError
         self.mark = mark
-        self.is_ai = ai
-        self.level = level
+        self.is_ai = False
+        if type_ != "user":
+            self.is_ai = True
+            self.level = type_
 
     def __str__(self) -> str:
         return self.mark
@@ -83,11 +89,13 @@ class TicTacToe:
 
     """
 
-    def __init__(self, *, field: str = EMPTY * 9, with_ai: bool = True):
+    def __init__(
+            self, *, field: str = EMPTY * 9, x_type: str = "user", o_type: str = "user"
+    ):
         self.active: bool = True
 
-        self.player_x: Player = Player('X')
-        self.player_o: Player = Player('O', ai=with_ai)
+        self.player_x: Player = Player('X', type_=x_type)
+        self.player_o: Player = Player('O', type_=o_type)
 
         self.field: str = field.replace('_', EMPTY)
         if not frozenset(self.field).issubset(
@@ -142,7 +150,7 @@ class TicTacToe:
                 else:  # self.field.count(EMPTY) == 0
                     print("Draw")
             elif len(winners) == 1:
-                print(f"{winners.pop()} wins")
+                print(f"{winners.pop()} wins\n")
             else:  # len(winners) > 1
                 print("Impossible")
         else:
@@ -175,5 +183,17 @@ class TicTacToe:
 
 
 if __name__ == '__main__':
-    tic_tac_toe = TicTacToe()
-    tic_tac_toe.play()
+    command = input("Input command: ")
+    while command != "exit":
+        parameters = command.split()
+        if (
+                len(parameters) == 3
+                and parameters[0] == "start"
+                and parameters[1] in Player.supported_types
+                and parameters[2] in Player.supported_types
+        ):
+            tic_tac_toe = TicTacToe(x_type=parameters[1], o_type=parameters[2])
+            tic_tac_toe.play()
+        else:
+            print("Bad parameters!")
+        command = input("Input command: ")
