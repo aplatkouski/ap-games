@@ -1,33 +1,35 @@
 from collections import deque
 from random import choice
-from typing import ClassVar, Deque, FrozenSet, Optional, Set, Tuple
+from typing import (Callable, ClassVar, Deque, Dict, List, Literal, Optional,
+                    Set, Tuple, Type)
 
 Side = Tuple[str, str, str]
+Strategy = Callable[[str], int]
+SupportedPlayers = Dict[str, Type['TicTacToePlayer']]
+PlayerMarks = Literal["X", "O"]
+
 
 EMPTY = ' '
 
 
-class Player:
-    """Player class introduces player in Tic-Tac-Toe game and interacts
-    by CLI.
+class TicTacToePlayer:
+    """TicTacToePlayer class introduces player in Tic-Tac-Toe."""
 
-    This class has only one public interface :meth:`.Player.go`.
-
-    """
-
-    supported_types: ClassVar[FrozenSet[str]] = frozenset(("user", "easy"))
-
-    def __init__(self, mark: str, *, type_: str = "user") -> None:
-        if type_ not in Player.supported_types:
-            raise ValueError
+    def __init__(self, mark: PlayerMarks) -> None:
         self.mark = mark
-        self.is_ai = False
-        if type_ != "user":
-            self.is_ai = True
-            self.level = type_
 
     def __str__(self) -> str:
         return self.mark
+
+    def go(self, field: str) -> int:
+        raise NotImplementedError
+
+
+class HumanPlayer(TicTacToePlayer):
+    """HumanPlayer class introduces user in Tic-Tac-Toe game and
+    interacts by CLI.
+
+    """
 
     @staticmethod
     def _coordinate_converter(x: int, y: int) -> int:
@@ -42,7 +44,7 @@ class Player:
         return (x - 1) + 3 * (3 - y)
 
     @classmethod
-    def _read_coordinates(cls) -> int:
+    def go(cls, field: str) -> int:
         """Read ``x`` and ``y`` coordinates from input and return one
         coordinate.
 
@@ -67,42 +69,130 @@ class Player:
             print('You should enter numbers!')
         return -1
 
+
+class EasyPlayer(TicTacToePlayer):
+    """EasyPlayer class introduces AI player in Tic-Tac-Toe
+    game with choice random index of any empty (' ') cell in field.
+
+    """
+
+    @staticmethod
+    def _random_choice(field: str) -> int:
+        empty_cells: List[int] = [
+            index for index, cell in enumerate(field) if cell == EMPTY
+        ]
+        if empty_cells:
+            return choice(empty_cells)
+        return -1
+
     def go(self, field: str) -> int:
-        if self.is_ai:
-            print(f'Making move level "{self.level}"')
-            return choice([index for index, cell in enumerate(field) if cell == EMPTY])
-        return self._read_coordinates()
+        """Return random index of any empty (' ') cell in field."""
+        print(f'Making move level "easy"')
+        return self._random_choice(field)
+
+
+class MediumPlayer(EasyPlayer):
+    """MediumPlayer class introduces AI player in Tic-Tac-Toe game
+    with making choice index of empty cell based on analysis
+    of consequences of one-next-step.
+
+    """
+
+    @staticmethod
+    def _strategy(*, func: Strategy, field: str) -> int:
+        """Iterates over all possible combinations of sides (rows,
+        columns and diagonals) and check them with :param:`func`.
+
+        If :param:`func` return ``True`` (strategy can be applied to
+        side) return index of empty cell in field as move option.
+        Otherwise return "-1"
+
+        """
+        for i in range(3):
+            row: str = field[i * 3: (i * 3) + 3]
+            if func(row):
+                return i * 3 + row.index(EMPTY)
+
+            column: str = field[0 + i:: 3]
+            if func(column):
+                return column.index(EMPTY) * 3 + i
+
+        back_diagonal: str = field[0] + field[4] + field[8]
+        if func(back_diagonal):
+            return back_diagonal.index(EMPTY) * 3 + back_diagonal.index(EMPTY)
+
+        forward_diagonal: str = field[2] + field[4] + field[6]
+        if func(forward_diagonal):
+            return (back_diagonal.index(EMPTY) + 1) * 2
+        return -1
+
+    def _can_win(self, side: str) -> bool:
+        """Strategy: If player can win, return ``True``, otherwise
+        return ``False``
+
+        :param side: any side (row, column or diagonal) as 3-letters string
+
+        """
+        if side.count(EMPTY) == 1 and side.count(self.mark) == 2:
+            return True
+        return False
+
+    def _can_lose(self, side: str) -> bool:
+        """Strategy: If player can lose, return ``True``, otherwise
+        return ``False``
+
+        :param side: any side (row, column or diagonal) as 3-letters string
+
+        """
+        if side.count(EMPTY) == 1 and side.find(self.mark) == -1:
+            return True
+        return False
+
+    def go(self, field: str) -> int:
+        print(f'Making move level "medium"')
+        for func in [self._can_win, self._can_lose]:
+            result: int = self._strategy(func=func, field=field)
+            if result >= 0:
+                return result
+        return self._random_choice(field=field)
 
 
 class TicTacToe:
     """TicTacToe class introduces Tic-Tac-Toe game and supports CLI.
 
-    :param field: Contains 9 symbols containing 'X', 'O' and '_',
-     the latter means it's an empty cell.
+    :param field: Contains 9 symbols containing 'X', 'O' and '_'.
+     '_' means an empty cell.
+
     :ivar active: This is current status of the game.  ``False`` if game
      can't be continued.
-    :ivar player_x: first :class:`.Player`.
-    :ivar player_o: second :class:`.Player`.
+    :ivar player_x: first :class:`.TicTacToePlayer`.
+    :ivar player_o: second :class:`.TicTacToePlayer`.
     :ivar field: battlefield as 9-letters string. It can contain only
      ``X``, ``O`` and `` `` symbols.
-    :ivar players: The queue with :class:`.Player`s.
+    :ivar players: The queue with :class:`.TicTacToePlayer`s.
 
     """
+
+    supported_players: ClassVar[SupportedPlayers] = {
+        "user": HumanPlayer,
+        "easy": EasyPlayer,
+        "medium": MediumPlayer,
+    }
 
     def __init__(
             self, *, field: str = EMPTY * 9, x_type: str = "user", o_type: str = "user"
     ):
         self.active: bool = True
 
-        self.player_x: Player = Player('X', type_=x_type)
-        self.player_o: Player = Player('O', type_=o_type)
+        self.player_x: TicTacToePlayer = TicTacToe.supported_players[x_type]('X')
+        self.player_o: TicTacToePlayer = TicTacToe.supported_players[o_type]('O')
 
         self.field: str = field.replace('_', EMPTY)
         if not frozenset(self.field).issubset(
                 {self.player_x.mark, self.player_o.mark, EMPTY}
         ):
             raise ValueError
-        self.players: Deque[Player] = deque((self.player_x, self.player_o))
+        self.players: Deque[TicTacToePlayer] = deque((self.player_x, self.player_o))
         if self.field.count(self.players[0].mark) > self.field.count(
                 self.players[1].mark
         ):
@@ -148,13 +238,13 @@ class TicTacToe:
                 if self.field.count(EMPTY) > 0:
                     return
                 else:  # self.field.count(EMPTY) == 0
-                    print("Draw")
+                    print("Draw\n")
             elif len(winners) == 1:
                 print(f"{winners.pop()} wins\n")
             else:  # len(winners) > 1
-                print("Impossible")
+                print("Impossible\n")
         else:
-            print("Impossible")
+            print("Impossible\n")
         self.active = False
 
     def print_battlefield(self) -> None:
@@ -189,8 +279,8 @@ if __name__ == '__main__':
         if (
                 len(parameters) == 3
                 and parameters[0] == "start"
-                and parameters[1] in Player.supported_types
-                and parameters[2] in Player.supported_types
+                and parameters[1] in TicTacToe.supported_players
+                and parameters[2] in TicTacToe.supported_players
         ):
             tic_tac_toe = TicTacToe(x_type=parameters[1], o_type=parameters[2])
             tic_tac_toe.play()
