@@ -1,4 +1,5 @@
 from collections import deque
+from random import choice
 from typing import Deque, Optional, Set, Tuple
 
 Side = Tuple[str, str, str]
@@ -6,23 +7,21 @@ Side = Tuple[str, str, str]
 EMPTY = ' '
 
 
-class TicTacToe:
-    """TicTacToe class introduces Tic-Tac-Toe game and supports CLI.
+class Player:
+    """Player class introduces player in Tic-Tac-Toe game and interacts
+    by CLI.
 
-    :param field: Contains 9 symbols containing 'X', 'O' and '_',
-     the latter means it's an empty cell.
-    :ivar active: This is current status of the game.  ``False`` if game
-     can't be continued.
-    :ivar players: The queue with players.
+    This class has only one public interface :meth:`.Player.go`.
 
     """
 
-    def __init__(self, field: str):
-        self.field = field.replace('_', EMPTY)
-        self.active: bool = True
-        self.players: Deque[str] = deque('XO')
-        if self.field.count(self.players[0]) > self.field.count(self.players[1]):
-            self.players.rotate(1)
+    def __init__(self, mark: str, *, ai: bool = False, level: str = 'easy') -> None:
+        self.mark = mark
+        self.is_ai = ai
+        self.level = level
+
+    def __str__(self) -> str:
+        return self.mark
 
     @staticmethod
     def _coordinate_converter(x: int, y: int) -> int:
@@ -36,7 +35,8 @@ class TicTacToe:
         """
         return (x - 1) + 3 * (3 - y)
 
-    def _read_coordinates(self) -> int:
+    @classmethod
+    def _read_coordinates(cls) -> int:
         """Read ``x`` and ``y`` coordinates from input and return one
         coordinate.
 
@@ -54,12 +54,51 @@ class TicTacToe:
         # check ``x`` and ``y``
         if x.isdigit() and y.isdigit():
             if (1 <= int(x) <= 3) and (1 <= int(y) <= 3):
-                return self._coordinate_converter(int(x), int(y))
+                return cls._coordinate_converter(int(x), int(y))
             else:
                 print('Coordinates should be from 1 to 3!')
         else:
             print('You should enter numbers!')
         return -1
+
+    def go(self, field: str) -> int:
+        if self.is_ai:
+            print(f'Making move level "{self.level}"')
+            return choice([index for index, cell in enumerate(field) if cell == EMPTY])
+        return self._read_coordinates()
+
+
+class TicTacToe:
+    """TicTacToe class introduces Tic-Tac-Toe game and supports CLI.
+
+    :param field: Contains 9 symbols containing 'X', 'O' and '_',
+     the latter means it's an empty cell.
+    :ivar active: This is current status of the game.  ``False`` if game
+     can't be continued.
+    :ivar player_x: first :class:`.Player`.
+    :ivar player_o: second :class:`.Player`.
+    :ivar field: battlefield as 9-letters string. It can contain only
+     ``X``, ``O`` and `` `` symbols.
+    :ivar players: The queue with :class:`.Player`s.
+
+    """
+
+    def __init__(self, *, field: str = EMPTY * 9, with_ai: bool = True):
+        self.active: bool = True
+
+        self.player_x: Player = Player('X')
+        self.player_o: Player = Player('O', ai=with_ai)
+
+        self.field: str = field.replace('_', EMPTY)
+        if not frozenset(self.field).issubset(
+                {self.player_x.mark, self.player_o.mark, EMPTY}
+        ):
+            raise ValueError
+        self.players: Deque[Player] = deque((self.player_x, self.player_o))
+        if self.field.count(self.players[0].mark) > self.field.count(
+                self.players[1].mark
+        ):
+            self.players.rotate(1)
 
     def _define_winners(self) -> Set[Optional[str]]:
         """Define and return set of all players who draw solid line.
@@ -72,29 +111,35 @@ class TicTacToe:
         for i in range(3):
             # check rows
             row: str = self.field[i * 3: (i * 3) + 3]
-            if len(set(row)) == 1:
+            if len(frozenset(row)) == 1:
                 winners.add(row[0])
             # check column
             column: str = self.field[0 + i:: 3]
-            if len(set(column)) == 1:
+            if len(frozenset(column)) == 1:
                 winners.add(column[0])
         # check diagonal
         back_diagonal: Side = (self.field[0], self.field[4], self.field[8])
-        if len(set(back_diagonal)) == 1:
+        if len(frozenset(back_diagonal)) == 1:
             winners.add(back_diagonal[0])
         forward_diagonal: Side = (self.field[2], self.field[4], self.field[6])
-        if len(set(forward_diagonal)) == 1:
+        if len(frozenset(forward_diagonal)) == 1:
             winners.add(forward_diagonal[0])
         winners.discard(EMPTY)
         return winners
 
     def _define_game_status(self) -> None:
-        if -1 <= (self.field.count('X') - self.field.count('O')) <= 1:
+        if (
+                abs(
+                    self.field.count(self.player_x.mark)
+                    - self.field.count(self.player_o.mark)
+                )
+                <= 1
+        ):
             winners: Set[Optional[str]] = self._define_winners()
             if len(winners) == 0:
                 if self.field.count(EMPTY) > 0:
-                    print("Game not finished")
-                else:
+                    return
+                else:  # self.field.count(EMPTY) == 0
                     print("Draw")
             elif len(winners) == 1:
                 print(f"{winners.pop()} wins")
@@ -116,10 +161,10 @@ class TicTacToe:
         """The main public interface that run the game."""
         self.print_battlefield()
         while self.active:
-            coordinate: int = self._read_coordinates()
+            coordinate: int = self.players[0].go(self.field)
             if coordinate >= 0:
                 if self.field[coordinate] == EMPTY:
-                    self.field = self.players[0].join(
+                    self.field = self.players[0].mark.join(
                         (self.field[:coordinate], self.field[coordinate + 1:])
                     )
                     self.print_battlefield()
@@ -130,6 +175,5 @@ class TicTacToe:
 
 
 if __name__ == '__main__':
-    enter_field = input("Enter cells: ")
-    tic_tac_toe = TicTacToe(enter_field)
+    tic_tac_toe = TicTacToe()
     tic_tac_toe.play()
