@@ -98,7 +98,7 @@ class SquareBattlefield:
         """
         if isinstance(y, int) and (1 <= y <= self.size):
             if isinstance(x, int) and (1 <= x <= self.size):
-                index: int = self.coordinate_to_index(column=x, row=y)
+                index: int = self.coordinate_to_index(x=x, y=y)
                 return (index,), self._field[index]
             elif x == '*':
                 # For the user: row coordinate starts from 1 from bottom
@@ -200,7 +200,7 @@ class SquareBattlefield:
         """
         return self._field.count(label)
 
-    def coordinate_to_index(self, *, column: int, row: int) -> int:
+    def coordinate_to_index(self, x: int, y: int) -> int:
         """Translates :param:`column` and :param:`row` to index.
 
         Where an example for a 3x3 ``self._field``::
@@ -212,8 +212,8 @@ class SquareBattlefield:
         Return "-1" if it is impossible to convert.
 
         """
-        if (1 <= column <= self.size) and (1 <= row <= self.size):
-            return (column - 1) + self.size * (self.size - row)
+        if (1 <= x <= self.size) and (1 <= y <= self.size):
+            return (x - 1) + self.size * (self.size - y)
         else:
             print(f'Coordinates should be from 1 to {self.size}!')
         return -1
@@ -251,8 +251,7 @@ class SquareBattlefield:
         ``False``.
 
         """
-        column, row = coordinate
-        index: int = self.coordinate_to_index(column=column, row=row)
+        index: int = self.coordinate_to_index(*coordinate)
         if 0 <= index < len(self._field):
             if force or self._field[index] == EMPTY:
                 self._field = label.join(
@@ -478,17 +477,18 @@ class Game:
                 f"The number of players should be from 2 to {self.max_players}!"
             )
 
-        players: Set[Player] = set()
+        self.players: Deque[Player] = deque()
         for num, player_type in enumerate(player_types):
             label: Label = self.labels[num]
-            players.add(self.supported_players[player_type](game=self, label=label))
+            self.players.append(
+                self.supported_players[player_type](game=self, label=label)
+            )
 
         field_without_underscore = field.replace('_', EMPTY)
         if not frozenset(field_without_underscore).issubset({*self.labels, EMPTY}):
             raise ValueError
 
         self._active: bool = True
-        self.players: Deque[Player] = deque(players)
         self.field: SquareBattlefield = SquareBattlefield(
             field=field_without_underscore, gap=self.gap, axis=self.axis
         )
@@ -517,6 +517,9 @@ class Game:
         raise NotImplementedError
 
     def step(self, coordinate: Coordinate, **kwargs: Any) -> bool:
+        if self.field.coordinate_to_index(*coordinate) not in self.possible_steps:
+            print("You cannot go here!")
+            return False
         return self.field.label(coordinate=coordinate, label=self.players[0].label)
 
     def play(self) -> None:
@@ -601,7 +604,7 @@ class Reversi(Game):
         "easy": EasyPlayer,
     }
 
-    directions: ClassVar[Tuple[Coordinate, ...]] = (
+    directions: ClassVar[Set[Coordinate]] = {
         (0, 1),  # top
         (1, 1),  # right-top
         (1, 0),  # right and so on
@@ -610,7 +613,7 @@ class Reversi(Game):
         (-1, -1),
         (-1, 0),
         (-1, 1),
-    )
+    }
 
     def __init__(
             self,
@@ -638,41 +641,42 @@ class Reversi(Game):
         """Return indexes of empty cells as a tuple."""
         current_player_label: Label = self.players[0].label
 
-        possible_steps: Tuple[int, ...] = self.field.possible_steps
         actual_possible_steps: List[int] = list()
-        for index in possible_steps:
-            is_successful: bool = False
+        for index in self.field.possible_steps:
             coordinate: Coordinate = self.field.index_to_coordinate(index)
-            directions: List[Coordinate] = self.enemy_occupied_directions(
-                coordinate=coordinate
-            )
-            for shift in directions:
+            # Iterate over all directions where the cell occupied by
+            # the opponent
+            for shift in self.opponent_occupied_directions(coordinate=coordinate):
                 analyzed_coordinate, label = self.field.get_offset_cell(
                     coordinate, shift
                 )
+                # Iterate over all cells in this direction
                 while label and label not in (EMPTY, current_player_label):
                     analyzed_coordinate, label = self.field.get_offset_cell(
                         analyzed_coordinate, shift
                     )
                 else:
+                    # If behind the opponent's cells, the cell occupied
+                    # by the current player is located
                     if label == current_player_label:
-                        is_successful = True
-            if is_successful:
-                actual_possible_steps.append(index)
+                        actual_possible_steps.append(index)
+                        # if successful, other directions can not be
+                        # checked
+                        break
         return tuple(actual_possible_steps)
 
-    def enemy_occupied_directions(
+    def opponent_occupied_directions(
             self, coordinate: Coordinate, player_label: str = ''
-    ) -> List[Coordinate]:
+    ) -> Set[Coordinate]:
         """Determine the ``directions`` where adjacent cells are
-        occupied by the enemy
+        occupied by the opponent
 
         :param coordinate: The coordinate against which adjacent
          cells will be checked.
         :param player_label: Cells with this "friendly" label will
-         not be considered an enemy.
+         not be considered an opponent.
 
-        :return: list of offsets relative to the ``coordinate``.
+        :return: set of offsets relative to the ``coordinate``.
 
         """
         if not player_label:
@@ -683,11 +687,13 @@ class Reversi(Game):
             _, adjacent_label = self.field.get_offset_cell(coordinate, shift)
             if adjacent_label and adjacent_label not in (EMPTY, player_label):
                 directions.append(shift)
-        return directions
+        return set(directions)
 
     def refresh_status(self) -> None:
         if not self.possible_steps:
-            skipped_message: str = f"Player '{self.players[0].label}' doesn't have possible steps!"
+            skipped_message: str = (
+                f"Player '{self.players[0].label}' doesn't have possible steps!"
+            )
             self.players.rotate(1)
             if not self.possible_steps:
                 winners: Set[Player] = self.winners
@@ -700,41 +706,37 @@ class Reversi(Game):
                 print(skipped_message)
 
     def step(self, coordinate: Coordinate, **kwargs: Any) -> bool:
-        current_player: Player = self.players[0]
-        is_successful: bool = False
-        directions: List[Coordinate] = self.enemy_occupied_directions(
-            coordinate=coordinate
-        )
-        while directions:
-            shift = directions.pop()
-            enemy_occupied_cells: List[Coordinate] = list()
-            # extract first cell in this direction
-            analyzed_coordinate, label = self.field.get_offset_cell(coordinate, shift)
-            # Iterate over all cells in this direction
-            while label and label not in (EMPTY, current_player.label):
-                # save the coordinate of the current occupied cell
-                enemy_occupied_cells.append(analyzed_coordinate)
-                # extract next cell in this direction
+        if self.field.coordinate_to_index(*coordinate) not in self.possible_steps:
+            print("You cannot go here!")
+            return False
+
+        current_player_label: Label = self.players[0].label
+        if self.field.label(coordinate=coordinate, label=current_player_label):
+            for shift in self.opponent_occupied_directions(coordinate=coordinate):
+                opponent_occupied_cells: List[Coordinate] = list()
                 analyzed_coordinate, label = self.field.get_offset_cell(
-                    analyzed_coordinate, shift
+                    coordinate, shift
                 )
-            else:
-                # If the last cell is occupied by the current player
-                # label all ``enemy_occupied_cells`` with
-                # ``player.label``
-                if label == current_player.label:
-                    is_successful = True
-                    while enemy_occupied_cells:
-                        self.field.label(
-                            coordinate=enemy_occupied_cells.pop(),
-                            label=current_player.label,
-                            force=True,
-                        )
-        if is_successful:
-            self.field.label(coordinate=coordinate, label=current_player.label)
-        # else:
-        #     print("You cannot go here!")
-        return is_successful
+                # Iterate over all cells in this direction while label is
+                # occupied opponent
+                while label and label not in (EMPTY, current_player_label):
+                    # Save the coordinate of the current occupied cell
+                    opponent_occupied_cells.append(analyzed_coordinate)
+                    analyzed_coordinate, label = self.field.get_offset_cell(
+                        analyzed_coordinate, shift
+                    )
+                else:
+                    # Label all opponent's cells if there is a cell behind
+                    # them occupied by the current player
+                    if label == current_player_label:
+                        while opponent_occupied_cells:
+                            self.field.label(
+                                coordinate=opponent_occupied_cells.pop(),
+                                label=current_player_label,
+                                force=True,
+                            )
+            return True
+        return False
 
 
 def main(game_class: Type[Game]) -> None:
