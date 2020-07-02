@@ -6,10 +6,10 @@ from typing import (Any, Callable, ClassVar, Deque, Dict, Iterable, List,
 from typing_extensions import Literal
 
 Coordinate = Tuple[int, int]
-Indexes = Tuple[int, ...]
-Side = Tuple[Indexes, str]
+Cell = Tuple[Coordinate, str]
+Side = Tuple[Cell, ...]
 Sides = Tuple[Side, ...]
-Strategy = Callable[[str], bool]
+Strategy = Callable[[Tuple[str, ...]], bool]
 SupportedPlayers = Dict[str, Type['Player']]
 Label = Literal['X', 'O', 'W', 'V']
 
@@ -30,11 +30,12 @@ class SquareBattlefield:
     """
 
     undefined_coordinate: ClassVar[Coordinate] = (-1, -1)
-    undefined_cell: ClassVar[Tuple[Tuple[int], str]] = ((-1,), '')
+    undefined_cell: ClassVar[Cell] = (undefined_coordinate, '')
 
     def __init__(
             self, *, field: str = EMPTY * 9, gap: str = ' ', axis: bool = False
     ) -> None:
+
         side = int(len(field) ** (1 / 2))
         if 1 > side > 9:
             raise ValueError("The size of the battlefield must be between 2 and 9!")
@@ -43,30 +44,35 @@ class SquareBattlefield:
             raise ValueError(
                 f"The battlefield must be square! {side}^2 != {len(field)}."
             )
+        self.size: int = side
 
         self._field: str = field
         self._gap: str = gap
         self._axis: bool = axis
-        self.size: int = side
 
     def __str__(self) -> str:
         horizontal_border: str = (
-                ('  ' if self._axis else '')
-                + '-' * (self.size + len(self._gap) * (self.size + 1) + 2)
+                ("  " if self._axis else "")
+                + "-" * (self.size + len(self._gap) * (self.size + 1) + 2)
         )
-        sparse_rows: List[str] = [
-            (f'{self.size - num} ' if self._axis else '')
-            + f"|{self._gap}"
-            + f'{self._gap}'.join(list(row))
-            for num, row in enumerate(dict(self.rows).values())
-        ]
-        field: str = f'{self._gap}|\n'.join(sparse_rows) + f'{self._gap}|'
-        col_nums: str = f'{self._gap}'.join(map(str, range(1, self.size + 1)))
+        sparse_rows: List[str] = list()
+        row: Side
+        for num, row in enumerate(self.rows):
+            row_as_str: str = (
+                    (f"{self.size - num} " if self._axis else "")
+                    + f"|{self._gap}"
+                    + f"{self._gap}".join(label for _, label in row)
+                    + f"{self._gap}|"
+            )
+            sparse_rows.append(row_as_str)
+
+        field: str = f"\n".join(sparse_rows)
+        col_nums: str = f"{self._gap}".join(map(str, range(1, self.size + 1)))
         battlefield: str = (
                 f"{horizontal_border}\n"
                 f"{field}\n"
                 f"{horizontal_border}"
-                + (f'\n   {self._gap}{col_nums}{self._gap}' if self._axis else '')
+                + (f"\n   {self._gap}{col_nums}{self._gap}" if self._axis else "")
         )
         return battlefield
 
@@ -76,132 +82,106 @@ class SquareBattlefield:
     def __len__(self) -> int:
         return len(self._field)
 
-    def __call__(
-            self, x: Union[int, Literal['*']], y: Union[int, Literal['*']]
-    ) -> Side:
-        """Return ``label`` or side (row or column) by coordinate as
-        2-tuple.
+    def __call__(self, x: int, y: int) -> Cell:
+        """Return cell by coordinate as 2-tuple.
 
-        :param x: column number or literal ``'*'``. Column number
-         starts with 1 from left side of field.
-        :param y: row number or literal ``'*'`` means that it will
-         return all rows. Row number starts with 1 from bottom of field.
-
-        Note: Forbidden to pass ``column='*', row='*'`` together.
+        :param x: column number. Column number starts with 1 from left
+         side of field.
+        :param y: row number. Row number starts with 1 from bottom of
+         field.
 
         :return: 2-tuple, where:
-         * ``first item`` - is a tuple with the index(es) of each
-           label of corresponding item, row or column.
-         * ``second item`` - is a string with label(s) of corresponding
-           cell, row or column.
+         * ``first item`` - column and row coordinates of corresponding
+           cell.
+         * ``second item`` - is a string with the label of corresponding
+           cell.
 
         """
-        if isinstance(y, int) and (1 <= y <= self.size):
-            if isinstance(x, int) and (1 <= x <= self.size):
-                index: int = self.coordinate_to_index(x=x, y=y)
-                return (index,), self._field[index]
-            elif x == '*':
-                # For the user: row coordinate starts from 1 from bottom
-                # to top;  In python row coordinate starts from 0 from
-                # top to bottom, so: self.size - row
-                return self.rows[self.size - y]
-        elif y == '*' and isinstance(x, int) and (1 <= x <= self.size):
-            # for the user: column coordinate starts from 1, in python
-            # starts from 0
-            return self.columns[x - 1]
+        if (1 <= y <= self.size) and (1 <= x <= self.size):
+            index: int = self._coordinate_to_index(x=x, y=y)
+            return (x, y), self._field[index]
         return self.undefined_cell
 
     @property
     def columns(self) -> Sides:
-        """Return columns as a tuple, where each column is a 2-tuple.
+        """Return all columns as a tuple of column.
 
-        Details in :meth:`.SquareBattlefield.all_sides`.
+        For details see :meth:`.SquareBattlefield.all_sides`.
 
         """
-        indexes: Tuple[int, ...]
-        labels: Tuple[str, ...]
-
         first_index_of_each_column = range(self.size)
-        columns: List[Tuple[Indexes, str]] = list()
+        columns: List[Side] = list()
         for index in first_index_of_each_column:
-            indexes, labels = zip(*self.cells[index:: self.size])
-            columns.append((indexes, ''.join(labels)))
+            columns.append(self.cells[index:: self.size])
         return tuple(columns)
 
     @property
     def rows(self) -> Sides:
-        """Return all rows as a tuple, where each row is a 2-tuple.
+        """Return all rows as a tuple of row.
 
-        Details in :meth:`.SquareBattlefield.all_sides`.
+        For details see :meth:`.SquareBattlefield.all_sides`.
 
         """
-        indexes: Tuple[int, ...]
-        labels: Tuple[str, ...]
-
         first_index_of_each_row = range(0, self.size ** 2 - 1, self.size)
-        rows: List[Tuple[Indexes, str]] = list()
+        rows: List[Side] = list()
         for index in first_index_of_each_row:
-            indexes, labels = zip(*self.cells[index: index + self.size])
-            rows.append((indexes, ''.join(labels)))
+            rows.append(self.cells[index: index + self.size])
         return tuple(rows)
 
     @property
     def diagonals(self) -> Sides:
-        """Return main and reverse diagonals as a tuple, where each
-        diagonals is a 2-tuple.
+        """Return main and reverse diagonals as a tuple.
 
-        Details in :meth:`.SquareBattlefield.all_sides`.
+        For details see :meth:`.SquareBattlefield.all_sides`.
 
         """
-        indexes: Tuple[int, ...]
-        labels: Tuple[str, ...]
-
-        indexes, labels = zip(
-            *(self.cells[i * self.size + i] for i in range(self.size))
+        main_diagonal: Side = tuple(
+            self.cells[i * (self.size + 1)] for i in range(self.size)
         )
-        main_diagonal: Side = (indexes, ''.join(labels))
-
-        indexes, labels = zip(
-            *(self.cells[i * self.size + self.size - 1 - i] for i in range(self.size))
+        reverse_diagonal: Side = tuple(
+            self.cells[(i + 1) * (self.size - 1)] for i in range(self.size)
         )
-        reverse_diagonal: Side = (indexes, ''.join(labels))
         return main_diagonal, reverse_diagonal
 
     @property
     def all_sides(self) -> Sides:
-        """Return all rows, columns and diagonals as a tuple, where
-        each side is a 2-tuple:
-         * ``first item`` - is a tuple with the indexes of each
-           label of corresponding side.
-         * ``second item`` - is a string with labels of corresponding
-           side.
+        """Return all rows, columns and diagonals as a tuple of all
+        sides. Where each side is a tuple of cells.
 
         """
         return self.rows + self.columns + self.diagonals
 
     @property
-    def cells(self) -> Tuple[Tuple[int, str], ...]:
+    def cells(self) -> Tuple[Cell, ...]:
         """Return tuple of cells of the battelfield where each cell is
         a 2-tuple, where:
-         * ``first item`` - is a index of the cell;
-         * ``second item`` - is a label of the cell.
+         * ``first item`` - is a coordinate of the corresponding cell;
+         * ``second item`` - is a label (as string) of the corresponding
+           cell.
 
         """
-        return tuple(enumerate(self._field))
+        return tuple(
+            (self._index_to_coordinate(index), label)
+            for index, label in enumerate(self._field)
+        )
 
     @property
-    def possible_steps(self) -> Tuple[int, ...]:
-        return tuple(index for index, cell in self.cells if cell == EMPTY)
+    def possible_steps(self) -> Tuple[Coordinate, ...]:
+        """Return coordinates of all possible steps. By default,
+        coordinates of all ``EMPTY`` cells.
+
+        """
+        return tuple(coordinate for coordinate, label in self.cells if label == EMPTY)
 
     def count(self, label: str) -> int:
-        """Returns the number of occurrences of a :param:`label`
-        in the current battlefield.
+        """Returns the number of occurrences of a :param:`label` in the
+        current battlefield.
 
         """
         return self._field.count(label)
 
-    def coordinate_to_index(self, x: int, y: int) -> int:
-        """Translates :param:`column` and :param:`row` to index.
+    def _coordinate_to_index(self, x: int, y: int) -> int:
+        """Translates :param:`x` and :param:`y` to index of cell.
 
         Where an example for a 3x3 ``self._field``::
 
@@ -218,10 +198,10 @@ class SquareBattlefield:
             print(f'Coordinates should be from 1 to {self.size}!')
         return -1
 
-    def index_to_coordinate(self, index: int) -> Coordinate:
+    def _index_to_coordinate(self, index: int) -> Coordinate:
         """Convert the index to coordinate.
 
-        For details see :meth:`.coordinate_to_index`.
+        For details see :meth:`.SquareBattlefield._coordinate_to_index`.
 
         """
         if 0 <= index < len(self._field):
@@ -231,27 +211,29 @@ class SquareBattlefield:
             return column, row
         return self.undefined_coordinate
 
-    def get_offset_cell(
-            self, coordinate: Coordinate, shift: Coordinate
-    ) -> Tuple[Coordinate, str]:
+    def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
+        """Return "Cell" (as tuple of coordinate and label) by
+        coordinate calculated as algebraic sum of vectors:
+        :param:`coordinate` and :param:`shift`.
+
+        """
         new_coordinate: Coordinate = cast(
-            Tuple[int, int], tuple(x + y for x, y in zip(coordinate, shift))
+            Tuple[int, int], tuple(map(sum, zip(coordinate, shift)))
         )
-        label: str = self(*new_coordinate)[1]
-        return new_coordinate, label
+        return self(*new_coordinate)
 
     def print(self) -> None:
-        """Print battlefield"""
+        """Print battlefield."""
         print(self)
 
     def label(self, coordinate: Coordinate, label: str, *, force: bool = False) -> bool:
-        """Mark position of battelfield with :param:`index` with
+        """Label position of battelfield with :param:`coordinate` with
         :param:`label` if :param:`force` = ``True`` or occupied position
         is **empty** (``EMPTY``). Return ``True``, otherwise return
         ``False``.
 
         """
-        index: int = self.coordinate_to_index(*coordinate)
+        index: int = self._coordinate_to_index(*coordinate)
         if 0 <= index < len(self._field):
             if force or self._field[index] == EMPTY:
                 self._field = label.join(
@@ -274,14 +256,16 @@ class SquareBattlefield:
         :param from_coordinate: The coordinate of cell that will be
          erased (set ``EMPTY``).
         :param to_coordinate: The coordinate of cell that will be
-         labeled with param:`label` if at least one of case is ``True``:
+         labeled with param:`label` if at least one of condition is
+         ``True``:
           * ``force=True``;
           * value in destination cell is ``EMPTY``and :param:`label` is
             equal "label" in cell with :param:`from_coordinate`.
-        :param label: "label" that will be set.
+        :param label: "label" that will be set cell with
+         ``to_coordinate``.
         :param force: Default is ``False``. If ``force=True`` it doesn't
-         matter if the position with ``to_coordinate`` is empty or it
-         the position wit ``from_coordinate`` contains the same "label"
+         matter if the position with ``to_coordinate`` is empty or if
+         the position with ``from_coordinate`` contains the same "label"
          as :param:`label`.
 
         """
@@ -289,7 +273,6 @@ class SquareBattlefield:
             result = self.label(to_coordinate, label, force=force)
             if result:
                 self.label(from_coordinate, EMPTY, force=True)
-            else:
                 return result
         else:
             raise ValueError("You cannot move other player's 'label'")
@@ -297,10 +280,7 @@ class SquareBattlefield:
 
 
 class Player:
-    """Abstract class :class:`.Player` introduces the player in the
-    game.
-
-    """
+    """Class introduces the player in the game."""
 
     def __init__(self, game: 'Game', label: Label) -> None:
         self.game = game
@@ -310,9 +290,9 @@ class Player:
         return self.label
 
     def random_choice(self, field: SquareBattlefield) -> Coordinate:
-        possible_steps: Tuple[int, ...] = self.game.possible_steps
+        possible_steps: Tuple[Coordinate, ...] = self.game.possible_steps
         if possible_steps:
-            return field.index_to_coordinate(choice(possible_steps))
+            return choice(possible_steps)
         return field.undefined_coordinate
 
     def go(self, field: SquareBattlefield) -> Coordinate:
@@ -320,7 +300,7 @@ class Player:
         ``field``.
 
         This method should be overridden by subclasses if there is a
-        more complicated rule for determining coordinates.
+        more complex rule for determining coordinates.
 
         """
         return self.random_choice(field)
@@ -333,8 +313,7 @@ class HumanPlayer(Player):
     """
 
     def go(self, field: SquareBattlefield) -> Coordinate:
-        """Read and return ``row`` and ``column`` coordinate from
-        input.
+        """Read coordinate from input and return them.
 
         :return: Return :attr:`.SquareBattlefield.undefined_coordinate`
          if the coordinate are incorrect.
@@ -343,15 +322,11 @@ class HumanPlayer(Player):
         input_list = input("Enter the coordinate: ").split()
         if len(input_list) >= 2:
             x, y = input_list[:2]
-        elif len(input_list) == 1:
-            x, y = input_list[0], EMPTY
-        else:  # input string is empty
-            x = y = EMPTY
-
+        else:
+            x, y = EMPTY, EMPTY
         if x.isdigit() and y.isdigit():
             return int(x), int(y)
-        else:
-            print('You should enter numbers!')
+        print('You should enter numbers!')
         return field.undefined_coordinate
 
 
@@ -363,7 +338,7 @@ class EasyPlayer(Player):
     """
 
     def go(self, field: SquareBattlefield) -> Coordinate:
-        """Return random coordinate of any empty (' ') cell in
+        """Return random coordinate of any empty (``EMPTY``) cell in
         ``field``.
 
         """
@@ -380,40 +355,48 @@ class TicTacToeMediumPlayer(Player):
 
     @staticmethod
     def _strategy(*, func: Strategy, field: SquareBattlefield) -> Coordinate:
-        """Iterates over all possible combinations of sides (rows,
-        columns and diagonals) and check them with :param:`func`.
+        """Iterates over all possible sides (rows, columns and
+        diagonals) and check them with :param:`func`.
 
         If :param:`func` return ``True`` (strategy can be applied to
-        side) return coordinate of empty cell in side as next move
-        option.  Otherwise return
-        :attr:`.SquareBattlefield.undefined_coordinate` if the
-        coordinate are incorrect.
+        side) return coordinate of first empty cell in side as next move
+        option.
+
+        :return: Return :attr:`.SquareBattlefield.undefined_coordinate`
+         if no one strategy can be applied (all ``func`` return
+         ``False``).
 
         """
-        for indexes, side in field.all_sides:
-            if func(side):
-                return field.index_to_coordinate(indexes[side.index(EMPTY)])
+        coordinates: Tuple[Coordinate, ...]
+        labels: Tuple[str, ...]
+
+        for side in field.all_sides:
+            coordinates, labels = zip(*side)
+            if func(labels):
+                return coordinates[labels.index(EMPTY)]
         return field.undefined_coordinate
 
-    def _try_to_win(self, side: str) -> bool:
-        """Strategy: If player can win, return ``True``, otherwise
-        return ``False``.
+    def _try_to_win(self, labels: Tuple[str, ...]) -> bool:
+        """Strategy: If player can win taking the next step, return
+        ``True``, otherwise return ``False``.
 
-        :param side: any side (row, column or diagonal) as string.
+        :param labels: any side (row, column or diagonal) as tuple of
+         labels.
 
         """
-        if side.count(EMPTY) == 1 and side.count(self.label) == (len(side) - 1):
+        if labels.count(EMPTY) == 1 and labels.count(self.label) == (len(labels) - 1):
             return True
         return False
 
-    def _try_not_to_lose(self, side: str) -> bool:
-        """Strategy: If player can lose, return ``True``, otherwise
-        return ``False``.
+    def _try_not_to_lose(self, labels: Tuple[str, ...]) -> bool:
+        """Strategy: If player can lose without taking the next step,
+        return ``True``, otherwise return ``False``.
 
-        :param side: any side (row, column or diagonal) as string.
+        :param labels: any side (row, column or diagonal) as tuple of
+         labels.
 
         """
-        if side.count(EMPTY) == 1 and side.find(self.label) == -1:
+        if labels.count(EMPTY) == 1 and labels.count(self.label) == 0:
             return True
         return False
 
@@ -430,19 +413,19 @@ class TicTacToeMediumPlayer(Player):
 class Game:
     """Game class.
 
-    :param field: String contains :attr:`.Game.field_space`
-     symbols from set :attr:`.Game.labels` and symbols '_' or ' ' mean
-     an empty cell.
+    :param field: String contains symbols from set :attr:`.Game.labels`
+     and symbols '_' or ' ' mean an empty cell.
     :param player_types: Tuple of strings from
-     :attr:`.Game.supported_players` that determine type and count of
-     players. Length of tuple must be between :attr:`.min_players` and
-     :attr:`max_players`.
+     :attr:`.Game.supported_players` that determine types and count of
+     players. Length of tuple must be between :attr:`.Game.min_players`
+     and :attr:`.Game.max_players`.
 
     :ivar _active: This is current status of the game.  ``False`` if game
      can't be continued.
-    :ivar field: The battlefield as as :class:`.SquareBattlefield`.
+    :ivar field: The battlefield as instance of
+     :class:`.SquareBattlefield`.
     :ivar players: The queue with players. Player is an instance of
-     :class:`.Player`.
+     :class:`.Player`. Player with index ``0`` is a current player.
 
 
     """
@@ -501,23 +484,39 @@ class Game:
 
     @property
     def winners(self) -> Set[Player]:
+        """Must be overridden by subclasses and must return
+        a set of instance ot the :class:`.Player` defined as winner.
+
+        """
         raise NotImplementedError
 
     @property
-    def possible_steps(self) -> Tuple[int, ...]:
-        """Return indexes of empty cells as a tuple.
+    def possible_steps(self) -> Tuple[Coordinate, ...]:
+        """Return coordinates of all empty cells as a tuple.
 
         This method should be overridden by subclasses if there is a
-        more complicated rule for determining which cell is empty.
+        more complex rule for determining which cell is empty.
 
         """
         return self.field.possible_steps
 
     def refresh_status(self) -> None:
+        """Must be overridden by subclasses and must change
+        :attr:`.Game._active` if game cannot be continued.
+
+        """
         raise NotImplementedError
 
     def step(self, coordinate: Coordinate, **kwargs: Any) -> bool:
-        if self.field.coordinate_to_index(*coordinate) not in self.possible_steps:
+        """Change the cell(s) in :attr:`.Game.field` using
+        :param:`coordinate` and the current user (user with index ``0``
+        in :attr:`.Game.players`).
+
+        This method should be overridden by subclasses if there is a
+        more complex rule for labeling cell(s) in ``field``.
+
+        """
+        if coordinate not in self.possible_steps:
             print("You cannot go here!")
             return False
         return self.field.label(coordinate=coordinate, label=self.players[0].label)
@@ -534,7 +533,11 @@ class Game:
 
 
 class TicTacToe(Game):
-    """TicTacToe class introduces Tic-Tac-Toe game and supports CLI."""
+    """TicTacToe class introduces Tic-Tac-Toe game and supports CLI.
+
+    For details see :class:`.Game`.
+
+    """
 
     default_field: ClassVar[str] = EMPTY * 9
 
@@ -556,19 +559,25 @@ class TicTacToe(Game):
     def winners(self) -> Set[Player]:
         """Define and return the set of all players who draw solid line.
 
-        If all characters on a "side" are the same and equal to ``label``
-        of :class:`.Player`, then current player is added to the set of
+        If all characters on a "side" are the same and equal to label of
+        player from :attr:`.players`, this player is added to the set of
         winners.
 
         """
         winners: Set[Player] = set()
-        for _, side in self.field.all_sides:
+        for side in self.field.all_sides:
+            labels: str = ''.join(label for _, label in side)
             for player in self.players:
-                if frozenset(side).issubset({player.label}):
+                if labels.count(player.label) == len(labels):
                     winners.add(player)
         return winners
 
     def refresh_status(self) -> None:
+        """Change :attr:`._active` using Tic-Tac-Toe game rule to
+        ``False`` if game cannot be continued.
+        Print the status of the game, if necessary.
+
+        """
         if (
                 abs(
                     self.field.count(self.players[0].label)
@@ -593,6 +602,12 @@ class TicTacToe(Game):
 
 
 class Reversi(Game):
+    """Reversi class introduces Reversi game includes a CLI and supports
+    human user and simple AI.
+
+    For details see :class:`.Game`.
+
+    """
     axis: ClassVar[bool] = True
 
     default_field: ClassVar[str] = (
@@ -625,25 +640,23 @@ class Reversi(Game):
 
     @property
     def winners(self) -> Set[Player]:
-        """Define and return the set of all players who has maximum count
-        of "label".
+        """Define and return the set of all players who have the maximum
+        count of player labels on the field.
 
         """
         player_scores: List[Tuple[int, Player]] = list()
         for player in self.players:
             player_scores.append((self.field.count(player.label), player))
-        player_scores.sort(reverse=True)
         max_score = max(score for score, _ in player_scores)
         return set(player for score, player in player_scores if score == max_score)
 
     @property
-    def possible_steps(self) -> Tuple[int, ...]:
+    def possible_steps(self) -> Tuple[Coordinate, ...]:
         """Return indexes of empty cells as a tuple."""
         current_player_label: Label = self.players[0].label
 
-        actual_possible_steps: List[int] = list()
-        for index in self.field.possible_steps:
-            coordinate: Coordinate = self.field.index_to_coordinate(index)
+        actual_possible_steps: List[Coordinate] = list()
+        for coordinate in self.field.possible_steps:
             # Iterate over all directions where the cell occupied by
             # the opponent
             for shift in self.opponent_occupied_directions(coordinate=coordinate):
@@ -659,7 +672,7 @@ class Reversi(Game):
                     # If behind the opponent's cells, the cell occupied
                     # by the current player is located
                     if label == current_player_label:
-                        actual_possible_steps.append(index)
+                        actual_possible_steps.append(coordinate)
                         # if successful, other directions can not be
                         # checked
                         break
@@ -676,7 +689,7 @@ class Reversi(Game):
         :param player_label: Cells with this "friendly" label will
          not be considered an opponent.
 
-        :return: set of offsets relative to the ``coordinate``.
+        :return: set of offsets relative to the :param:`coordinate`.
 
         """
         if not player_label:
@@ -706,7 +719,7 @@ class Reversi(Game):
                 print(skipped_message)
 
     def step(self, coordinate: Coordinate, **kwargs: Any) -> bool:
-        if self.field.coordinate_to_index(*coordinate) not in self.possible_steps:
+        if coordinate not in self.possible_steps:
             print("You cannot go here!")
             return False
 
