@@ -1,12 +1,12 @@
 from collections import deque
 from random import choice
 from typing import (Any, Callable, ClassVar, Deque, Dict, Iterable, List,
-                    NoReturn, Set, Tuple, Type, Union, cast)
+                    NoReturn, Set, Tuple, Type, Union, cast, NamedTuple)
 
 from typing_extensions import Literal
 
-Coordinate = Tuple[int, int]
-Cell = Tuple[Coordinate, str]
+Coordinate = NamedTuple('Coordinate', [('x', int), ('y', int)])
+Cell = NamedTuple('Cell', [('coordinate', Coordinate), ('label', str)])
 Side = Tuple[Cell, ...]
 Sides = Tuple[Side, ...]
 Strategy = Callable[[Tuple[str, ...]], bool]
@@ -29,8 +29,8 @@ class SquareBattlefield:
 
     """
 
-    undefined_coordinate: ClassVar[Coordinate] = (-1, -1)
-    undefined_cell: ClassVar[Cell] = (undefined_coordinate, '')
+    undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=-1, y=-1)
+    undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label='')
 
     def __init__(
             self, *, field: str = EMPTY * 9, gap: str = ' ', axis: bool = False
@@ -99,7 +99,7 @@ class SquareBattlefield:
         """
         if (1 <= y <= self.size) and (1 <= x <= self.size):
             index: int = self._coordinate_to_index(x=x, y=y)
-            return (x, y), self._field[index]
+            return Cell(coordinate=Coordinate(x, y), label=self._field[index])
         return self.undefined_cell
 
     @property
@@ -161,7 +161,7 @@ class SquareBattlefield:
 
         """
         return tuple(
-            (self._index_to_coordinate(index), label)
+            Cell(coordinate=self._index_to_coordinate(index), label=label)
             for index, label in enumerate(self._field)
         )
 
@@ -171,7 +171,7 @@ class SquareBattlefield:
         coordinates of all ``EMPTY`` cells.
 
         """
-        return tuple(coordinate for coordinate, label in self.cells if label == EMPTY)
+        return tuple(cell.coordinate for cell in self.cells if cell.label == EMPTY)
 
     def count(self, label: str) -> int:
         """Returns the number of occurrences of a :param:`label` in the
@@ -208,7 +208,7 @@ class SquareBattlefield:
             x, y = divmod(index, self.size)
             column = y + 1
             row = self.size - x
-            return column, row
+            return Coordinate(column, row)
         return self.undefined_coordinate
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
@@ -217,10 +217,7 @@ class SquareBattlefield:
         :param:`coordinate` and :param:`shift`.
 
         """
-        new_coordinate: Coordinate = cast(
-            Tuple[int, int], tuple(map(sum, zip(coordinate, shift)))
-        )
-        return self(*new_coordinate)
+        return self(x=coordinate.x + shift.x, y=coordinate.y + shift.y)
 
     def print(self) -> None:
         """Print battlefield."""
@@ -269,7 +266,7 @@ class SquareBattlefield:
          as :param:`label`.
 
         """
-        if force or label == self(*from_coordinate)[1]:
+        if force or label == self(*from_coordinate).label:
             result = self.label(to_coordinate, label, force=force)
             if result:
                 self.label(from_coordinate, EMPTY, force=True)
@@ -325,7 +322,7 @@ class HumanPlayer(Player):
         else:
             x, y = EMPTY, EMPTY
         if x.isdigit() and y.isdigit():
-            return int(x), int(y)
+            return Coordinate(int(x), int(y))
         print('You should enter numbers!')
         return field.undefined_coordinate
 
@@ -620,14 +617,14 @@ class Reversi(Game):
     }
 
     directions: ClassVar[Set[Coordinate]] = {
-        (0, 1),  # top
-        (1, 1),  # right-top
-        (1, 0),  # right and so on
-        (1, -1),
-        (0, -1),
-        (-1, -1),
-        (-1, 0),
-        (-1, 1),
+        Coordinate(0, 1),  # top
+        Coordinate(1, 1),  # right-top
+        Coordinate(1, 0),  # right and so on
+        Coordinate(1, -1),
+        Coordinate(0, -1),
+        Coordinate(-1, -1),
+        Coordinate(-1, 0),
+        Coordinate(-1, 1),
     }
 
     def __init__(
@@ -770,4 +767,4 @@ def main(game_class: Type[Game]) -> None:
 
 
 if __name__ == '__main__':
-    main(game_class=TicTacToe)
+    main(game_class=Reversi)
