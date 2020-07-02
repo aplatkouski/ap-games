@@ -1,17 +1,20 @@
 from collections import deque
 from random import choice
-from typing import (Any, Callable, ClassVar, Deque, Dict, Iterable, List,
-                    NoReturn, Set, Tuple, Type, Union, cast, NamedTuple)
+from typing import (Callable, ClassVar, Deque, Dict, Iterable, List,
+                    NamedTuple, NoReturn, Set, Tuple, Type, Union)
 
 from typing_extensions import Literal
 
 Coordinate = NamedTuple('Coordinate', [('x', int), ('y', int)])
 Cell = NamedTuple('Cell', [('coordinate', Coordinate), ('label', str)])
+Scores = NamedTuple('Scores', [('score', int), ('coordinate', Coordinate)])
+
 Side = Tuple[Cell, ...]
 Sides = Tuple[Side, ...]
+
 Strategy = Callable[[Tuple[str, ...]], bool]
-SupportedPlayers = Dict[str, Type['Player']]
 Label = Literal['X', 'O', 'W', 'V']
+SupportedPlayers = Dict[str, Type['Player']]
 
 EMPTY: Literal[' '] = ' '
 
@@ -36,15 +39,15 @@ class SquareBattlefield:
             self, *, field: str = EMPTY * 9, gap: str = ' ', axis: bool = False
     ) -> None:
 
-        side = int(len(field) ** (1 / 2))
-        if 1 > side > 9:
+        size = int(len(field) ** (1 / 2))
+        if 1 > size > 9:
             raise ValueError("The size of the battlefield must be between 2 and 9!")
         # check that the field is a square
-        if side ** 2 != len(field):
+        if size ** 2 != len(field):
             raise ValueError(
-                f"The battlefield must be square! {side}^2 != {len(field)}."
+                f"The battlefield must be square! {size}^2 != {len(field)}."
             )
-        self.size: int = side
+        self.size: int = size
 
         self._field: str = field
         self._gap: str = gap
@@ -223,22 +226,39 @@ class SquareBattlefield:
         """Print battlefield."""
         print(self)
 
-    def label(self, coordinate: Coordinate, label: str, *, force: bool = False) -> bool:
-        """Label position of battelfield with :param:`coordinate` with
-        :param:`label` if :param:`force` = ``True`` or occupied position
-        is **empty** (``EMPTY``). Return ``True``, otherwise return
-        ``False``.
+    def label(
+            self,
+            coordinate: Coordinate,
+            label: str,
+            *,
+            force: bool = False,
+            simulation: bool = False,
+    ) -> int:
+        """Label position of battelfield.
+
+        :param coordinate: position of cell as
+         Coordinate(x: int, y: int).
+        :param label: new label. It will be set if ``force=True`` or
+         cell with :param:`coordinate` is **empty** (``EMPTY``).
+        :param force: ``False`` by default. When ``True`` it doesn't
+         matter if cell is **empty** or not.
+        :param simulation: ``False`` by default. If ``True`` score is
+         returned without real labeling.
+
+        :return: count of labeled cell with :param:`label`.
 
         """
         index: int = self._coordinate_to_index(*coordinate)
         if 0 <= index < len(self._field):
             if force or self._field[index] == EMPTY:
-                self._field = label.join(
-                    (self._field[:index], self._field[index + 1:])
-                )
-                return True
-            print("This cell is occupied! Choose another one!")
-        return False
+                if not simulation:
+                    self._field = label.join(
+                        (self._field[:index], self._field[index + 1:])
+                    )
+                return 1
+            if not simulation:
+                print("This cell is occupied! Choose another one!")
+        return 0
 
     def move(
             self,
@@ -247,7 +267,8 @@ class SquareBattlefield:
             label: str,
             *,
             force: bool = False,
-    ) -> Union[NoReturn, bool]:
+            simulation: bool = False,
+    ) -> Union[NoReturn, int]:
         """Move :param:`label` from one place to another.
 
         :param from_coordinate: The coordinate of cell that will be
@@ -260,20 +281,24 @@ class SquareBattlefield:
             equal "label" in cell with :param:`from_coordinate`.
         :param label: "label" that will be set cell with
          ``to_coordinate``.
-        :param force: Default is ``False``. If ``force=True`` it doesn't
+        :param force: ``False`` by default. When ``True`` it doesn't
          matter if the position with ``to_coordinate`` is empty or if
          the position with ``from_coordinate`` contains the same "label"
          as :param:`label`.
+        :param simulation: ``False`` by default. If ``True`` score is
+         returned without real labeling.
+
+        :return: count of labeled cell with :param:`label`.
 
         """
+        score: int = 0
         if force or label == self(*from_coordinate).label:
-            result = self.label(to_coordinate, label, force=force)
-            if result:
-                self.label(from_coordinate, EMPTY, force=True)
-                return result
-        else:
-            raise ValueError("You cannot move other player's 'label'")
-        return False
+            score += self.label(
+                to_coordinate, label, force=force, simulation=simulation
+            )
+            if score:
+                self.label(from_coordinate, EMPTY, force=True, simulation=simulation)
+        return score
 
 
 class Player:
@@ -286,13 +311,13 @@ class Player:
     def __str__(self) -> str:
         return self.label
 
-    def random_choice(self, field: SquareBattlefield) -> Coordinate:
+    def random_choice(self) -> Coordinate:
         possible_steps: Tuple[Coordinate, ...] = self.game.possible_steps
         if possible_steps:
             return choice(possible_steps)
-        return field.undefined_coordinate
+        return self.game.field.undefined_coordinate
 
-    def go(self, field: SquareBattlefield) -> Coordinate:
+    def go(self) -> Coordinate:
         """Return random coordinate of any empty (``EMTPY``) cell in
         ``field``.
 
@@ -300,7 +325,7 @@ class Player:
         more complex rule for determining coordinates.
 
         """
-        return self.random_choice(field)
+        return self.random_choice()
 
 
 class HumanPlayer(Player):
@@ -309,7 +334,7 @@ class HumanPlayer(Player):
 
     """
 
-    def go(self, field: SquareBattlefield) -> Coordinate:
+    def go(self) -> Coordinate:
         """Read coordinate from input and return them.
 
         :return: Return :attr:`.SquareBattlefield.undefined_coordinate`
@@ -324,7 +349,7 @@ class HumanPlayer(Player):
         if x.isdigit() and y.isdigit():
             return Coordinate(int(x), int(y))
         print('You should enter numbers!')
-        return field.undefined_coordinate
+        return self.game.field.undefined_coordinate
 
 
 class EasyPlayer(Player):
@@ -334,13 +359,13 @@ class EasyPlayer(Player):
 
     """
 
-    def go(self, field: SquareBattlefield) -> Coordinate:
+    def go(self) -> Coordinate:
         """Return random coordinate of any empty (``EMPTY``) cell in
         ``field``.
 
         """
         print(f'Making move level "easy"')
-        return self.random_choice(field)
+        return self.random_choice()
 
 
 class TicTacToeMediumPlayer(Player):
@@ -350,8 +375,31 @@ class TicTacToeMediumPlayer(Player):
 
     """
 
-    @staticmethod
-    def _strategy(*, func: Strategy, field: SquareBattlefield) -> Coordinate:
+    def _try_to_win(self, labels: Tuple[str, ...]) -> bool:
+        """Strategy: If player can win taking the next step, return
+        ``True``, otherwise return ``False``.
+
+        :param labels: any side of field as a tuple of the label of
+         each cell.
+
+        """
+        if labels.count(EMPTY) == 1 and labels.count(self.label) == (len(labels) - 1):
+            return True
+        return False
+
+    def _try_not_to_lose(self, labels: Tuple[str, ...]) -> bool:
+        """Strategy: If player can lose without taking the next step,
+        return ``True``, otherwise return ``False``.
+
+        :param labels: any side of field as a tuple of the label of
+         each cell.
+
+        """
+        if labels.count(EMPTY) == 1 and labels.count(self.label) == 0:
+            return True
+        return False
+
+    def _strategy(self, *, func: Strategy) -> Coordinate:
         """Iterates over all possible sides (rows, columns and
         diagonals) and check them with :param:`func`.
 
@@ -364,47 +412,46 @@ class TicTacToeMediumPlayer(Player):
          ``False``).
 
         """
+
         coordinates: Tuple[Coordinate, ...]
         labels: Tuple[str, ...]
 
-        for side in field.all_sides:
+        for side in self.game.field.all_sides:
             coordinates, labels = zip(*side)
             if func(labels):
                 return coordinates[labels.index(EMPTY)]
-        return field.undefined_coordinate
+        return self.game.field.undefined_coordinate
 
-    def _try_to_win(self, labels: Tuple[str, ...]) -> bool:
-        """Strategy: If player can win taking the next step, return
-        ``True``, otherwise return ``False``.
-
-        :param labels: any side (row, column or diagonal) as tuple of
-         labels.
-
-        """
-        if labels.count(EMPTY) == 1 and labels.count(self.label) == (len(labels) - 1):
-            return True
-        return False
-
-    def _try_not_to_lose(self, labels: Tuple[str, ...]) -> bool:
-        """Strategy: If player can lose without taking the next step,
-        return ``True``, otherwise return ``False``.
-
-        :param labels: any side (row, column or diagonal) as tuple of
-         labels.
-
-        """
-        if labels.count(EMPTY) == 1 and labels.count(self.label) == 0:
-            return True
-        return False
-
-    def go(self, field: SquareBattlefield) -> Coordinate:
+    def go(self) -> Coordinate:
         print(f'Making move level "medium"')
         func: Strategy
-        for func in (self._try_to_win, self._try_not_to_lose):
-            result: Coordinate = self._strategy(func=func, field=field)
-            if result != field.undefined_coordinate:
+        for strategy in (self._try_to_win, self._try_not_to_lose):
+            result: Coordinate = self._strategy(func=strategy)
+            if result != self.game.field.undefined_coordinate:
                 return result
-        return self.random_choice(field=field)
+        return self.random_choice()
+
+
+class ReversiMediumPlayer(Player):
+    def _max_score(self) -> Coordinate:
+
+        scores: List[Scores] = sorted(
+            (
+                Scores(self.game.step(coordinate, simulation=True), coordinate)
+                for coordinate in self.game.possible_steps
+            ),
+            reverse=True,
+        )
+        if scores:
+            return scores[0].coordinate
+        return self.game.field.undefined_coordinate
+
+    def go(self) -> Coordinate:
+        print(f'Making move level "medium"')
+        result: Coordinate = self._max_score()
+        if result != self.game.field.undefined_coordinate:
+            return result
+        return self.random_choice()
 
 
 class Game:
@@ -466,7 +513,9 @@ class Game:
 
         field_without_underscore = field.replace('_', EMPTY)
         if not frozenset(field_without_underscore).issubset({*self.labels, EMPTY}):
-            raise ValueError
+            raise ValueError(
+                "Field must contain only ' ', '_' and symbols " f"from {self.labels}."
+            )
 
         self._active: bool = True
         self.field: SquareBattlefield = SquareBattlefield(
@@ -504,25 +553,32 @@ class Game:
         """
         raise NotImplementedError
 
-    def step(self, coordinate: Coordinate, **kwargs: Any) -> bool:
+    def step(self, coordinate: Coordinate, *, simulation: bool = False) -> int:
         """Change the cell(s) in :attr:`.Game.field` using
         :param:`coordinate` and the current user (user with index ``0``
         in :attr:`.Game.players`).
+
+        :param coordinate: coordinate of cell which player label.
+        :param simulation: ``False`` by default. If ``True`` score is
+         returned without real labeling.
 
         This method should be overridden by subclasses if there is a
         more complex rule for labeling cell(s) in ``field``.
 
         """
         if coordinate not in self.possible_steps:
-            print("You cannot go here!")
-            return False
-        return self.field.label(coordinate=coordinate, label=self.players[0].label)
+            if not simulation:
+                print("You cannot go here!")
+            return 0
+        return self.field.label(
+            coordinate, self.players[0].label, simulation=simulation
+        )
 
     def play(self) -> None:
         """The main public interface that run the game."""
         self.field.print()
         while self._active:
-            coordinate: Coordinate = self.players[0].go(self.field)
+            coordinate: Coordinate = self.players[0].go()
             if self.step(coordinate=coordinate):
                 self.field.print()
                 self.players.rotate(1)
@@ -605,6 +661,7 @@ class Reversi(Game):
     For details see :class:`.Game`.
 
     """
+
     axis: ClassVar[bool] = True
 
     default_field: ClassVar[str] = (
@@ -614,6 +671,7 @@ class Reversi(Game):
     supported_players: ClassVar[SupportedPlayers] = {
         "user": HumanPlayer,
         "easy": EasyPlayer,
+        "medium": ReversiMediumPlayer,
     }
 
     directions: ClassVar[Set[Coordinate]] = {
@@ -715,13 +773,18 @@ class Reversi(Game):
             else:
                 print(skipped_message)
 
-    def step(self, coordinate: Coordinate, **kwargs: Any) -> bool:
+    def step(self, coordinate: Coordinate, *, simulation: bool = False) -> int:
+        score: int = 0
+
         if coordinate not in self.possible_steps:
             print("You cannot go here!")
-            return False
+            return score
 
         current_player_label: Label = self.players[0].label
-        if self.field.label(coordinate=coordinate, label=current_player_label):
+        score += self.field.label(
+            coordinate=coordinate, label=current_player_label, simulation=simulation
+        )
+        if score:
             for shift in self.opponent_occupied_directions(coordinate=coordinate):
                 opponent_occupied_cells: List[Coordinate] = list()
                 analyzed_coordinate, label = self.field.get_offset_cell(
@@ -740,13 +803,13 @@ class Reversi(Game):
                     # them occupied by the current player
                     if label == current_player_label:
                         while opponent_occupied_cells:
-                            self.field.label(
+                            score += self.field.label(
                                 coordinate=opponent_occupied_cells.pop(),
                                 label=current_player_label,
                                 force=True,
+                                simulation=simulation,
                             )
-            return True
-        return False
+        return score
 
 
 def main(game_class: Type[Game]) -> None:
@@ -767,4 +830,4 @@ def main(game_class: Type[Game]) -> None:
 
 
 if __name__ == '__main__':
-    main(game_class=Reversi)
+    main(game_class=TicTacToe)
