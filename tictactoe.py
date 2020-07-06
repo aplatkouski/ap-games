@@ -524,11 +524,7 @@ class AIPlayer(Player):
 
         step: Step = choice(most_likely_steps)
         # compute and replace ``percentage`` in the selected step
-        step = Step(
-            coordinate=step.coordinate,
-            score=step.score,
-            percentage=int(len(desired_steps) / len(steps) * 100),
-        )
+        step = step._replace(percentage=int(len(desired_steps) / len(steps) * 100))
         log.debug("\t" * depth + f"selected step: {step}")
 
         return step
