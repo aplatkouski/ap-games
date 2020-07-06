@@ -257,9 +257,11 @@ class SquareGameboard:
     def print(self, indent: str = "") -> None:
         """Print gameboard."""
         if indent:
-            print("\n".join(f"{indent}{line}" for line in str(self).split("\n")))
+            result: str = "\n".join(f"{indent}{line}" for line in str(self).split("\n"))
         else:
-            print(self)
+            result = str(self)
+        log.info(result)
+        print(result)
 
     def label(self, coordinate: Coordinate, label: str, *, force: bool = False,) -> int:
         """Label cell of the gameboard with the ``coordinate``.
@@ -639,7 +641,7 @@ class Game:
         if gameboard is None:
             gameboard = self.gameboard
         if player is None:
-            player = self.game.players[0]
+            player = self.players[0]
         return gameboard.available_steps
 
     def get_score(
@@ -731,7 +733,6 @@ class Game:
     def play(self) -> None:
         """The main public interface that run the game."""
         self.gameboard.print()
-        log.info(str(self.gameboard))
         self.status = self.get_status()
         while self.status.active:
             coordinate: Coordinate = self.players[0].go()
