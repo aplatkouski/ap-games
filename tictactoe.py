@@ -356,6 +356,109 @@ class AIPlayer(Player):
         "hard": 4,
     }
 
+    def _get_terminal_score(
+        self, *, depth: int, gameboard: SquareGameboard, player: Player
+    ) -> Tuple[int, int]:
+        """Return ``score`` and ``percentage`` of terminal state."""
+
+        score: int
+        """In the minimax algorithm, it doesn't matter how many ways
+        to win AI at the end of the game. Therefore, the AI
+        "stops fighting" and​is not trying to "steal" one of them.
+        With the variable ``percentage``, the case with two
+        possible steps to lose are worse than one.
+        This is especially important if the "depth" of analysis is
+        limited.
+
+        Run example below with and without ``percentage`` once or twice:
+        TicTacToe(surface="X_OXX_O__", player_types=("easy", "hard")).play()
+
+        hint: "hard" select cell randomly from all empty cells and
+        can lose to "easy" without ``percentage``."""
+        percentage: int
+        """In the minimax algorithm, it doesn't matter when you lose:
+        now or later. Therefore, the AI "stops fighting" if it
+        in any case loses the next steps, regardless of how it takes
+        the step now. In this case, the AI considers that all the
+        steps are the same bad, but this is wrong.
+        Because the adversary can make a mistake, and adding the
+        variable ``factor`` allows the AI to use a possible
+        adversary errors in the future.
+        With the ``factor``, losing now is worse than losing later.
+        Therefore, the AI is trying not to "give up" now and wait
+        for better chances in the future.
+        This is especially important if the "depth" of analysis is
+        limited.
+
+        Run example below with and without ``factor`` once or twice:
+        TicTacToe(surface="X_OX_____", player_types=("easy", "hard")).play()
+
+        hint: "hard" select cell randomly from all empty cells and
+        can lose to "easy" without ``factor``."""
+        factor: int = 1
+
+        if self.game.get_status(gameboard=gameboard, player=player).active:
+            if depth < self.max_depth[self.type]:
+                _, score, percentage = self._minimax(
+                    depth=depth + 1, gameboard=gameboard, player=player
+                )
+            else:
+                score = self.game.get_score(gameboard=gameboard, player=self)
+                percentage = 100
+        else:
+            factor *= self.max_depth[self.type] + 1 - depth
+            score = self.game.get_score(gameboard=gameboard, player=self)
+            percentage = 100
+        return score * factor, percentage
+
+    def _get_next_player(self, current_player: Player) -> Player:
+        players_cycle: Iterator[Player] = cycle(self.game.players)
+        while next(players_cycle) != current_player:
+            pass
+        return next(players_cycle)
+
+    def _extract_desired_steps(
+        self, depth: int, steps: List[Step], player: Player
+    ) -> List[Step]:
+        if player == self:
+            score_func = max
+        else:
+            score_func = min
+
+        desired_score: int = score_func(step.score for step in steps)
+        desired_steps: List[Step] = [
+            step for step in steps if step.score == desired_score
+        ]
+        log.debug(
+            "\t" * depth + f"desired score steps ({score_func}) -> {desired_steps}"
+        )
+        return desired_steps
+
+    def _extract_most_likely_steps(
+        self, depth: int, steps: List[Step], player: Player
+    ) -> List[Step]:
+        # Note: all Steps on this stage have the same score
+        desired_score: int = steps[0].score
+
+        if (desired_score >= 0 and player == self) or (
+            desired_score < 0 and player != self
+        ):
+            # maximize the probability of self own winning or adversary
+            # losing
+            percentage_func = max
+        else:
+            percentage_func = min
+        desired_percentage: int = percentage_func(step.percentage for step in steps)
+        most_likely_steps: List[Step] = [
+            step for step in steps if step.percentage == desired_percentage
+        ]
+        log.debug(
+            "\t" * depth
+            + f"desired percentage steps ({percentage_func}) -> "
+            + str(most_likely_steps)
+        )
+        return most_likely_steps
+
     def _minimax(
         self,
         *,
@@ -363,6 +466,24 @@ class AIPlayer(Player):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> Step:
+        """Algorithm:
+
+        1. Go through available spots on the board;
+        2. Return a value (score) if a terminal state is found
+           (:meth:`._get_terminal_score`);
+        3. or call the minimax function on each available spot
+           (recursion).
+        4. Evaluate returning values from function calls
+           (:meth:`._extract_desired_steps` and
+           :meth:`._extract_most_likely_steps`);
+        5. And return the best value (Step).
+
+        TODO: swap the first and second item.
+         In the current implementation, there may be an error if
+         running the method with the ``gameboard`` without the available
+         steps.
+
+        """
         if gameboard is None:
             gameboard = self.game.gameboard
         if player is None:
@@ -377,117 +498,36 @@ class AIPlayer(Player):
             )
             self.game.step(coordinate, gameboard=fake_gameboard, player=player)
 
-            log.debug(" ".join(["\n", "\t" * depth, player.label, str(coordinate)]))
+            log.debug("\n " + ("\t" * depth) + f"[{player.label}] {coordinate}")
             log.debug(
                 "\n".join(
                     '\t' * depth + line for line in str(fake_gameboard).split("\n")
                 )
             )
 
-            players_cycle: Iterator[Player] = cycle(self.game.players)
-            while next(players_cycle) != player:
-                pass
-            next_player = next(players_cycle)
+            next_player = self._get_next_player(current_player=player)
 
-            score: int
-            percentage: int
-            factor: int = 1
-            if self.game.get_status(
-                gameboard=fake_gameboard, player=next_player
-            ).active:
-                if depth < self.max_depth[self.type]:
-                    _, score, percentage = self._minimax(
-                        depth=depth + 1, gameboard=fake_gameboard, player=next_player
-                    )
-                else:
-                    score = self.game.get_score(gameboard=fake_gameboard, player=self)
-                    percentage = 100
-            else:
-                score = self.game.get_score(gameboard=fake_gameboard, player=self)
-                """In the minimax algorithm, it doesn't matter when you lose:
-                now or later. Therefore, the AI "stops fighting" if it
-                in any case loses the next steps, regardless of how it takes
-                the step now. In this case, the AI considers that all the
-                steps are the same bad, but this is wrong.
-                Because the adversary can make a mistake, and adding the
-                variable ``factor`` allows the AI to use a possible
-                adversary errors in the future.
-                With the ``factor``, losing now is worse than losing later.
-                Therefore, the AI is trying not to "give up" now and wait
-                for better chances in the future.
-                This is especially important if the "depth" of analysis is
-                limited.
-
-                Run example below with and without ``factor`` once or twice:
-                TicTacToe(surface="X_OX_____", player_types=("easy", "hard")).play()
-
-                hint: "hard" select cell randomly from all empty cells and
-                can lose to "easy" without ``factor``."""
-                factor *= self.max_depth[self.type] + 1 - depth
-                """In the minimax algorithm, it doesn't matter how many ways
-                to win AI at the end of the game. Therefore, the AI
-                "stops fighting" and​is not trying to "steal" one of them.
-                With the variable ``percentage``, the case with two
-                possible steps to lose are worse than one.
-                This is especially important if the "depth" of analysis is
-                limited.
-
-                Run example below with and without ``percentage`` once or twice:
-                TicTacToe(surface="X_OXX_O__", player_types=("easy", "hard")).play()
-
-                hint: "hard" select cell randomly from all empty cells and
-                can lose to "easy" without ``percentage``."""
-                percentage = 100
-            steps.append(Step(coordinate, score * factor, percentage))
-        if player == self:
-            score_func = max
-        else:
-            score_func = min
-
-        desired_score: int = score_func(step.score for step in steps)
-        desired_steps: Tuple[Step, ...] = tuple(
-            step for step in steps if step.score == desired_score
-        )
-
-        log.debug(
-            " ".join(
-                [
-                    "\t" * depth,
-                    f"desired score steps ({score_func}) -> ",
-                    str(desired_steps),
-                ]
+            terminal_score, percentage = self._get_terminal_score(
+                depth=depth, gameboard=fake_gameboard, player=next_player
             )
+            steps.append(Step(coordinate, terminal_score, percentage))
+
+        desired_steps: List[Step] = self._extract_desired_steps(
+            depth=depth, steps=steps, player=player
         )
 
-        if (desired_score >= 0 and player == self) or (
-            desired_score < 0 and player != self
-        ):
-            percentage_func = max
-        else:
-            percentage_func = min
-        desired_percentage: int = percentage_func(
-            step.percentage for step in desired_steps
-        )
-        most_likely_steps: Tuple[Step, ...] = tuple(
-            step for step in desired_steps if step.percentage == desired_percentage
-        )
-        log.debug(
-            " ".join(
-                [
-                    "\t" * depth,
-                    f"desired percentage steps ({percentage_func}) -> ",
-                    str(most_likely_steps),
-                ]
-            )
+        most_likely_steps: List[Step] = self._extract_most_likely_steps(
+            depth=depth, steps=desired_steps, player=player
         )
 
         step: Step = choice(most_likely_steps)
+        # compute and replace ``percentage`` in the selected step
         step = Step(
             coordinate=step.coordinate,
             score=step.score,
             percentage=int(len(desired_steps) / len(steps) * 100),
         )
-        log.debug(" ".join(["\t" * depth, "selected step: ", str(step)]))
+        log.debug("\t" * depth + f"selected step: {step}")
 
         return step
 
@@ -569,7 +609,8 @@ class Game:
 
     def winners(self, *, gameboard: Optional[SquareGameboard] = None) -> Set[Player]:
         """Must be overridden by subclasses and must return
-        a set of instance ot the :class:`.Player` defined as winner.
+        a set of instance(s) ot the :class:`.Player` defined as
+        winner(s).
 
         :param gameboard: Optional.  If undefined, use
          :attr:`.Game.gameboard`.
@@ -583,10 +624,11 @@ class Game:
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> Tuple[Coordinate, ...]:
-        """Return coordinates of all empty cells as a tuple.
+        """Return a tuple of coordinates of all available cells on the
+        :param:`gameboard` for the :param:`player`.
 
         This method should be overridden by subclasses if there is a
-        more complex rule for determining which cell is empty.
+        more complex rule for determining which cell is available.
 
         :param gameboard: Optional.  If undefined, use
          :attr:`.Game.gameboard`.
@@ -596,6 +638,8 @@ class Game:
         """
         if gameboard is None:
             gameboard = self.gameboard
+        if player is None:
+            player = self.game.players[0]
         return gameboard.available_steps
 
     def get_score(
@@ -625,11 +669,24 @@ class Game:
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> GameStatus:
-        """Must be overridden by subclasses and must change
-        :attr:`.Game.status` if game cannot be continued.
+        """Return the current game status calculated for the
+        :param:`gameboard` in accordance with the game rule.
 
-        Note: If it's not exist any available step, method must return
-        ``GameStatus.active == False``
+        :param gameboard: Optional.  If undefined, use
+         :attr:`.Game.gameboard`.
+        :param player: Optional.  If undefined, user current user
+         :attr:`.Game.players[0]`.
+
+        :return: Game status as the instance of namedtuple
+         ``GameStatus`` with two fields: ``active`` and ``message``.
+         ``GameStatus.active == False`` if game cannot be continued.
+
+        Must be overridden by subclasses if there is a more complex rule
+        for calculating game status.
+
+        Note: If there is no available step for the ``player`` and the
+        game cannot be continued, the method must return
+        ``GameStatus.active == False``.
 
         """
         if gameboard is None:
@@ -652,7 +709,8 @@ class Game:
         gameboard.
 
         :param coordinate: coordinate of cell which player label.
-        :param gameboard: Optional.  If undefined, use :attr:`.Game.gameboard`.
+        :param gameboard: Optional.  If undefined, use
+         :attr:`.Game.gameboard`.
         :param player: Optional.  If undefined, user current user
          :attr:`.Game.players[0]`.
 
@@ -721,12 +779,12 @@ class TicTacToe(Game):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> GameStatus:
-        """Return status of Tic-Tac-Toe game as the instance of
-        namedtuple ``GameStatus`` with two fields: ``active`` and
-        ``message``.
+        """Return the Tic-Tac-Toe game status calculated for the
+        :param:`gameboard` in accordance with the game rule.
 
-        :return: ``GameStatus.active == False`` if game cannot be
-         continued.
+        :return: Game status as the instance of namedtuple
+         ``GameStatus`` with two fields: ``active`` and ``message``.
+         ``GameStatus.active == False`` if game cannot be continued.
 
         """
         if gameboard is None:
@@ -805,7 +863,7 @@ class Reversi(Game):
         flip at least one another player label using Reversi game's
         rule.
 
-        TODO: add max priority to corner cells
+        TODO: add max priority to corner cells.
 
         """
 
@@ -902,15 +960,23 @@ class Reversi(Game):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> GameStatus:
-        """
-        TODO: implement rotate players
-          if current player doesn't have available steps only.
+        """Return the Reversi game status calculated for the
+        :param:`gameboard` in accordance with the game rule.
 
-        if not self.available_steps(gameboard=gameboard, player=self.players[1]):
-            pass
-        else:
-            print(f"Player '{self.players[0].label}' doesn't have available steps!")
-            self.players.rotate(1)
+        :return: Game status as the instance of namedtuple
+         ``GameStatus`` with two fields: ``active`` and ``message``.
+         ``GameStatus.active == False`` if game cannot be continued.
+
+        TODO: implement the rotation of the players, if only the current
+         player doesn't have available steps.
+
+        Draft::
+
+            if not self.available_steps(gameboard=gameboard, player=self.players[1]):
+                pass
+            else:
+                print(f"Player '{self.players[0].label}' doesn't have available steps!")
+                self.players.rotate(1)
 
         """
         if gameboard is None:
@@ -997,5 +1063,5 @@ def cli(game_class: Type[Game] = TicTacToe) -> None:
 
 
 if __name__ == "__main__":
-    cli()
-    # cli(game_class=Reversi)
+    # cli()
+    cli(game_class=Reversi)
