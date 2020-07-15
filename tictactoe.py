@@ -290,16 +290,16 @@ class SquareGameboard:
 class Player:
     """Class introduces the player in the game."""
 
-    def __init__(self, type_: str, /, *, game: Game, label: Label) -> None:
+    def __init__(self, type_: str, /, *, game: GameBase, label: Label) -> None:
         self.type: str = type_
-        self._game: Game = game
+        self._game: GameBase = game
         self._label: Label = label
 
     def __str__(self) -> str:
         return self._label
 
     @cached_property
-    def game(self) -> Game:
+    def game(self) -> GameBase:
         return self._game
 
     @cached_property
@@ -538,14 +538,23 @@ class AIPlayer(Player):
         return self._random_coordinate()
 
 
-class Game:
-    """Game class.
+class GameBase:
+    """Base class which are used to specify the various categories of
+    games.
 
-    :param surface: String contains symbols from set :attr:`.Game.labels`
-     and symbols "_" or " " mean an empty cell.
+    Then concrete classes providing the standard game implementations.
+
+    Note::
+
+      The base class also provide default implementations of some
+      methods in order to help implementation of concrete game class.
+
+    :param surface: String contains symbols from set
+     :attr:`.GameBase.labels` and symbols "_" or " " mean an empty
+     cell.
     :param player_types: A tuple of strings with two elements from
-     :attr:`.Game.supported_players.keys` which determine the types of
-     players.
+     :attr:`.GameBase.supported_players.keys` which determine the types
+     of players.
 
     :ivar status: This is current status of the game.  ``False`` if game
      can't be continued.
@@ -611,7 +620,7 @@ class Game:
         winner(s).
 
         :param gameboard: Optional.  If undefined, use
-         :attr:`.Game.gameboard`.
+         :attr:`.GameBase.gameboard`.
 
         """
         return set()
@@ -629,9 +638,9 @@ class Game:
         more complex rule for determining which cell is available.
 
         :param gameboard: Optional.  If undefined, use
-         :attr:`.Game.gameboard`.
+         :attr:`.GameBase.gameboard`.
         :param player: Optional.  If undefined, user current user
-         :attr:`.Game.players[0]`.
+         :attr:`.GameBase.players[0]`.
 
         """
         if gameboard is None:
@@ -671,9 +680,9 @@ class Game:
         :param:`gameboard` in accordance with the game rule.
 
         :param gameboard: Optional.  If undefined, use
-         :attr:`.Game.gameboard`.
+         :attr:`.GameBase.gameboard`.
         :param player: Optional.  If undefined, user current user
-         :attr:`.Game.players[0]`.
+         :attr:`.GameBase.players[0]`.
 
         :return: Game status as the instance of namedtuple
          ``GameStatus`` with two fields: ``active`` and ``message``.
@@ -708,9 +717,9 @@ class Game:
 
         :param coordinate: coordinate of cell which player label.
         :param gameboard: Optional.  If undefined, use
-         :attr:`.Game.gameboard`.
+         :attr:`.GameBase.gameboard`.
         :param player: Optional.  If undefined, user current user
-         :attr:`.Game.players[0]`.
+         :attr:`.GameBase.players[0]`.
 
         This method should be overridden by subclasses if there is a
         more complex rule for labeling cell(s) in ``gameboard``.
@@ -741,10 +750,10 @@ class Game:
                     print(self.status.message)
 
 
-class TicTacToe(Game):
+class TicTacToe(GameBase):
     """TicTacToe class introduces Tic-Tac-Toe game.
 
-    For details see :class:`.Game`.
+    For details see :class:`.GameBase`.
 
     """
 
@@ -756,7 +765,7 @@ class TicTacToe(Game):
         the set of winners.
 
         :param gameboard: Optional.  If undefined, use
-         :attr:`.Game.gameboard`.
+         :attr:`.GameBase.gameboard`.
 
         """
         if gameboard is None:
@@ -807,11 +816,11 @@ class TicTacToe(Game):
         return game_status
 
 
-class Reversi(Game):
+class Reversi(GameBase):
     """Reversi game supports human user and three types of AI (easy,
     medium, hard).
 
-    For details see :class:`.Game`.
+    For details see :class:`.GameBase`.
 
     """
 
@@ -910,7 +919,7 @@ class Reversi(Game):
         :param coordinate: The coordinate against which adjacent
          cells will be checked.
         :param gameboard: Optional.  If undefined, use
-         :attr:`.Game.gameboard`.
+         :attr:`.GameBase.gameboard`.
         :param player_label: Cells with this "friendly" label will
          not be considered an adversary.
 
@@ -1042,7 +1051,7 @@ class Reversi(Game):
         return score
 
 
-def cli(game_class: Type[Game] = TicTacToe) -> None:
+def cli(game_class: Type[GameBase] = TicTacToe) -> None:
     command: str = input("Input command: ")
     while command != "exit":
         parameters = command.split()
