@@ -29,8 +29,9 @@ def test_available_steps(reversi_w_2users):
 
 def test_adversary_occupied_directions(reversi_w_2users):
     adversary_occupied_directions = {Coordinate(1, 0)}
-    assert adversary_occupied_directions == reversi_w_2users.adversary_occupied_directions(
-        Coordinate(3, 4)
+    assert (
+        adversary_occupied_directions
+        == reversi_w_2users.adversary_occupied_directions(Coordinate(3, 4))
     )
 
 

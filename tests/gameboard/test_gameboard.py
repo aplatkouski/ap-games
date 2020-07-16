@@ -1,97 +1,50 @@
 import pytest
-from ap_games.types import Cell
-from ap_games.types import Coordinate
 from ap_games.gameboard.gameboard import SquareGameboard
-from .conftest import SIZE
+from .conftest import SIZE_2
 
 
 def test_size(square_gameboard_2x2):
-    assert SIZE == square_gameboard_2x2.size
+    assert SIZE_2 == square_gameboard_2x2.size
 
 
-def test_surface(square_gameboard_2x2):
-    assert " " * (SIZE ** 2) == square_gameboard_2x2.surface
+def test_surface(square_gameboard_2x2, surface_4):
+    assert surface_4 == square_gameboard_2x2.surface
 
 
-def test_columns(square_gameboard_2x2):
-    columns = (
-        (
-            Cell(coordinate=Coordinate(x=1, y=2), label=" "),
-            Cell(coordinate=Coordinate(x=1, y=1), label=" "),
-        ),
-        (
-            Cell(coordinate=Coordinate(x=2, y=2), label=" "),
-            Cell(coordinate=Coordinate(x=2, y=1), label=" "),
-        ),
-    )
+def test_columns(square_gameboard_2x2, columns):
     assert columns == square_gameboard_2x2.columns
 
 
-def test_rows(square_gameboard_2x2):
-    rows = (
-        (
-            Cell(coordinate=Coordinate(x=1, y=2), label=" "),
-            Cell(coordinate=Coordinate(x=2, y=2), label=" "),
-        ),
-        (
-            Cell(coordinate=Coordinate(x=1, y=1), label=" "),
-            Cell(coordinate=Coordinate(x=2, y=1), label=" "),
-        ),
-    )
+def test_rows(square_gameboard_2x2, rows):
     assert rows == square_gameboard_2x2.rows
 
 
-def test_diagonals(square_gameboard_2x2):
-    diagonals = (
-        (
-            Cell(coordinate=Coordinate(x=1, y=2), label=" "),
-            Cell(coordinate=Coordinate(x=2, y=1), label=" "),
-        ),
-        (
-            Cell(coordinate=Coordinate(x=2, y=2), label=" "),
-            Cell(coordinate=Coordinate(x=1, y=1), label=" "),
-        ),
-    )
+def test_diagonals(square_gameboard_2x2, diagonals):
     assert diagonals == square_gameboard_2x2.diagonals
 
 
-def test_cells(square_gameboard_2x2):
-    cells = (
-        Cell(coordinate=Coordinate(x=1, y=2), label=' '),
-        Cell(coordinate=Coordinate(x=2, y=2), label=' '),
-        Cell(coordinate=Coordinate(x=1, y=1), label=' '),
-        Cell(coordinate=Coordinate(x=2, y=1), label=' '),
-    )
+def test_cells(square_gameboard_2x2, cells):
     assert cells == square_gameboard_2x2.cells
 
 
-def test_available_steps(square_gameboard_2x2):
-    available_steps = (
-        Coordinate(x=1, y=2),
-        Coordinate(x=2, y=2),
-        Coordinate(x=1, y=1),
-        Coordinate(x=2, y=1),
-    )
-    assert available_steps == square_gameboard_2x2.available_steps
+def test_available_steps(square_gameboard_2x2, coordinate_1_1_empty):
+    assert (coordinate_1_1_empty,) == square_gameboard_2x2.available_steps
 
 
 def test_count(square_gameboard_2x2):
-    assert SIZE ** 2 == square_gameboard_2x2.count(label=" ")
+    assert 1 == square_gameboard_2x2.count(label=" ")
+    assert 1 == square_gameboard_2x2.count(label="O")
+    assert 2 == square_gameboard_2x2.count(label="X")
 
 
-def test_get_offset_cell(square_gameboard_2x2):
-    x = 1
-    y = 1
-    coordinate = Coordinate(x=x, y=y)
-    cell = Cell(coordinate=Coordinate(x=x + x, y=y + y), label=" ")
-    assert cell == square_gameboard_2x2.get_offset_cell(
-        coordinate=coordinate, shift=coordinate
+def test_get_offset_cell(square_gameboard_2x2, cell_2_2_o, coordinate_1_1_empty):
+    assert cell_2_2_o == square_gameboard_2x2.get_offset_cell(
+        coordinate=coordinate_1_1_empty, shift=coordinate_1_1_empty
     )
 
 
-def test_label(square_gameboard_2x2):
-    square_gameboard_2x2 = SquareGameboard(surface=" " * (SIZE ** 2))
-    assert 1 == square_gameboard_2x2.label(coordinate=Coordinate(x=1, y=1), label="X")
+def test_label(square_gameboard_2x2, coordinate_1_1_empty):
+    assert 1 == square_gameboard_2x2.label(coordinate=coordinate_1_1_empty, label="X")
 
 
 def test_gameboard_1x1_too_small():
@@ -111,7 +64,6 @@ def test_not_square_gameboard():
     with pytest.raises(ValueError) as exc:
         SquareGameboard(surface=surface)
     assert (
-            "The gameboard must be square "
-            f"({int(len(surface) ** (1 / 2))}^2 != {len(surface)})!"
-            == str(exc.value)
+        "The gameboard must be square "
+        f"({int(len(surface) ** (1 / 2))}^2 != {len(surface)})!" == str(exc.value)
     )

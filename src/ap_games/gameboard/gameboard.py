@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import functools
-import weakref
 from typing import TYPE_CHECKING
 
 from ap_games.log import log
@@ -11,32 +10,11 @@ from ap_games.types import EMPTY
 
 if TYPE_CHECKING:
     from typing import ClassVar
-    from typing import Iterable
-    from typing import List
+    from typing import Dict
     from typing import Tuple
     from ap_games.types import Side
 
 __ALL__ = ['SquareGameboard']
-
-
-def memoized_method(meth):
-    @functools.wraps(meth)
-    def wrapped_method(self, *args, **kwargs):
-        # We're storing the wrapped method inside the instance. If we had
-        # a strong reference to self the instance would never die.
-        self_weak = weakref.ref(self)
-
-        @functools.wraps(meth)
-        @functools.lru_cache(maxsize=91)
-        def cached_method(
-            *args, size: int = self._size, max_len: int = len(self), **kwargs
-        ):
-            return meth(self_weak(), *args, **kwargs)
-
-        setattr(self, meth.__name__, cached_method)
-        return cached_method(*args, **kwargs)
-
-    return wrapped_method
 
 
 class SquareGameboard:
@@ -67,10 +45,13 @@ class SquareGameboard:
                 f"The gameboard must be square ({size}^2 != {len(surface)})!"
             )
         self._size: int = size
-
-        self._surface: str = surface
         self._gap: str = gap
         self._axis: bool = axis
+
+        self._cells: Dict[Tuple[int, int], Cell] = dict()
+        for index, label in enumerate(surface):
+            x, y = self._index_to_coordinate(index)
+            self._cells[x, y] = Cell(coordinate=Coordinate(x=x, y=y), label=label)
 
     def __str__(self) -> str:
         horizontal_border: str = (
@@ -96,12 +77,6 @@ class SquareGameboard:
         )
         return board
 
-    def __iter__(self) -> Iterable[str]:
-        return iter(self._surface)
-
-    def __len__(self) -> int:
-        return len(self._surface)
-
     def __call__(self, x: int, y: int) -> Cell:
         """Return cell by coordinates as namedtuple with two fields:
         ``coordinate`` and ``label``.
@@ -115,10 +90,7 @@ class SquareGameboard:
          incorrect.
 
         """
-        if (1 <= y <= self._size) and (1 <= x <= self._size):
-            index: int = self._coordinate_to_index(x=x, y=y)
-            return Cell(coordinate=Coordinate(x, y), label=self._surface[index])
-        return self.undefined_cell
+        return self._cells.get((x, y), self.undefined_cell)
 
     @functools.cached_property
     def size(self) -> int:
@@ -126,7 +98,7 @@ class SquareGameboard:
 
     @property
     def surface(self) -> str:
-        return self._surface
+        return "".join(cell.label for cell in self._cells.values())
 
     @property
     def columns(self) -> Tuple[Side, ...]:
@@ -135,23 +107,34 @@ class SquareGameboard:
         For details see :meth:`.SquareGameboard.all_sides`.
 
         """
-        first_index_of_each_column = range(self._size)
-        columns: List[Side] = list()
-        for index in first_index_of_each_column:
-            columns.append(self.cells[index :: self._size])
-        return tuple(columns)
+        columns = tuple(
+            tuple(
+                cell
+                for coordinate, cell in self._cells.items()
+                if coordinate[0] == column
+            )
+            for column in range(1, self._size + 1)
+        )
+        return columns
 
     @property
     def rows(self) -> Tuple[Side, ...]:
         """Return all rows of gameboard as a tuple.
 
+        Note::
+
+          Rows are returned in the reverse order from top to button.
+          To get rows in the coordinate order, use ``sorted`` method.
+
         For details see :meth:`.SquareGameboard.all_sides`.
 
         """
-        first_index_of_each_row = range(0, self._size ** 2 - 1, self._size)
-        rows: List[Side] = list()
-        for index in first_index_of_each_row:
-            rows.append(self.cells[index : index + self._size])
+        rows = tuple(
+            tuple(
+                cell for coordinate, cell in self._cells.items() if coordinate[1] == row
+            )
+            for row in reversed(range(1, self._size + 1))
+        )
         return tuple(rows)
 
     @property
@@ -162,10 +145,10 @@ class SquareGameboard:
 
         """
         main_diagonal: Side = tuple(
-            self.cells[i * (self._size + 1)] for i in range(self._size)
+            self._cells[num + 1, self._size - num] for num in range(self._size)
         )
         reverse_diagonal: Side = tuple(
-            self.cells[(i + 1) * (self._size - 1)] for i in range(self._size)
+            self._cells[num, num] for num in range(1, self._size + 1)
         )
         return main_diagonal, reverse_diagonal
 
@@ -186,10 +169,7 @@ class SquareGameboard:
          * ``label`` (as string).
 
         """
-        return tuple(
-            Cell(coordinate=self._index_to_coordinate(index), label=label)
-            for index, label in enumerate(self._surface)
-        )
+        return tuple(self._cells.values())
 
     @property
     def available_steps(self) -> Tuple[Coordinate, ...]:
@@ -201,16 +181,15 @@ class SquareGameboard:
 
     @property
     def copy(self) -> SquareGameboard:
-        return SquareGameboard(surface=self._surface, gap=self._gap, axis=self._axis)
+        return SquareGameboard(surface=self.surface, gap=self._gap, axis=self._axis)
 
     def count(self, label: str) -> int:
         """Returns the number of occurrences of a :param:`label` on the
         gameboard.
 
         """
-        return self._surface.count(label)
+        return [cell.label for cell in self._cells.values()].count(label)
 
-    @memoized_method
     def _coordinate_to_index(self, x: int, y: int) -> int:
         """Translates the cell coordinates represented by :param:`x` and
         :param:`y` into the index of this cell.
@@ -234,19 +213,16 @@ class SquareGameboard:
             print(f"Coordinates should be from 1 to {self._size}!")
         return -1
 
-    @memoized_method
     def _index_to_coordinate(self, index: int) -> Coordinate:
         """Convert the index to the coordinate.
 
         For details see :meth:`.SquareGameboard._coordinate_to_index`.
 
         """
-        if 0 <= index < len(self._surface):
-            x, y = divmod(index, self._size)
-            column = y + 1
-            row = self._size - x
-            return Coordinate(column, row)
-        return self.undefined_coordinate
+        x, y = divmod(index, self._size)
+        column = y + 1
+        row = self._size - x
+        return Coordinate(column, row)
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
         """Return "Cell" (as tuple of coordinate and label) by
@@ -254,7 +230,9 @@ class SquareGameboard:
         :param:`coordinate` and :param:`shift`.
 
         """
-        return self(x=coordinate.x + shift.x, y=coordinate.y + shift.y)
+        return self._cells.get(
+            (coordinate.x + shift.x, coordinate.y + shift.y), self.undefined_cell
+        )
 
     def print(self, indent: str = "") -> None:
         """Print gameboard."""
@@ -278,12 +256,9 @@ class SquareGameboard:
         :return: count of labeled cell with :param:`label`.
 
         """
-        index: int = self._coordinate_to_index(*coordinate)
-        if 0 <= index < len(self._surface):
-            if force or self._surface[index] == EMPTY:
-                self._surface = label.join(
-                    (self._surface[:index], self._surface[index + 1 :])
-                )
-                return 1
-            print("This cell is occupied! Choose another one!")
+        x, y = coordinate
+        if force or self._cells.get((x, y), self.undefined_cell).label == EMPTY:
+            self._cells[x, y] = Cell(Coordinate(x, y), label)
+            return 1
+        print("This cell is occupied! Choose another one!")
         return 0
