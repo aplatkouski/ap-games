@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from functools import cached_property
+import functools
+import weakref
 from typing import TYPE_CHECKING
 
 from ap_games.log import log
@@ -16,6 +17,26 @@ if TYPE_CHECKING:
     from ap_games.types import Side
 
 __ALL__ = ['SquareGameboard']
+
+
+def memoized_method(meth):
+    @functools.wraps(meth)
+    def wrapped_method(self, *args, **kwargs):
+        # We're storing the wrapped method inside the instance. If we had
+        # a strong reference to self the instance would never die.
+        self_weak = weakref.ref(self)
+
+        @functools.wraps(meth)
+        @functools.lru_cache(maxsize=91)
+        def cached_method(
+            *args, size: int = self._size, max_len: int = len(self), **kwargs
+        ):
+            return meth(self_weak(), *args, **kwargs)
+
+        setattr(self, meth.__name__, cached_method)
+        return cached_method(*args, **kwargs)
+
+    return wrapped_method
 
 
 class SquareGameboard:
@@ -99,7 +120,7 @@ class SquareGameboard:
             return Cell(coordinate=Coordinate(x, y), label=self._surface[index])
         return self.undefined_cell
 
-    @cached_property
+    @functools.cached_property
     def size(self) -> int:
         return self._size
 
@@ -189,6 +210,7 @@ class SquareGameboard:
         """
         return self._surface.count(label)
 
+    @memoized_method
     def _coordinate_to_index(self, x: int, y: int) -> int:
         """Translates the cell coordinates represented by :param:`x` and
         :param:`y` into the index of this cell.
@@ -212,6 +234,7 @@ class SquareGameboard:
             print(f"Coordinates should be from 1 to {self._size}!")
         return -1
 
+    @memoized_method
     def _index_to_coordinate(self, index: int) -> Coordinate:
         """Convert the index to the coordinate.
 
