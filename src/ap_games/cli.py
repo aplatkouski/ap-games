@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from typing import Type
     from ap_games.game.game_base import GameBase
 
-__ALL__ = ['cli']
+__ALL__ = ["cli"]
 
 
 def cli(game_class: Type[GameBase] = TicTacToe) -> None:

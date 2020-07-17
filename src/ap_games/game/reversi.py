@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from typing import ClassVar
     from typing import List
     from typing import Optional
-    from typing import Set
     from typing import Tuple
     from ap_games.gameboard.gameboard import SquareGameboard
     from ap_games.player.player import Player
@@ -34,13 +33,32 @@ class Reversi(GameBase):
         (EMPTY * 27) + "XO" + (EMPTY * 6) + "OX" + (EMPTY * 27)
     )
 
-    def winners(self, *, gameboard: Optional[SquareGameboard] = None) -> Set[Player]:
+    @classmethod
+    def _adversary_occupied_directions(
+        cls, coordinate: Coordinate, gameboard: SquareGameboard, player_label: str,
+    ) -> Tuple[Coordinate, ...]:
+        """Determine the ``directions`` where adjacent cells are
+        occupied by the adversary.
+
+        :param coordinate: The coordinate against which adjacent
+         cells will be checked.
+        :param gameboard: Optional.  If undefined, use
+         :attr:`.GameBase.gameboard`.
+        :param player_label: Cells with this "friendly" label will
+         not be considered an adversary.
+
+        :return: Set of offsets relative to the :param:`coordinate`.
+
+        """
+        return gameboard.offset_directions(
+            coordinate=coordinate, exclude_labels=(EMPTY, player_label)
+        )
+
+    def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Define and return the set of all players who have the maximum
         count of player labels on the gameboard.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
         # TODO: give a turn to another player if the current player
         #   cannot go
         # if any(self.available_steps(gameboard=gameboard, player=player) for player in self.players):
@@ -50,7 +68,7 @@ class Reversi(GameBase):
             (player, gameboard.count(player.label)) for player in self.players
         ]
         max_score = max(score for _, score in player_scores)
-        return set(player for player, score in player_scores if score == max_score)
+        return tuple(player for player, score in player_scores if score == max_score)
 
     def available_steps(
         self,
@@ -77,7 +95,7 @@ class Reversi(GameBase):
         for coordinate in gameboard.available_steps:
             # Iterate over all directions where the cell occupied by
             # the adversary
-            for shift in self.adversary_occupied_directions(
+            for shift in self._adversary_occupied_directions(
                 coordinate=coordinate,
                 gameboard=gameboard,
                 player_label=current_player_label,
@@ -100,47 +118,20 @@ class Reversi(GameBase):
                         break
         return tuple(actual_available_steps)
 
-    @classmethod
-    def adversary_occupied_directions(
-        cls, coordinate: Coordinate, gameboard: SquareGameboard, player_label: str,
-    ) -> Tuple[Coordinate, ...]:
-        """Determine the ``directions`` where adjacent cells are
-        occupied by the adversary.
-
-        :param coordinate: The coordinate against which adjacent
-         cells will be checked.
-        :param gameboard: Optional.  If undefined, use
-         :attr:`.GameBase.gameboard`.
-        :param player_label: Cells with this "friendly" label will
-         not be considered an adversary.
-
-        :return: Set of offsets relative to the :param:`coordinate`.
-
-        """
-        return gameboard.offset_directions(
-            coordinate=coordinate, exclude_labels=(EMPTY, player_label)
-        )
-
     def get_score(
         self,
         *,
-        gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
+        gameboard: SquareGameboard,
+        player: Player,
     ) -> int:
-
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
-
         player_score: int = 0
-        other_players_score: int = 0
+        another_players_score: int = 0
         for p in self.players:
             if p == player:
                 player_score += gameboard.count(p.label)
             else:
-                other_players_score += gameboard.count(p.label)
-        return player_score - other_players_score
+                another_players_score += gameboard.count(p.label)
+        return player_score - another_players_score
 
     def get_status(
         self,
@@ -175,9 +166,9 @@ class Reversi(GameBase):
         game_status = GameStatus(active=True, message="")
 
         if not self.available_steps(gameboard=gameboard, player=player):
-            winners: Set[Player] = self.winners(gameboard=gameboard)
+            winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
             if len(winners) == 1:
-                game_status = GameStatus(False, f"{winners.pop().label} wins\n")
+                game_status = GameStatus(False, f"{winners[0].label} wins\n")
             elif len(winners) > 1:
                 game_status = GameStatus(False, "Draw\n")
             else:  # len(winners) == 0
@@ -205,7 +196,7 @@ class Reversi(GameBase):
         current_player_label: Label = player.label
         score += gameboard.label(coordinate=coordinate, label=current_player_label)
         if score:
-            for shift in self.adversary_occupied_directions(
+            for shift in self._adversary_occupied_directions(
                 coordinate=coordinate, gameboard=gameboard, player_label=player.label
             ):
                 adversary_occupied_cells: List[Coordinate] = list()

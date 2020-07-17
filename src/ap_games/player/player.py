@@ -1,9 +1,9 @@
 from functools import cached_property
 from random import choice as random_choice
 
-TEST_MODE = True
+TEST_MODE = False
 
-__ALL__ = ['Player', 'TEST_MODE']
+__ALL__ = ["Player", "TEST_MODE"]
 
 
 class Player:

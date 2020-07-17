@@ -8,7 +8,7 @@ def test_size(square_gameboard_2x2):
 
 
 def test_surface(square_gameboard_2x2, surface_4):
-    assert surface_4 == square_gameboard_2x2.surface
+    assert surface_4 == square_gameboard_2x2._surface
 
 
 def test_columns(square_gameboard_2x2, columns):

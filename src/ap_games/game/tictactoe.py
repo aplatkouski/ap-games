@@ -7,11 +7,12 @@ from ap_games.ap_types import GameStatus
 
 if TYPE_CHECKING:
     from typing import Optional
-    from typing import Set
+    from typing import List
+    from typing import Tuple
     from ap_games.gameboard.gameboard import SquareGameboard
     from ap_games.player.player import Player
 
-__ALL__ = ['TicTacToe']
+__ALL__ = ["TicTacToe"]
 
 
 class TicTacToe(GameBase):
@@ -21,27 +22,24 @@ class TicTacToe(GameBase):
 
     """
 
-    def winners(self, *, gameboard: Optional[SquareGameboard] = None) -> Set[Player]:
+    def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Define and return the set of all players who draw solid line.
 
         If all characters on a "side" are the same and equal to the
         label of player from :attr:`.players`, this player is added to
         the set of winners.
 
-        :param gameboard: Optional.  If undefined, use
-         :attr:`.GameBase.gameboard`.
-
         """
         if gameboard is None:
             gameboard = self.gameboard
 
-        winners: Set[Player] = set()
+        winners: List[Player, ...] = list()
         for player in self.players:
             for side in gameboard.all_sides:
                 if all(cell.label == player.label for cell in side):
-                    winners.add(player)
+                    winners.append(player)
                     break
-        return winners
+        return tuple(winners)
 
     def get_status(
         self,
@@ -70,11 +68,11 @@ class TicTacToe(GameBase):
         ):
             game_status = GameStatus(False, "Impossible\n")
         else:
-            winners: Set[Player] = self.winners(gameboard=gameboard)
+            winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
             if not winners and not self.available_steps(gameboard=gameboard):
                 game_status = GameStatus(False, "Draw\n")
             elif len(winners) == 1:
-                game_status = GameStatus(False, f"{winners.pop().label} wins\n")
+                game_status = GameStatus(False, f"{winners[0].label} wins\n")
             elif len(winners) > 1:
                 game_status = GameStatus(False, "Impossible\n")
         return game_status

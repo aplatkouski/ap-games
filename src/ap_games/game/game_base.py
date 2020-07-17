@@ -101,16 +101,13 @@ class GameBase:
         ):
             self.players.rotate(1)
 
-    def winners(self, *, gameboard: Optional[SquareGameboard] = None) -> Set[Player]:
+    def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Must be overridden by subclasses and must return
         a set of instance(s) ot the :class:`.Player` defined as
         winner(s).
 
-        :param gameboard: Optional.  If undefined, use
-         :attr:`.GameBase.gameboard`.
-
         """
-        return set()
+        return tuple()
 
     def available_steps(
         self,
@@ -136,19 +133,8 @@ class GameBase:
             player = self.players[0]
         return gameboard.available_steps
 
-    def get_score(
-        self,
-        *,
-        gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
-    ) -> int:
-
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
-
-        winners: Set[Player] = self.winners(gameboard=gameboard)
+    def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
+        winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
         if len(winners) == 1:
             if player in winners:
                 return 1

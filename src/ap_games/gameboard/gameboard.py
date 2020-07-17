@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 import weakref
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from ap_games.log import log
@@ -19,10 +20,22 @@ if TYPE_CHECKING:
     from typing import Union
     from ap_games.ap_types import Side
 
-__ALL__ = ['SquareGameboard']
+__ALL__ = ["SquareGameboard"]
 
 
-def memoized_method(method_name, *self_attrs):  # type: ignore
+@dataclass(frozen=True)
+class BColors:
+    HEADER: Final[str] = "\033[95m"
+    OKBLUE: Final[str] = "\033[94m"
+    OKGREEN: Final[str] = "\033[92m"
+    WARNING: Final[str] = "\033[93m"
+    RED: Final[str] = "\033[91m"
+    ENDC: Final[str] = "\033[0m"
+    BOLD: Final[str] = "\033[1m"
+    UNDERLINE: Final[str] = "\033[4m"
+
+
+def memoized_method(*self_attrs):  # type: ignore
     """Decorator to wrap a method with a memoizing callable that saves
     up to the ``999`` most recent calls.
 
@@ -45,6 +58,7 @@ def memoized_method(method_name, *self_attrs):  # type: ignore
             keywords = dict()
             for attr_name in self_attrs:
                 keywords[attr_name] = getattr(self_weak(), attr_name, None)
+            method_name = meth.__name__
             keywords[method_name] = method_name
             new_keywords = {**keywords, **kwargs}
 
@@ -90,8 +104,19 @@ class SquareGameboard:
         Coordinate(-1, 1),
     }
 
+    label_colors: Dict[str, BColors] = {
+        "X": BColors.OKBLUE,
+        "O": BColors.OKGREEN,
+        " ": BColors.HEADER,
+    }
+
     def __init__(
-        self, *, surface: str = EMPTY * 9, gap: str = " ", axis: bool = False
+        self,
+        *,
+        surface: str = EMPTY * 9,
+        gap: str = " ",
+        axis: bool = False,
+        colorized: bool = True,
     ) -> None:
 
         size: int = int(len(surface) ** (1 / 2))
@@ -106,9 +131,14 @@ class SquareGameboard:
         self._axis: Final[bool] = axis
 
         self._cells: Dict[Tuple[int, int], Cell] = dict()
+        self._colors: Dict[Tuple[int, int], Union[BColors, str]] = dict()
+
         for index, label in enumerate(surface):
             x, y = self._index_to_coordinate(index)
             self._cells[x, y] = Cell(coordinate=Coordinate(x=x, y=y), label=label)
+
+        self.colorized: bool = colorized
+        self._paint()
 
     def __str__(self) -> str:
         horizontal_border: str = (
@@ -119,7 +149,16 @@ class SquareGameboard:
         surface: str = f"\n".join(
             (f"{self._size - num} " if self._axis else "")
             + f"|{self._gap}"
-            + f"{self._gap}".join(cell.label for cell in row)
+            + f"{self._gap}".join(
+                (
+                    self._colors[cell.coordinate.x, cell.coordinate.y]
+                    if self.colorized
+                    else ""
+                )
+                + cell.label
+                + (BColors.ENDC if self.colorized else "")
+                for cell in row
+            )
             + f"{self._gap}|"
             for num, row in enumerate(self.rows)
         )
@@ -134,21 +173,6 @@ class SquareGameboard:
         )
         return board
 
-    def __call__(self, x: int, y: int) -> Cell:
-        """Return cell by coordinates as namedtuple with two fields:
-        ``coordinate`` and ``label``.
-
-        :param x: Column number starts with 1 from left side of
-         gameboard.
-        :param y: Row number starts with 1 from bottom of gameboard.
-
-        :return: The cell by the coordinates or
-         :attr:`.SquareGameboard.undefined_cell` if coordinates are
-         incorrect.
-
-        """
-        return self._cells.get((x, y), self.undefined_cell)
-
     @functools.cached_property
     def size(self) -> int:
         return self._size
@@ -158,7 +182,7 @@ class SquareGameboard:
         return tuple(self._cells.keys())
 
     @property
-    def surface(self) -> str:
+    def _surface(self) -> str:
         return "".join(cell.label for cell in self._cells.values())
 
     @property
@@ -185,7 +209,8 @@ class SquareGameboard:
         Note::
 
           Rows are returned in the reverse order from top to button.
-          To get rows in the coordinate order, use ``sorted`` method.
+          To get rows in the coordinate order from button to top, use
+          ``sorted`` method.
 
         For details see :meth:`.SquareGameboard.all_sides`.
 
@@ -242,7 +267,11 @@ class SquareGameboard:
 
     @property
     def copy(self) -> SquareGameboard:
-        return SquareGameboard(surface=self.surface, gap=self._gap, axis=self._axis)
+        """Return copy of current gameboard with exactly the same
+        surface.
+
+        """
+        return SquareGameboard(surface=self._surface, gap=self._gap, axis=self._axis)
 
     def count(self, label: str) -> int:
         """Returns the number of occurrences of a :param:`label` on the
@@ -251,7 +280,7 @@ class SquareGameboard:
         """
         return [cell.label for cell in self._cells.values()].count(label)
 
-    @memoized_method("_coordinate_to_index", "_size")  # type: ignore
+    @memoized_method("_size")  # type: ignore
     def _coordinate_to_index(self, column: int, row: int) -> int:
         """Translates the cell coordinates represented by
         :param:`column` and :param:`row` into the index of this cell.
@@ -275,7 +304,7 @@ class SquareGameboard:
             print(f"Coordinates should be from 1 to {self._size}!")
         return -1
 
-    @memoized_method("_index_to_coordinate", "_size")  # type: ignore
+    @memoized_method("_size")  # type: ignore
     def _index_to_coordinate(self, index: int) -> Coordinate:
         """Convert the index to the coordinate.
 
@@ -287,7 +316,7 @@ class SquareGameboard:
         row = self._size - x
         return Coordinate(column, row)
 
-    @memoized_method("_offset_directions", "_size")  # type: ignore
+    @memoized_method("_size")  # type: ignore
     def _offset_directions(self, coordinate: Coordinate) -> Tuple[Coordinate, ...]:
         return tuple(
             shift
@@ -301,6 +330,8 @@ class SquareGameboard:
         *,
         exclude_labels: Tuple[Union[Literal[" "], str], ...] = (),
     ) -> Tuple[Coordinate, ...]:
+        if coordinate not in self._all_coordinates:
+            raise ValueError(f"The {coordinate}  out of range!")
         if exclude_labels:
             return tuple(
                 direction
@@ -314,9 +345,11 @@ class SquareGameboard:
             return self._offset_directions(coordinate)
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
-        """Return "Cell" (as tuple of coordinate and label) by
-        coordinate calculated as algebraic sum of vectors:
-        :param:`coordinate` and :param:`shift`.
+        """Return "Cell" by coordinate calculated as algebraic sum of
+        vectors ``coordinate`` and ``shift``.
+
+        :param coordinate: coordinate of init cell;
+        :param shift: coordinate of direction.
 
         """
         return self._cells.get(
@@ -331,6 +364,7 @@ class SquareGameboard:
             result = str(self)
         log.info(result)
         print(result)
+        self._paint()
 
     def label(self, coordinate: Coordinate, label: str, *, force: bool = False,) -> int:
         """Label cell of the gameboard with the ``coordinate``.
@@ -348,6 +382,20 @@ class SquareGameboard:
         x, y = coordinate
         if force or self._cells.get((x, y), self.undefined_cell).label == EMPTY:
             self._cells[x, y] = Cell(Coordinate(x, y), label)
+            if self.colorized:
+                if force:
+                    self._colors[x, y] = BColors.BOLD + self.label_colors.get(
+                        self._cells[x, y].label, BColors.HEADER
+                    )
+                else:
+                    self._colors[x, y] = BColors.BOLD + BColors.RED
             return 1
         print("This cell is occupied! Choose another one!")
         return 0
+
+    def _paint(self):
+        if self.colorized:
+            for x, y in self._all_coordinates:
+                self._colors[x, y] = self.label_colors.get(
+                    self._cells[x, y].label, BColors.HEADER
+                )
