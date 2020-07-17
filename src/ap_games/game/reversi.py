@@ -34,17 +34,6 @@ class Reversi(GameBase):
         (EMPTY * 27) + "XO" + (EMPTY * 6) + "OX" + (EMPTY * 27)
     )
 
-    directions: ClassVar[Set[Coordinate]] = {
-        Coordinate(0, 1),  # top
-        Coordinate(1, 1),  # right-top
-        Coordinate(1, 0),  # right and so on
-        Coordinate(1, -1),
-        Coordinate(0, -1),
-        Coordinate(-1, -1),
-        Coordinate(-1, 0),
-        Coordinate(-1, 1),
-    }
-
     def winners(self, *, gameboard: Optional[SquareGameboard] = None) -> Set[Player]:
         """Define and return the set of all players who have the maximum
         count of player labels on the gameboard.
@@ -111,12 +100,10 @@ class Reversi(GameBase):
                         break
         return tuple(actual_available_steps)
 
+    @classmethod
     def adversary_occupied_directions(
-        self,
-        coordinate: Coordinate,
-        gameboard: Optional[SquareGameboard] = None,
-        player_label: str = "",
-    ) -> Set[Coordinate]:
+        cls, coordinate: Coordinate, gameboard: SquareGameboard, player_label: str,
+    ) -> Tuple[Coordinate, ...]:
         """Determine the ``directions`` where adjacent cells are
         occupied by the adversary.
 
@@ -130,18 +117,9 @@ class Reversi(GameBase):
         :return: Set of offsets relative to the :param:`coordinate`.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if not player_label:
-            player_label = self.players[0].label
-
-        adjacent_label: str
-        directions: List[Coordinate] = list()
-        for shift in self.directions:
-            _, adjacent_label = gameboard.get_offset_cell(coordinate, shift)
-            if adjacent_label and adjacent_label not in (EMPTY, player_label):
-                directions.append(shift)
-        return set(directions)
+        return gameboard.offset_directions(
+            coordinate=coordinate, exclude_labels=(EMPTY, player_label)
+        )
 
     def get_score(
         self,

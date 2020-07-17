@@ -28,10 +28,14 @@ def test_available_steps(reversi_w_2users):
 
 
 def test_adversary_occupied_directions(reversi_w_2users):
-    adversary_occupied_directions = {Coordinate(1, 0)}
+    adversary_occupied_directions = (Coordinate(1, 0),)
     assert (
         adversary_occupied_directions
-        == reversi_w_2users.adversary_occupied_directions(Coordinate(3, 4))
+        == reversi_w_2users.adversary_occupied_directions(
+            coordinate=Coordinate(3, 4),
+            gameboard=reversi_w_2users.gameboard,
+            player_label=reversi_w_2users.players[0].label,
+        )
     )
 
 

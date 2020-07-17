@@ -1,7 +1,9 @@
 from functools import cached_property
-from random import choice
+from random import choice as random_choice
 
-__ALL__ = ['Player']
+TEST_MODE = True
+
+__ALL__ = ['Player', 'TEST_MODE']
 
 
 class Player:
@@ -29,9 +31,17 @@ class Player:
 
         """
         available_steps = self.game.available_steps()
-        if available_steps:
-            return choice(available_steps)
-        return self.game.gameboard.undefined_coordinate
+        if TEST_MODE:
+            return (
+                available_steps[0]
+                if available_steps
+                else self.game.gameboard.undefined_coordinate
+            )
+        return (
+            random_choice(available_steps)
+            if available_steps
+            else self.game.gameboard.undefined_coordinate
+        )
 
     def go(self):
         """Return the randomly selected coordinates.

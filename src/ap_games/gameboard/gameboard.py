@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import functools
-from typing import TYPE_CHECKING
+import weakref
+from typing import TYPE_CHECKING, Set, Literal, Union, Callable
 
 from ap_games.log import log
 from ap_games.types import Cell
@@ -15,6 +16,45 @@ if TYPE_CHECKING:
     from ap_games.types import Side
 
 __ALL__ = ['SquareGameboard']
+
+
+def memoized_method(*self_attrs):  # type: ignore
+    """Decorator to wrap a method with a memoizing callable that saves
+    up to the ``999`` most recent calls.
+
+    :param self_attrs: attributes of instance that can be used as
+    arguments of ``cached_method``. The instance attributes from
+    variable ``self_attrs`` MUST be hashable.
+
+    TODO: Add type annotation
+
+    """
+
+    def decorator(meth):  # type: ignore
+        @functools.wraps(meth)
+        def wrapped_method(self, *args, **kwargs):  # type: ignore
+            # We're storing the wrapped method inside the instance. If we had
+            # a strong reference to self the instance would never die.
+            self_weak = weakref.ref(self)
+
+            keywords = dict()
+            for attr_name in self_attrs:
+                keywords[attr_name] = getattr(self_weak(), attr_name, None)
+            new_keywords = {**keywords, **kwargs}
+
+            @functools.wraps(meth)
+            @functools.lru_cache(maxsize=999)
+            def cached_method(*args, **new_keywords):  # type: ignore
+                """Attributes from ``self_attrs`` are added as keyword
+                parameters to ``cached_method``."""
+                return meth(self_weak(), *args, **kwargs)
+
+            setattr(self, meth.__name__, cached_method)
+            return cached_method(*args, **kwargs)
+
+        return wrapped_method
+
+    return decorator
 
 
 class SquareGameboard:
@@ -32,6 +72,17 @@ class SquareGameboard:
 
     undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=-1, y=-1)
     undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label="")
+
+    directions: ClassVar[Set[Coordinate]] = {
+        Coordinate(0, 1),  # top
+        Coordinate(1, 1),  # right-top
+        Coordinate(1, 0),  # right and so on
+        Coordinate(1, -1),
+        Coordinate(0, -1),
+        Coordinate(-1, -1),
+        Coordinate(-1, 0),
+        Coordinate(-1, 1),
+    }
 
     def __init__(
         self, *, surface: str = EMPTY * 9, gap: str = " ", axis: bool = False
@@ -95,6 +146,10 @@ class SquareGameboard:
     @functools.cached_property
     def size(self) -> int:
         return self._size
+
+    @functools.cached_property
+    def _all_coordinates(self) -> Tuple[Tuple[int, int], ...]:
+        return tuple(self._cells.keys())
 
     @property
     def surface(self) -> str:
@@ -190,12 +245,13 @@ class SquareGameboard:
         """
         return [cell.label for cell in self._cells.values()].count(label)
 
-    def _coordinate_to_index(self, x: int, y: int) -> int:
-        """Translates the cell coordinates represented by :param:`x` and
-        :param:`y` into the index of this cell.
+    @memoized_method("_size")  # type: ignore
+    def _coordinate_to_index(self, column: int, row: int) -> int:
+        """Translates the cell coordinates represented by
+        :param:`column` and :param:`row` into the index of this cell.
 
-        :param x: Column number from left to right;
-        :param y: Row number from bottom to top.
+        :param column: Column number from left to right;
+        :param row: Row number from bottom to top.
 
         Where an example for a 3x3 ``self._surface``::
 
@@ -207,13 +263,14 @@ class SquareGameboard:
         size of the gameboard, or "-1" if the coordinates are incorrect.
 
         """
-        if (1 <= x <= self._size) and (1 <= y <= self._size):
-            return (x - 1) + self._size * (self._size - y)
+        if (1 <= column <= self._size) and (1 <= row <= self._size):
+            return (column - 1) + self._size * (self._size - row)
         else:
             print(f"Coordinates should be from 1 to {self._size}!")
         return -1
 
-    def _index_to_coordinate(self, index: int) -> Coordinate:
+    @memoized_method("_size")  # type: ignore
+    def _index_to_coordinate(self, index: int, /) -> Coordinate:
         """Convert the index to the coordinate.
 
         For details see :meth:`.SquareGameboard._coordinate_to_index`.
@@ -223,6 +280,32 @@ class SquareGameboard:
         column = y + 1
         row = self._size - x
         return Coordinate(column, row)
+
+    @memoized_method("_size")  # type: ignore
+    def _offset_directions(self, coordinate: Coordinate) -> Tuple[Coordinate, ...]:
+        return tuple(
+            shift
+            for shift in self.directions
+            if (coordinate.x + shift.x, coordinate.y + shift.y) in self._all_coordinates
+        )
+
+    def offset_directions(
+        self,
+        coordinate: Coordinate,
+        *,
+        exclude_labels: Tuple[Union[Literal[" "], str], ...] = (),
+    ) -> Tuple[Coordinate, ...]:
+        return tuple(
+            direction
+            for direction in self._offset_directions(coordinate)
+            if (not exclude_labels)
+            or (
+                self._cells[
+                    coordinate.x + direction.x, coordinate.y + direction.y
+                ].label
+                not in exclude_labels
+            )
+        )
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
         """Return "Cell" (as tuple of coordinate and label) by

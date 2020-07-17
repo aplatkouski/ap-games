@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from itertools import cycle
-from random import choice
+from random import choice as random_choice
 from typing import TYPE_CHECKING
 
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import log
 from ap_games.player.player import Player
 from ap_games.types import Step
+from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
     from typing import ClassVar
@@ -190,7 +191,10 @@ class AIPlayer(Player):
             depth=depth, steps=desired_steps, player=player
         )
 
-        step: Step = choice(most_likely_steps)
+        if TEST_MODE:
+            step: Step = most_likely_steps[0]
+        else:
+            step = random_choice(most_likely_steps)
         # compute and replace ``percentage`` in the selected step
         step = step._replace(percentage=int(len(desired_steps) / len(steps) * 100))
         log.debug("\t" * depth + f"selected step: {step}")
