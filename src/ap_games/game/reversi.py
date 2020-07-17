@@ -3,9 +3,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ap_games.game.game_base import GameBase
-from ap_games.types import Coordinate
-from ap_games.types import EMPTY
-from ap_games.types import GameStatus
+from ap_games.ap_types import Coordinate
+from ap_games.ap_types import EMPTY
+from ap_games.ap_types import GameStatus
 
 if TYPE_CHECKING:
     from typing import ClassVar
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from typing import Tuple
     from ap_games.gameboard.gameboard import SquareGameboard
     from ap_games.player.player import Player
-    from ap_games.types import Label
+    from ap_games.ap_types import Label
 
 __ALL__ = ['Reversi']
 

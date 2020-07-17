@@ -1,7 +1,7 @@
 import pytest
 
-from ap_games.types import Coordinate
-from ap_games.types import GameStatus
+from ap_games.ap_types import Coordinate
+from ap_games.ap_types import GameStatus
 from ap_games.game.reversi import Reversi
 
 

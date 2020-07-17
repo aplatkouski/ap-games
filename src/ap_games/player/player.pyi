@@ -1,7 +1,7 @@
 from functools import cached_property
 from ap_games.game.game_base import GameBase
-from ap_games.types import Coordinate
-from ap_games.types import Label
+from ap_games.ap_types import Coordinate
+from ap_games.ap_types import Label
 
 TEST_MODE: bool
 

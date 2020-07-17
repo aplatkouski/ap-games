@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import log
 from ap_games.player.player import Player
-from ap_games.types import Step
+from ap_games.ap_types import Step
 from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from typing import List
     from typing import Optional
     from typing import Tuple
-    from ap_games.types import Coordinate
+    from ap_games.ap_types import Coordinate
 
 __ALL__ = ['AIPlayer']
 

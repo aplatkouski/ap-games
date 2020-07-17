@@ -2,7 +2,7 @@ from typing import Tuple
 
 import pytest
 from ap_games.gameboard.gameboard import SquareGameboard
-from ap_games.types import Cell, Coordinate, Side
+from ap_games.ap_types import Cell, Coordinate, Side
 
 SIZE_2 = 2
 

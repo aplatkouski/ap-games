@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from ap_games.game.game_base import GameBase
-from ap_games.types import GameStatus
+from ap_games.ap_types import GameStatus
 
 if TYPE_CHECKING:
     from typing import Optional

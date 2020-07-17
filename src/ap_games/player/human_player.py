@@ -1,6 +1,6 @@
 from ap_games.player.player import Player
-from ap_games.types import Coordinate
-from ap_games.types import EMPTY
+from ap_games.ap_types import Coordinate
+from ap_games.ap_types import EMPTY
 
 __ALL__ = ['HumanPlayer']
 

@@ -7,8 +7,8 @@ from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import log
 from ap_games.player.ai_player import AIPlayer
 from ap_games.player.human_player import HumanPlayer
-from ap_games.types import EMPTY
-from ap_games.types import GameStatus
+from ap_games.ap_types import EMPTY
+from ap_games.ap_types import GameStatus
 
 if TYPE_CHECKING:
     from typing import Tuple
@@ -17,9 +17,9 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Set
     from ap_games.player.player import Player
-    from ap_games.types import Coordinate
-    from ap_games.types import Label
-    from ap_games.types import SupportedPlayers
+    from ap_games.ap_types import Coordinate
+    from ap_games.ap_types import Label
+    from ap_games.ap_types import SupportedPlayers
     from typing_extensions import Literal
 
 __ALL__ = ["GameBase"]

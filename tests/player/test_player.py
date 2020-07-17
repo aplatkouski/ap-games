@@ -2,7 +2,7 @@ import pytest
 
 from ap_games.game.game_base import GameBase
 from ap_games.player.player import Player
-from ap_games.types import Coordinate
+from ap_games.ap_types import Coordinate
 
 
 @pytest.fixture

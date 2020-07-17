@@ -2,26 +2,31 @@ from __future__ import annotations
 
 import functools
 import weakref
-from typing import TYPE_CHECKING, Set, Literal, Union, Callable
+from typing import TYPE_CHECKING
 
 from ap_games.log import log
-from ap_games.types import Cell
-from ap_games.types import Coordinate
-from ap_games.types import EMPTY
+from ap_games.ap_types import Cell
+from ap_games.ap_types import Coordinate
+from ap_games.ap_types import EMPTY
 
 if TYPE_CHECKING:
     from typing import ClassVar
     from typing import Dict
+    from typing import Final
+    from typing import Literal
+    from typing import Set
     from typing import Tuple
-    from ap_games.types import Side
+    from typing import Union
+    from ap_games.ap_types import Side
 
 __ALL__ = ['SquareGameboard']
 
 
-def memoized_method(*self_attrs):  # type: ignore
+def memoized_method(method_name, *self_attrs):  # type: ignore
     """Decorator to wrap a method with a memoizing callable that saves
     up to the ``999`` most recent calls.
 
+    :param method_name: name of decorated method as first argument;
     :param self_attrs: attributes of instance that can be used as
     arguments of ``cached_method``. The instance attributes from
     variable ``self_attrs`` MUST be hashable.
@@ -40,6 +45,7 @@ def memoized_method(*self_attrs):  # type: ignore
             keywords = dict()
             for attr_name in self_attrs:
                 keywords[attr_name] = getattr(self_weak(), attr_name, None)
+            keywords[method_name] = method_name
             new_keywords = {**keywords, **kwargs}
 
             @functools.wraps(meth)
@@ -73,7 +79,7 @@ class SquareGameboard:
     undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=-1, y=-1)
     undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label="")
 
-    directions: ClassVar[Set[Coordinate]] = {
+    _directions: Final[ClassVar[Set[Coordinate]]] = {
         Coordinate(0, 1),  # top
         Coordinate(1, 1),  # right-top
         Coordinate(1, 0),  # right and so on
@@ -95,9 +101,9 @@ class SquareGameboard:
             raise ValueError(
                 f"The gameboard must be square ({size}^2 != {len(surface)})!"
             )
-        self._size: int = size
-        self._gap: str = gap
-        self._axis: bool = axis
+        self._size: Final[int] = size
+        self._gap: Final[str] = gap
+        self._axis: Final[bool] = axis
 
         self._cells: Dict[Tuple[int, int], Cell] = dict()
         for index, label in enumerate(surface):
@@ -245,7 +251,7 @@ class SquareGameboard:
         """
         return [cell.label for cell in self._cells.values()].count(label)
 
-    @memoized_method("_size")  # type: ignore
+    @memoized_method("_coordinate_to_index", "_size")  # type: ignore
     def _coordinate_to_index(self, column: int, row: int) -> int:
         """Translates the cell coordinates represented by
         :param:`column` and :param:`row` into the index of this cell.
@@ -269,8 +275,8 @@ class SquareGameboard:
             print(f"Coordinates should be from 1 to {self._size}!")
         return -1
 
-    @memoized_method("_size")  # type: ignore
-    def _index_to_coordinate(self, index: int, /) -> Coordinate:
+    @memoized_method("_index_to_coordinate", "_size")  # type: ignore
+    def _index_to_coordinate(self, index: int) -> Coordinate:
         """Convert the index to the coordinate.
 
         For details see :meth:`.SquareGameboard._coordinate_to_index`.
@@ -281,11 +287,11 @@ class SquareGameboard:
         row = self._size - x
         return Coordinate(column, row)
 
-    @memoized_method("_size")  # type: ignore
+    @memoized_method("_offset_directions", "_size")  # type: ignore
     def _offset_directions(self, coordinate: Coordinate) -> Tuple[Coordinate, ...]:
         return tuple(
             shift
-            for shift in self.directions
+            for shift in self._directions
             if (coordinate.x + shift.x, coordinate.y + shift.y) in self._all_coordinates
         )
 
@@ -295,17 +301,17 @@ class SquareGameboard:
         *,
         exclude_labels: Tuple[Union[Literal[" "], str], ...] = (),
     ) -> Tuple[Coordinate, ...]:
-        return tuple(
-            direction
-            for direction in self._offset_directions(coordinate)
-            if (not exclude_labels)
-            or (
-                self._cells[
+        if exclude_labels:
+            return tuple(
+                direction
+                for direction in self._offset_directions(coordinate)
+                if self._cells[
                     coordinate.x + direction.x, coordinate.y + direction.y
                 ].label
                 not in exclude_labels
             )
-        )
+        else:
+            return self._offset_directions(coordinate)
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
         """Return "Cell" (as tuple of coordinate and label) by
