@@ -12,7 +12,7 @@ def reversi_w_2users() -> Reversi:
 
 def test_construction():
     reversi = Reversi(surface=" " * 64, player_types=("user", "user"))
-    assert " " * 64 == reversi.gameboard._surface
+    assert " " * 64 == reversi.gameboard.surface
     assert "user" == reversi.players[0].type
     assert "user" == reversi.players[1].type
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from ap_games.gameboard.gameboard import SquareGameboard
@@ -12,15 +13,18 @@ from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
 
 if TYPE_CHECKING:
-    from typing import Tuple
     from typing import ClassVar
+    from typing import DefaultDict
     from typing import Deque
+    from typing import Dict
     from typing import Optional
-    from ap_games.player.player import Player
+    from typing import Tuple
+    from typing_extensions import Literal
+
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import Label
     from ap_games.ap_types import SupportedPlayers
-    from typing_extensions import Literal
+    from ap_games.player.player import Player
 
 __ALL__ = ["GameBase"]
 
@@ -100,6 +104,17 @@ class GameBase:
             self.players[1].label
         ):
             self.players.rotate(1)
+
+        self._available_steps_cache: DefaultDict[
+            int, Dict[Tuple[str, Label], Tuple[Coordinate, ...],]
+        ] = defaultdict(dict)
+        self.available_steps_cache_size: int = 7  # depth
+
+    def _clean_cache(self) -> None:
+        outdated: int = self.gameboard.surface.count(EMPTY) + 1
+        while outdated in self._available_steps_cache:
+            del self._available_steps_cache[outdated]
+            outdated += 1
 
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Must be overridden by subclasses and must return

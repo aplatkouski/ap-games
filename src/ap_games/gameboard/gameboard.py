@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 from collections import defaultdict
 from dataclasses import dataclass
+from operator import add
 from typing import TYPE_CHECKING
 
 # from ap_games.log import log
@@ -103,7 +104,10 @@ class SquareGameboard:
         gap: str = " ",
         axis: bool = False,
         colorized: bool = True,
+        _safety: bool = True,
     ) -> None:
+
+        self.colorized: bool = colorized if _safety else False
 
         size: int = int(len(surface) ** (1 / 2))
         self._size: Final[int] = size
@@ -112,16 +116,15 @@ class SquareGameboard:
 
         self._cells: Dict[Tuple[int, int], Cell] = dict()
         self._colors: Dict[Tuple[int, int], str] = dict()
-
-        for index, label in enumerate(surface):
-            x, y = self._index_to_coordinate[self._size][index]
-            self._cells[x, y] = Cell(coordinate=Coordinate(x=x, y=y), label=label)
-
-        self.colorized: bool = colorized
-        self._paint()
         self._offset_directions_cache: Dict[
             Tuple[Coordinate, Labels], Directions,
         ] = dict()
+
+        if _safety:
+            for index, label in enumerate(surface):
+                x, y = self._index_to_coordinate[self._size][index]
+                self._cells[x, y] = Cell(coordinate=Coordinate(x=x, y=y), label=label)
+            self._paint()
 
     def __str__(self) -> str:
         horizontal_border: str = (
@@ -196,7 +199,7 @@ class SquareGameboard:
         return self._size
 
     @property
-    def _surface(self) -> str:
+    def surface(self) -> str:
         return "".join(cell.label for cell in self._cells.values())
 
     @property
@@ -286,9 +289,10 @@ class SquareGameboard:
 
         """
         sg: SquareGameboard = SquareGameboard(
-            surface=self._surface, gap=self._gap, axis=self._axis
+            surface=self.surface, gap=self._gap, axis=self._axis, _safety=False
         )
-        sg._offset_directions_cache = self._offset_directions_cache
+        sg._cells = dict(self._cells)
+        sg._offset_directions_cache = dict(self._offset_directions_cache)
         return sg
 
     def count(self, label: str) -> int:

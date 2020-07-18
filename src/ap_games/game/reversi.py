@@ -91,6 +91,15 @@ class Reversi(GameBase):
 
         current_player_label: Label = player.label
 
+        surface: str = gameboard.surface
+        count_empty_cell: int = surface.count(EMPTY)
+        if (surface, current_player_label) in self._available_steps_cache[
+            count_empty_cell
+        ]:
+            return self._available_steps_cache[count_empty_cell][
+                surface, current_player_label
+            ]
+
         actual_available_steps: List[Coordinate] = list()
         for coordinate in gameboard.available_steps:
             # Iterate over all directions where the cell occupied by
@@ -116,7 +125,12 @@ class Reversi(GameBase):
                         # if successful, other directions can be not
                         # checked
                         break
-        return tuple(actual_available_steps)
+        self._available_steps_cache[count_empty_cell][
+            surface, current_player_label
+        ] = tuple(actual_available_steps)
+        return self._available_steps_cache[count_empty_cell][
+            surface, current_player_label
+        ]
 
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
         player_score: int = 0
@@ -216,4 +230,6 @@ class Reversi(GameBase):
                                 label=current_player_label,
                                 force=True,
                             )
+            if len(self._available_steps_cache) > self.available_steps_cache_size:
+                self._clean_cache()
         return score
