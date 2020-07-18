@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from typing import Dict
     from typing import Final
     from typing import Literal
-    from typing import Set
     from typing import Tuple
     from typing import Union
     from ap_games.ap_types import Side
@@ -25,11 +24,11 @@ __ALL__ = ["SquareGameboard"]
 
 @dataclass(frozen=True)
 class BColors:
-    HEADER: Final[str] = "\033[95m"
-    OKBLUE: Final[str] = "\033[94m"
-    OKGREEN: Final[str] = "\033[92m"
-    WARNING: Final[str] = "\033[93m"
-    RED: Final[str] = "\033[91m"
+    HEADER: Final[str] = "\033[35m"
+    BLUE: Final[str] = "\033[34m"
+    GREEN: Final[str] = "\033[32m"
+    YELLOW: Final[str] = "\033[33m"
+    TURQUOISE: Final[str] = "\033[36m"
     ENDC: Final[str] = "\033[0m"
     BOLD: Final[str] = "\033[1m"
     UNDERLINE: Final[str] = "\033[4m"
@@ -93,7 +92,7 @@ class SquareGameboard:
     undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=0, y=0)
     undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label="")
 
-    _directions: Final[ClassVar[Set[Coordinate]]] = {
+    _directions: Final[ClassVar[Tuple[Coordinate, ...]]] = (
         Coordinate(0, 1),  # top
         Coordinate(1, 1),  # right-top
         Coordinate(1, 0),  # right and so on
@@ -102,11 +101,11 @@ class SquareGameboard:
         Coordinate(-1, -1),
         Coordinate(-1, 0),
         Coordinate(-1, 1),
-    }
+    )
 
-    label_colors: Dict[str, BColors] = {
-        "X": BColors.OKBLUE,
-        "O": BColors.OKGREEN,
+    label_colors: Dict[str, str] = {
+        "X": BColors.BLUE,
+        "O": BColors.GREEN,
         " ": BColors.HEADER,
     }
 
@@ -131,7 +130,7 @@ class SquareGameboard:
         self._axis: Final[bool] = axis
 
         self._cells: Dict[Tuple[int, int], Cell] = dict()
-        self._colors: Dict[Tuple[int, int], Union[BColors, str]] = dict()
+        self._colors: Dict[Tuple[int, int], str] = dict()
 
         for index, label in enumerate(surface):
             x, y = self._index_to_coordinate(index)
@@ -139,6 +138,7 @@ class SquareGameboard:
 
         self.colorized: bool = colorized
         self._paint()
+        self._offset_directions_cache: Dict[Coordinate, Tuple[Coordinate, ...]] = dict()
 
     def __str__(self) -> str:
         horizontal_border: str = (
@@ -176,10 +176,6 @@ class SquareGameboard:
     @functools.cached_property
     def size(self) -> int:
         return self._size
-
-    @functools.cached_property
-    def _all_coordinates(self) -> Tuple[Tuple[int, int], ...]:
-        return tuple(self._cells.keys())
 
     @property
     def _surface(self) -> str:
@@ -271,7 +267,11 @@ class SquareGameboard:
         surface.
 
         """
-        return SquareGameboard(surface=self._surface, gap=self._gap, axis=self._axis)
+        sg: SquareGameboard = SquareGameboard(
+            surface=self._surface, gap=self._gap, axis=self._axis
+        )
+        sg._offset_directions_cache = self._offset_directions_cache
+        return sg
 
     def count(self, label: str) -> int:
         """Returns the number of occurrences of a :param:`label` on the
@@ -281,34 +281,21 @@ class SquareGameboard:
         return [cell.label for cell in self._cells.values()].count(label)
 
     @memoized_method("_size")  # type: ignore
-    def _coordinate_to_index(self, column: int, row: int) -> int:
-        """Translates the cell coordinates represented by
-        :param:`column` and :param:`row` into the index of this cell.
-
-        :param column: Column number from left to right;
-        :param row: Row number from bottom to top.
-
-        Where an example for a 3x3 ``self._surface``::
-
-            (1, 3) (2, 3) (3, 3)         0  1  2
-            (1, 2) (2, 2) (3, 2)  ==>    3  4  5
-            (1, 1) (2, 1) (3, 1)         6  7  8
-
-        :return: the index of the corresponding cell between 1 and the
-        size of the gameboard, or "-1" if the coordinates are incorrect.
-
-        """
-        if (1 <= column <= self._size) and (1 <= row <= self._size):
-            return (column - 1) + self._size * (self._size - row)
-        else:
-            print(f"Coordinates should be from 1 to {self._size}!")
-        return -1
-
-    @memoized_method("_size")  # type: ignore
     def _index_to_coordinate(self, index: int) -> Coordinate:
-        """Convert the index to the coordinate.
+        """Convert the index of the cell (label of surface) into the
+        coordinate of this cell.
 
-        For details see :meth:`.SquareGameboard._coordinate_to_index`.
+        :param index: The index of the corresponding cell between 0 and
+        the size of the gameboard.
+
+        Where an example for a 3x3 ``self.surface``::
+
+            0 1 2         (1, 3) (2, 3) (3, 3)
+            3 4 5   ==>   (1, 2) (2, 2) (3, 2)
+            6 7 8         (1, 1) (2, 1) (3, 1)
+
+        :return: Namedtuple ``Coordinate`` where x is column number from
+        left to right, and y is row number from bottom to top.
 
         """
         x, y = divmod(index, self._size)
@@ -321,7 +308,7 @@ class SquareGameboard:
         return tuple(
             shift
             for shift in self._directions
-            if (coordinate.x + shift.x, coordinate.y + shift.y) in self._all_coordinates
+            if (coordinate.x + shift.x, coordinate.y + shift.y) in self._cells
         )
 
     def offset_directions(
@@ -330,10 +317,12 @@ class SquareGameboard:
         *,
         exclude_labels: Tuple[Union[Literal[" "], str], ...] = (),
     ) -> Tuple[Coordinate, ...]:
-        if coordinate not in self._all_coordinates:
+        if coordinate in self._offset_directions_cache:
+            return self._offset_directions_cache[coordinate]
+        if coordinate not in self._cells:
             raise ValueError(f"The {coordinate}  out of range!")
         if exclude_labels:
-            return tuple(
+            result = tuple(
                 direction
                 for direction in self._offset_directions(coordinate)
                 if self._cells[
@@ -342,7 +331,9 @@ class SquareGameboard:
                 not in exclude_labels
             )
         else:
-            return self._offset_directions(coordinate)
+            result = self._offset_directions(coordinate)
+        self._offset_directions_cache[coordinate] = result
+        return result
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
         """Return "Cell" by coordinate calculated as algebraic sum of
@@ -384,18 +375,17 @@ class SquareGameboard:
             self._cells[x, y] = Cell(Coordinate(x, y), label)
             if self.colorized:
                 if force:
-                    self._colors[x, y] = BColors.BOLD + self.label_colors.get(
-                        self._cells[x, y].label, BColors.HEADER
-                    )
+                    self._colors[x, y] = BColors.TURQUOISE
                 else:
-                    self._colors[x, y] = BColors.BOLD + BColors.RED
+                    self._colors[x, y] = BColors.BOLD + BColors.TURQUOISE
+            self._offset_directions_cache = dict()
             return 1
         print("This cell is occupied! Choose another one!")
         return 0
 
-    def _paint(self):
+    def _paint(self) -> None:
         if self.colorized:
-            for x, y in self._all_coordinates:
+            for x, y in self._cells:
                 self._colors[x, y] = self.label_colors.get(
                     self._cells[x, y].label, BColors.HEADER
                 )

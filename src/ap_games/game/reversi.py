@@ -47,7 +47,7 @@ class Reversi(GameBase):
         :param player_label: Cells with this "friendly" label will
          not be considered an adversary.
 
-        :return: Set of offsets relative to the :param:`coordinate`.
+        :return: Tuple of offsets relative to the :param:`coordinate`.
 
         """
         return gameboard.offset_directions(
@@ -118,12 +118,7 @@ class Reversi(GameBase):
                         break
         return tuple(actual_available_steps)
 
-    def get_score(
-        self,
-        *,
-        gameboard: SquareGameboard,
-        player: Player,
-    ) -> int:
+    def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
         player_score: int = 0
         another_players_score: int = 0
         for p in self.players:

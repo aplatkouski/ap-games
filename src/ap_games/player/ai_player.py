@@ -5,6 +5,7 @@ from random import choice as random_choice
 from typing import TYPE_CHECKING
 
 from ap_games.gameboard.gameboard import SquareGameboard
+
 # from ap_games.log import log
 from ap_games.player.player import Player
 from ap_games.ap_types import Step

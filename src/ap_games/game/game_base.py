@@ -4,6 +4,7 @@ from collections import deque
 from typing import TYPE_CHECKING
 
 from ap_games.gameboard.gameboard import SquareGameboard
+
 # from ap_games.log import log
 from ap_games.player.ai_player import AIPlayer
 from ap_games.player.human_player import HumanPlayer
@@ -15,7 +16,6 @@ if TYPE_CHECKING:
     from typing import ClassVar
     from typing import Deque
     from typing import Optional
-    from typing import Set
     from ap_games.player.player import Player
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import Label

@@ -10,12 +10,16 @@ class Player:
     """Class introduces the player in the game."""
 
     def __init__(self, type_, /, *, game, label):
-        self.type = type_
+        self._type = type_
         self._game = game
         self._label = label
 
     def __str__(self):
         return self._label
+
+    @cached_property
+    def type(self):
+        return self._type
 
     @cached_property
     def game(self):

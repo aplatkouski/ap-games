@@ -14,9 +14,9 @@ __ALL__ = ["cli"]
 
 def cli(game_class: Type[GameBase] = TicTacToe) -> None:
     if TEST_MODE:
-        command = "start medium hard"
+        command: str = "start medium hard"
     else:
-        command: str = input("Input command: ")
+        command = input("Input command: ")
     while command != "exit":
         parameters = command.split()
         if (

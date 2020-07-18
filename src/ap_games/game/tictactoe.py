@@ -33,7 +33,7 @@ class TicTacToe(GameBase):
         if gameboard is None:
             gameboard = self.gameboard
 
-        winners: List[Player, ...] = list()
+        winners: List[Player] = list()
         for player in self.players:
             for side in gameboard.all_sides:
                 if all(cell.label == player.label for cell in side):
