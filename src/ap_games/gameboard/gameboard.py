@@ -5,7 +5,7 @@ import weakref
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from ap_games.log import log
+# from ap_games.log import log
 from ap_games.ap_types import Cell
 from ap_games.ap_types import Coordinate
 from ap_games.ap_types import EMPTY
@@ -362,7 +362,7 @@ class SquareGameboard:
             result: str = "\n".join(f"{indent}{line}" for line in str(self).split("\n"))
         else:
             result = str(self)
-        log.info(result)
+        # log.info(result)
         print(result)
         self._paint()
 
