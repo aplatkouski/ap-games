@@ -90,7 +90,7 @@ class SquareGameboard:
 
     """
 
-    undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=-1, y=-1)
+    undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=0, y=0)
     undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label="")
 
     _directions: Final[ClassVar[Set[Coordinate]]] = {
