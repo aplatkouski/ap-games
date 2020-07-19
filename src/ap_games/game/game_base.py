@@ -124,30 +124,6 @@ class GameBase:
         """
         return tuple()
 
-    def available_steps(
-        self,
-        *,
-        gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
-    ) -> Tuple[Coordinate, ...]:
-        """Return a tuple of coordinates of all available cells on the
-        :param:`gameboard` for the :param:`player`.
-
-        This method should be overridden by subclasses if there is a
-        more complex rule for determining which cell is available.
-
-        :param gameboard: Optional.  If undefined, use
-         :attr:`.GameBase.gameboard`.
-        :param player: Optional.  If undefined, user current user
-         :attr:`.GameBase.players[0]`.
-
-        """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
-        return gameboard.available_steps
-
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
         winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
         if len(winners) == 1:
@@ -192,6 +168,30 @@ class GameBase:
         if self.available_steps(gameboard=gameboard, player=player):
             return GameStatus(active=True, message="")
         return GameStatus(active=False, message="")
+
+    def available_steps(
+        self,
+        *,
+        gameboard: Optional[SquareGameboard] = None,
+        player: Optional[Player] = None,
+    ) -> Tuple[Coordinate, ...]:
+        """Return a tuple of coordinates of all available cells on the
+        :param:`gameboard` for the :param:`player`.
+
+        This method should be overridden by subclasses if there is a
+        more complex rule for determining which cell is available.
+
+        :param gameboard: Optional.  If undefined, use
+         :attr:`.GameBase.gameboard`.
+        :param player: Optional.  If undefined, user current user
+         :attr:`.GameBase.players[0]`.
+
+        """
+        if gameboard is None:
+            gameboard = self.gameboard
+        if player is None:
+            player = self.players[0]
+        return gameboard.available_steps
 
     def step(
         self,

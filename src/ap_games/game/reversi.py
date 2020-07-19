@@ -70,68 +70,6 @@ class Reversi(GameBase):
         max_score = max(score for _, score in player_scores)
         return tuple(player for player, score in player_scores if score == max_score)
 
-    def available_steps(
-        self,
-        *,
-        gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
-    ) -> Tuple[Coordinate, ...]:
-        """Return coordinates of only that cells where ``player`` can
-        flip at least one another player label using Reversi game's
-        rule.
-
-        TODO: add max priority to corner cells.
-
-        """
-
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
-
-        current_player_label: Label = player.label
-
-        surface: str = gameboard.surface
-        count_empty_cell: int = surface.count(EMPTY)
-        if (surface, current_player_label) in self._available_steps_cache[
-            count_empty_cell
-        ]:
-            return self._available_steps_cache[count_empty_cell][
-                surface, current_player_label
-            ]
-
-        actual_available_steps: List[Coordinate] = list()
-        for coordinate in gameboard.available_steps:
-            # Iterate over all directions where the cell occupied by
-            # the adversary
-            for shift in self._adversary_occupied_directions(
-                coordinate=coordinate,
-                gameboard=gameboard,
-                player_label=current_player_label,
-            ):
-                analyzed_coordinate, label = gameboard.get_offset_cell(
-                    coordinate, shift
-                )
-                # Iterate over all cells in this direction
-                while label and label not in (EMPTY, current_player_label):
-                    analyzed_coordinate, label = gameboard.get_offset_cell(
-                        analyzed_coordinate, shift
-                    )
-                else:
-                    # Check there is the cell occupied by the current
-                    # player behind the adversary cells
-                    if label == current_player_label:
-                        actual_available_steps.append(coordinate)
-                        # if successful, other directions can be not
-                        # checked
-                        break
-        self._available_steps_cache[count_empty_cell][
-            surface, current_player_label
-        ] = tuple(actual_available_steps)
-        return self._available_steps_cache[count_empty_cell][
-            surface, current_player_label
-        ]
-
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
         player_score: int = 0
         another_players_score: int = 0
@@ -183,6 +121,67 @@ class Reversi(GameBase):
             else:  # len(winners) == 0
                 game_status = GameStatus(False, "Impossible\n")
         return game_status
+
+    def available_steps(
+        self,
+        *,
+        gameboard: Optional[SquareGameboard] = None,
+        player: Optional[Player] = None,
+    ) -> Tuple[Coordinate, ...]:
+        """Return coordinates of only that cells where ``player`` can
+        flip at least one another player label using Reversi game's
+        rule.
+
+        TODO: add max priority to corner cells.
+
+        """
+        if gameboard is None:
+            gameboard = self.gameboard
+        if player is None:
+            player = self.players[0]
+
+        current_player_label: Label = player.label
+
+        surface: str = gameboard.surface
+        count_empty_cell: int = surface.count(EMPTY)
+        if (surface, current_player_label) in self._available_steps_cache[
+            count_empty_cell
+        ]:
+            return self._available_steps_cache[count_empty_cell][
+                surface, current_player_label
+            ]
+
+        actual_available_steps: List[Coordinate] = list()
+        for coordinate in gameboard.available_steps:
+            # Iterate over all directions where the cell occupied by
+            # the adversary
+            for shift in self._adversary_occupied_directions(
+                coordinate=coordinate,
+                gameboard=gameboard,
+                player_label=current_player_label,
+            ):
+                analyzed_coordinate, label = gameboard.get_offset_cell(
+                    coordinate, shift
+                )
+                # Iterate over all cells in this direction
+                while label and label not in (EMPTY, current_player_label):
+                    analyzed_coordinate, label = gameboard.get_offset_cell(
+                        analyzed_coordinate, shift
+                    )
+                else:
+                    # Check there is the cell occupied by the current
+                    # player behind the adversary cells
+                    if label == current_player_label:
+                        actual_available_steps.append(coordinate)
+                        # if successful, other directions can be not
+                        # checked
+                        break
+        self._available_steps_cache[count_empty_cell][
+            surface, current_player_label
+        ] = tuple(actual_available_steps)
+        return self._available_steps_cache[count_empty_cell][
+            surface, current_player_label
+        ]
 
     def step(
         self,
