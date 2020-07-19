@@ -23,6 +23,7 @@ Coordinate = NamedTuple("Coordinate", [("x", int), ("y", int)])
 Cell = NamedTuple("Cell", [("coordinate", Coordinate), ("label", str)])
 Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]
+Offset = NamedTuple("Offset", [("coordinate", Coordinate), ("direction", Coordinate)])
 
 GameStatus = NamedTuple("GameStatus", [("active", bool), ("message", str)])
 Step = NamedTuple(

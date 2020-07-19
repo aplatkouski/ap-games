@@ -62,7 +62,7 @@ class GameBase:
     labels: ClassVar[Tuple[Label, ...]] = (_X, _O)
 
     default_surface: ClassVar[str] = EMPTY * 9
-    axis: ClassVar[bool] = False
+    axis: ClassVar[bool] = True
     gap: ClassVar[str] = " "
 
     supported_players: ClassVar[SupportedPlayers] = {
