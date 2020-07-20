@@ -18,6 +18,8 @@ __ALL__ = [
 ]
 
 EMPTY: Literal[" "] = " "
+X: Literal["X"] = "X"
+O: Literal["O"] = "O"
 
 Coordinate = NamedTuple("Coordinate", [("x", int), ("y", int)])
 Cell = NamedTuple("Cell", [("coordinate", Coordinate), ("label", str)])

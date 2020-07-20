@@ -9,6 +9,8 @@ from ap_games.ap_types import Cell
 from ap_games.ap_types import Coordinate
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import Offset
+from ap_games.ap_types import X
+from ap_games.ap_types import O
 
 if TYPE_CHECKING:
     from typing import Any
@@ -59,8 +61,10 @@ class GameboardRegistry:
         self.index_to_coordinate: Dict[int, Coordinate] = dict()
         self.offsets: Dict[Coordinate, Tuple[Offset, ...]] = dict()
         self._fill_index_to_coordinate(size=size)
+        self.all_coordinates: Final[Tuple[Coordinate, ...]] = tuple(
+            self.index_to_coordinate.values()
+        )
         self._fill_offsets()
-        self.all_coordinates: Final[Tuple[Coordinate, ...]] = tuple(self.offsets.keys())
 
     def _fill_index_to_coordinate(self, size: int) -> None:
         """Convert the index of the cell (label of surface) into the
@@ -85,16 +89,13 @@ class GameboardRegistry:
             self.index_to_coordinate[index] = Coordinate(column, row)
 
     def _fill_offsets(self) -> None:
-        all_coordinates: Tuple[Coordinate, ...] = tuple(
-            self.index_to_coordinate.values()
-        )
-        for coordinate in all_coordinates:
+        for coordinate in self.all_coordinates:
             offsets: List[Offset] = list()
             for shift in self._directions:
                 offset_coordinate = Coordinate(
                     x=coordinate.x + shift.x, y=coordinate.y + shift.y
                 )
-                if offset_coordinate in all_coordinates:
+                if offset_coordinate in self.all_coordinates:
                     offsets.append(
                         Offset(coordinate=offset_coordinate, direction=shift)
                     )
@@ -118,16 +119,16 @@ class SquareGameboard:
     undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label="")
 
     label_colors: Dict[str, str] = {
-        "X": BColors.BLUE,
-        "O": BColors.GREEN,
-        " ": BColors.HEADER,
+        X: BColors.BLUE,
+        O: BColors.GREEN,
+        EMPTY: BColors.HEADER,
     }
 
     default_surface: str = EMPTY * 9
 
     _registries: Dict[Size, GameboardRegistry] = dict()
 
-    def __new__(cls, **kwargs: Any) -> SquareGameboard:
+    def __new__(cls, **kwargs: Any) -> Any:
         surface = kwargs.get("surface", cls.default_surface)
         size: int = int(len(surface) ** (1 / 2))
         if size ** 2 != len(surface):
@@ -155,7 +156,7 @@ class SquareGameboard:
         self._gap: Final[str] = gap
         self._axis: Final[bool] = axis
 
-        self._cells: Dict[Tuple[int, int], Cell] = dict()
+        self._cells_dict: Dict[Tuple[int, int], Cell] = dict()
         self._colors: Dict[Tuple[int, int], str] = dict()
         self._offset_directions_cache: Dict[
             Tuple[Coordinate, Labels], Directions,
@@ -166,8 +167,8 @@ class SquareGameboard:
             self.registry: GameboardRegistry = self._registries[size]
             for index, label in enumerate(surface):
                 coordinate = self.registry.index_to_coordinate[index]
-                self._cells[coordinate] = Cell(coordinate, label)
-            self._paint()
+                self._cells_dict[coordinate] = Cell(coordinate, label)
+            self._default_paint()
 
     def __str__(self) -> str:
         horizontal_border: str = (
@@ -209,7 +210,9 @@ class SquareGameboard:
     @property
     def surface(self) -> str:
         if not self._surface_cache:
-            self._surface_cache = "".join(cell.label for cell in self._cells.values())
+            self._surface_cache = "".join(
+                cell.label for cell in self._cells_dict.values()
+            )
         return self._surface_cache
 
     @property
@@ -218,7 +221,7 @@ class SquareGameboard:
         columns = tuple(
             tuple(
                 cell
-                for coordinate, cell in self._cells.items()
+                for coordinate, cell in self._cells_dict.items()
                 if coordinate[0] == column
             )
             for column in range(1, self._size + 1)
@@ -239,7 +242,9 @@ class SquareGameboard:
         """
         rows = tuple(
             tuple(
-                cell for coordinate, cell in self._cells.items() if coordinate[1] == row
+                cell
+                for coordinate, cell in self._cells_dict.items()
+                if coordinate[1] == row
             )
             for row in reversed(range(1, self._size + 1))
         )
@@ -249,10 +254,10 @@ class SquareGameboard:
     def diagonals(self) -> Tuple[Side, ...]:
         """Return main and reverse diagonals as a tuple."""
         main_diagonal: Side = tuple(
-            self._cells[num + 1, self._size - num] for num in range(self._size)
+            self._cells_dict[num + 1, self._size - num] for num in range(self._size)
         )
         reverse_diagonal: Side = tuple(
-            self._cells[num, num] for num in range(1, self._size + 1)
+            self._cells_dict[num, num] for num in range(1, self._size + 1)
         )
         return main_diagonal, reverse_diagonal
 
@@ -273,7 +278,7 @@ class SquareGameboard:
          * ``label`` (as string).
 
         """
-        return tuple(self._cells.values())
+        return tuple(self._cells_dict.values())
 
     @property
     def available_steps(self) -> Tuple[Coordinate, ...]:
@@ -292,7 +297,7 @@ class SquareGameboard:
         sg: SquareGameboard = SquareGameboard(
             surface=self.surface, gap=self._gap, axis=self._axis, _safety=False
         )
-        sg._cells = dict(self._cells)
+        sg._cells_dict = dict(self._cells_dict)
         sg._offset_directions_cache = dict(self._offset_directions_cache)
         sg._surface_cache = self._surface_cache
         sg.registry = self.registry
@@ -303,7 +308,7 @@ class SquareGameboard:
         gameboard.
 
         """
-        return [cell.label for cell in self._cells.values()].count(label)
+        return self.surface.count(label)
 
     def offset_directions(
         self, coordinate: Coordinate, *, exclude_labels: Labels = (),
@@ -317,7 +322,7 @@ class SquareGameboard:
                 for offset_coordinate, offset_direction in self.registry.offsets[
                     coordinate
                 ]
-                if self._cells[offset_coordinate].label not in exclude_labels
+                if self._cells_dict[offset_coordinate].label not in exclude_labels
             )
         return self._offset_directions_cache[coordinate, exclude_labels]
 
@@ -329,7 +334,7 @@ class SquareGameboard:
         :param shift: coordinate of direction.
 
         """
-        return self._cells.get(
+        return self._cells_dict.get(
             (coordinate.x + shift.x, coordinate.y + shift.y), self.undefined_cell
         )
 
@@ -341,7 +346,7 @@ class SquareGameboard:
             result = str(self)
         # log.info(result)
         print(result)
-        self._paint()
+        self._default_paint()
 
     def label(self, coordinate: Coordinate, label: str, *, force: bool = False,) -> int:
         """Label cell of the gameboard with the ``coordinate``.
@@ -356,8 +361,11 @@ class SquareGameboard:
         :return: count of labeled cell with :param:`label`.
 
         """
-        if force or self._cells.get(coordinate, self.undefined_cell).label == EMPTY:
-            self._cells[coordinate] = Cell(coordinate, label)
+        if (
+            force
+            or self._cells_dict.get(coordinate, self.undefined_cell).label == EMPTY
+        ):
+            self._cells_dict[coordinate] = Cell(coordinate, label)
             if self.colorized:
                 if force:
                     self._colors[coordinate] = BColors.TURQUOISE
@@ -369,11 +377,11 @@ class SquareGameboard:
         print("This cell is occupied! Choose another one!")
         return 0
 
-    def _paint(self) -> None:
+    def _default_paint(self) -> None:
         if self.colorized:
             self._colors = {
                 coordinate: self.label_colors.get(
-                    self._cells[coordinate].label, BColors.HEADER
+                    self._cells_dict[coordinate].label, BColors.HEADER
                 )
-                for coordinate in self._cells
+                for coordinate in self._cells_dict
             }

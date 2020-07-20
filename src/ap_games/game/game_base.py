@@ -11,6 +11,8 @@ from ap_games.player.ai_player import AIPlayer
 from ap_games.player.human_player import HumanPlayer
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
+from ap_games.ap_types import X
+from ap_games.ap_types import O
 
 if TYPE_CHECKING:
     from typing import ClassVar
@@ -57,9 +59,7 @@ class GameBase:
 
     """
 
-    _X: Literal["X"] = "X"
-    _O: Literal["O"] = "O"
-    labels: ClassVar[Tuple[Label, ...]] = (_X, _O)
+    labels: ClassVar[Tuple[Label, ...]] = (X, O)
 
     default_surface: ClassVar[str] = EMPTY * 9
     axis: ClassVar[bool] = True
@@ -109,6 +109,10 @@ class GameBase:
             int, Dict[Tuple[str, Label], Tuple[Coordinate, ...],]
         ] = defaultdict(dict)
         self.available_steps_cache_size: int = 7  # depth
+
+    @staticmethod
+    def _get_adversary_label(player_label: str) -> str:
+        return X if player_label == O else O
 
     def _clean_cache(self) -> None:
         outdated: int = self.gameboard.surface.count(EMPTY) + 1
