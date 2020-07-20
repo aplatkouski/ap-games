@@ -246,3 +246,6 @@ class GameBase:
                 self.status = self.get_status()
                 if self.status.message:
                     print(self.status.message)
+                if self.status.must_skip:
+                    self.players.rotate(1)
+                    self.status = self.status._replace(active=True)
