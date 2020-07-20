@@ -173,12 +173,12 @@ class Reversi(GameBase):
             coordinate=start_coordinate, label=mid_label
         ):
             next_coordinate, label = gameboard.get_offset_cell(
-                start_coordinate, direction
+                coordinate=start_coordinate, shift=direction
             )
-            # Iterate over all cells in this direction
+            # Iterate over the cells in this direction
             while label == mid_label:
                 next_coordinate, label = gameboard.get_offset_cell(
-                    next_coordinate, direction
+                    coordinate=next_coordinate, shift=direction
                 )
             else:
                 # Check there is the cell occupied by the ``end_label``
@@ -206,26 +206,28 @@ class Reversi(GameBase):
 
         score: int = 0
 
-        if coordinate not in self.available_steps(gameboard=gameboard, player_label=player_label):
+        if coordinate not in self.available_steps(
+            gameboard=gameboard, player_label=player_label
+        ):
             print("You cannot go here!")
             return score
 
         score += gameboard.label(coordinate=coordinate, label=player_label)
         if score:
-            for shift in gameboard.offset_directions(
-                coordinate=coordinate, label=self._get_adversary_label(player_label)
+            adversary_label: str = self._get_adversary_label(player_label)
+            for direction in gameboard.offset_directions(
+                coordinate=coordinate, label=adversary_label
             ):
                 adversary_occupied_cells: List[Coordinate] = list()
-                analyzed_coordinate, label = gameboard.get_offset_cell(
-                    coordinate, shift
+                next_coordinate, label = gameboard.get_offset_cell(
+                    coordinate=coordinate, shift=direction
                 )
-                # Iterate over all cells in this direction while label is
-                # occupied adversary
-                while label and label not in (EMPTY, player_label):
+                # Iterate over the cells in this direction
+                while label == adversary_label:
                     # Save the coordinate of the current occupied cell
-                    adversary_occupied_cells.append(analyzed_coordinate)
-                    analyzed_coordinate, label = gameboard.get_offset_cell(
-                        analyzed_coordinate, shift
+                    adversary_occupied_cells.append(next_coordinate)
+                    next_coordinate, label = gameboard.get_offset_cell(
+                        coordinate=next_coordinate, shift=direction
                     )
                 else:
                     # Label all adversary cells if there is a cell behind
