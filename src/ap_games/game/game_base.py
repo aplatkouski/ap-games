@@ -21,10 +21,10 @@ if TYPE_CHECKING:
     from typing import Dict
     from typing import Optional
     from typing import Tuple
-    from typing_extensions import Literal
 
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import Label
+    from ap_games.ap_types import Labels
     from ap_games.ap_types import SupportedPlayers
     from ap_games.player.player import Player
 
@@ -106,7 +106,7 @@ class GameBase:
             self.players.rotate(1)
 
         self._available_steps_cache: DefaultDict[
-            int, Dict[Tuple[str, Label], Tuple[Coordinate, ...],]
+            int, Dict[Tuple[str, Labels], Tuple[Coordinate, ...],]
         ] = defaultdict(dict)
         self.available_steps_cache_size: int = 7  # depth
 
@@ -169,7 +169,7 @@ class GameBase:
         if player is None:
             player = self.players[0]
 
-        if self.available_steps(gameboard=gameboard, player=player):
+        if self.available_steps(gameboard=gameboard, player_label=player.label):
             return GameStatus(active=True, message="")
         return GameStatus(active=False, message="")
 
@@ -177,7 +177,7 @@ class GameBase:
         self,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
+        player_label: Optional[Labels] = None,
     ) -> Tuple[Coordinate, ...]:
         """Return a tuple of coordinates of all available cells on the
         :param:`gameboard` for the :param:`player`.
@@ -187,14 +187,12 @@ class GameBase:
 
         :param gameboard: Optional.  If undefined, use
          :attr:`.GameBase.gameboard`.
-        :param player: Optional.  If undefined, user current user
-         :attr:`.GameBase.players[0]`.
+        :param player_label: Optional.  If undefined, user label of
+         current user :attr:`.GameBase.players[0].label`.
 
         """
         if gameboard is None:
             gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
         return gameboard.available_steps
 
     def step(
@@ -202,7 +200,7 @@ class GameBase:
         coordinate: Coordinate,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
+        player_label: Optional[Labels] = None,
     ) -> int:
         """Change the label of the cell with ``coordinate`` on the
         gameboard.
@@ -210,8 +208,8 @@ class GameBase:
         :param coordinate: coordinate of cell which player label.
         :param gameboard: Optional.  If undefined, use
          :attr:`.GameBase.gameboard`.
-        :param player: Optional.  If undefined, user current user
-         :attr:`.GameBase.players[0]`.
+        :param player_label: Optional.  If undefined, user label of
+         current user :attr:`.GameBase.players[0].label`.
 
         This method should be overridden by subclasses if there is a
         more complex rule for labeling cell(s) in ``gameboard``.
@@ -219,13 +217,13 @@ class GameBase:
         """
         if gameboard is None:
             gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
+        if player_label is None:
+            player_label = self.players[0].label
 
         if coordinate not in self.available_steps(gameboard=gameboard):
             print("You cannot go here!")
             return 0
-        return gameboard.label(coordinate, player.label)
+        return gameboard.label(coordinate, player_label)
 
     def play(self) -> None:
         """The main public interface that run the game."""

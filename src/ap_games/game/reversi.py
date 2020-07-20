@@ -12,9 +12,9 @@ if TYPE_CHECKING:
     from typing import List
     from typing import Optional
     from typing import Tuple
+    from ap_games.ap_types import Labels
     from ap_games.gameboard.gameboard import SquareGameboard
     from ap_games.player.player import Player
-    from ap_games.ap_types import Label
 
 __ALL__ = ['Reversi']
 
@@ -86,7 +86,7 @@ class Reversi(GameBase):
 
         game_status = GameStatus(active=True, message="")
 
-        if not self.available_steps(gameboard=gameboard, player=player):
+        if not self.available_steps(gameboard=gameboard, player_label=player.label):
             winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
             if len(winners) == 1:
                 game_status = GameStatus(False, f"{winners[0].label} wins\n")
@@ -100,7 +100,7 @@ class Reversi(GameBase):
         self,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
+        player_label: Optional[Labels] = None,
     ) -> Tuple[Coordinate, ...]:
         """Return coordinates of only that cells where ``player`` can
         flip at least one another player label using Reversi game's
@@ -111,12 +111,11 @@ class Reversi(GameBase):
         """
         if gameboard is None:
             gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
+        if player_label is None:
+            player_label = self.players[0].label
 
         surface: str = gameboard.surface
         count_empty_cell: int = surface.count(EMPTY)
-        player_label: Label = player.label
 
         if (surface, player_label) not in self._available_steps_cache[count_empty_cell]:
             actual_available_steps: List[Coordinate] = list()
@@ -186,20 +185,19 @@ class Reversi(GameBase):
         coordinate: Coordinate,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
+        player_label: Optional[str] = None,
     ) -> int:
         if gameboard is None:
             gameboard = self.gameboard
-        if player is None:
-            player = self.players[0]
+        if player_label is None:
+            player_label = self.players[0].label
 
         score: int = 0
 
-        if coordinate not in self.available_steps(gameboard=gameboard, player=player):
+        if coordinate not in self.available_steps(gameboard=gameboard, player_label=player_label):
             print("You cannot go here!")
             return score
 
-        player_label: Label = player.label
         score += gameboard.label(coordinate=coordinate, label=player_label)
         if score:
             for shift in gameboard.offset_directions(

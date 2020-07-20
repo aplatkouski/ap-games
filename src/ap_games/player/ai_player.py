@@ -169,10 +169,12 @@ class AIPlayer(Player):
 
         steps: List[Step] = list()
         for coordinate in player.game.available_steps(
-            gameboard=gameboard, player=player
+            gameboard=gameboard, player_label=player.label
         ):
             fake_gameboard: SquareGameboard = gameboard.copy
-            self.game.step(coordinate, gameboard=fake_gameboard, player=player)
+            self.game.step(
+                coordinate, gameboard=fake_gameboard, player_label=player.label
+            )
 
             # log.debug("\n " + ("\t" * depth) + f"[{player.label}] {coordinate}")
             # log.debug(
