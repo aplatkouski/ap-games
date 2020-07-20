@@ -1,9 +1,13 @@
 from functools import cached_property
 from random import choice as random_choice
+import random
 
 TEST_MODE = False
 
 __ALL__ = ["Player", "TEST_MODE"]
+
+if TEST_MODE:
+    random.seed(123)
 
 
 class Player:
@@ -35,12 +39,6 @@ class Player:
 
         """
         available_steps = self.game.available_steps()
-        if TEST_MODE:
-            return (
-                available_steps[0]
-                if available_steps
-                else self.game.gameboard.undefined_coordinate
-            )
         return (
             random_choice(available_steps)
             if available_steps

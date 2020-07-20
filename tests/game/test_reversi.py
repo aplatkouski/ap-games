@@ -19,24 +19,12 @@ def test_construction():
 
 def test_available_steps(reversi_w_2users):
     available_steps = (
+        Coordinate(3, 4),
         Coordinate(5, 6),
         Coordinate(6, 5),
-        Coordinate(3, 4),
         Coordinate(4, 3),
     )
     assert available_steps == reversi_w_2users.available_steps()
-
-
-def test_adversary_occupied_directions(reversi_w_2users):
-    adversary_occupied_directions = (Coordinate(1, 0),)
-    assert (
-        adversary_occupied_directions
-        == reversi_w_2users._adversary_occupied_directions(
-            coordinate=Coordinate(3, 4),
-            gameboard=reversi_w_2users.gameboard,
-            player_label=reversi_w_2users.players[0].label,
-        )
-    )
 
 
 def test_get_score(reversi_w_2users):

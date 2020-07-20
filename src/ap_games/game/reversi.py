@@ -33,37 +33,11 @@ class Reversi(GameBase):
         (EMPTY * 27) + "XO" + (EMPTY * 6) + "OX" + (EMPTY * 27)
     )
 
-    @classmethod
-    def _adversary_occupied_directions(
-        cls, coordinate: Coordinate, gameboard: SquareGameboard, player_label: str,
-    ) -> Tuple[Coordinate, ...]:
-        """Determine the ``directions`` where adjacent cells are
-        occupied by the adversary.
-
-        :param coordinate: The coordinate against which adjacent
-         cells will be checked.
-        :param gameboard: Optional.  If undefined, use
-         :attr:`.GameBase.gameboard`.
-        :param player_label: Cells with this "friendly" label will
-         not be considered an adversary.
-
-        :return: Tuple of offsets relative to the :param:`coordinate`.
-
-        """
-        return gameboard.offset_directions(
-            coordinate=coordinate, exclude_labels=(EMPTY, player_label)
-        )
-
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Define and return the set of all players who have the maximum
         count of player labels on the gameboard.
 
         """
-        # TODO: give a turn to another player if the current player
-        #   cannot go
-        # if any(self.available_steps(gameboard=gameboard, player=player) for player in self.players):
-        #     # winner undefined if there's at least one player who can go
-        #     return set()
         player_scores: List[Tuple[Player, int]] = [
             (player, gameboard.count(player.label)) for player in self.players
         ]
@@ -140,48 +114,72 @@ class Reversi(GameBase):
         if player is None:
             player = self.players[0]
 
-        current_player_label: Label = player.label
-
         surface: str = gameboard.surface
         count_empty_cell: int = surface.count(EMPTY)
-        if (surface, current_player_label) in self._available_steps_cache[
-            count_empty_cell
-        ]:
-            return self._available_steps_cache[count_empty_cell][
-                surface, current_player_label
-            ]
+        player_label: Label = player.label
 
-        actual_available_steps: List[Coordinate] = list()
-        for coordinate in gameboard.available_steps:
-            # Iterate over all directions where the cell occupied by
-            # the adversary
-            for shift in self._adversary_occupied_directions(
-                coordinate=coordinate,
-                gameboard=gameboard,
-                player_label=current_player_label,
-            ):
-                analyzed_coordinate, label = gameboard.get_offset_cell(
-                    coordinate, shift
+        if (surface, player_label) not in self._available_steps_cache[count_empty_cell]:
+            actual_available_steps: List[Coordinate] = list()
+            adversary_label = self._get_adversary_label(player_label)
+            counter = gameboard.counter
+            if counter[EMPTY] <= counter[player_label]:
+                reverse: bool = False
+                start_label: str = EMPTY
+                end_label: str = player_label
+            else:
+                reverse = True
+                start_label = player_label
+                end_label = EMPTY
+            for coordinate in gameboard.coordinates_with_label(start_label):
+                result = self._check_directions(
+                    gameboard,
+                    start_coordinate=coordinate,
+                    mid_label=adversary_label,
+                    end_label=end_label,
+                    reverse=reverse,
                 )
-                # Iterate over all cells in this direction
-                while label and label not in (EMPTY, current_player_label):
-                    analyzed_coordinate, label = gameboard.get_offset_cell(
-                        analyzed_coordinate, shift
-                    )
-                else:
-                    # Check there is the cell occupied by the current
-                    # player behind the adversary cells
-                    if label == current_player_label:
-                        actual_available_steps.append(coordinate)
+                if result:
+                    actual_available_steps.extend(result)
+            # use ``set`` to remove possible duplicates
+            self._available_steps_cache[count_empty_cell][
+                surface, player_label
+            ] = tuple(set(actual_available_steps))
+        return self._available_steps_cache[count_empty_cell][surface, player_label]
+
+    @staticmethod
+    def _check_directions(
+        gameboard: SquareGameboard,
+        *,
+        start_coordinate: Coordinate,
+        mid_label: str,
+        end_label: str,
+        reverse: bool = False,
+    ) -> Tuple[Coordinate, ...]:
+        available_steps: List[Coordinate] = list()
+        # Iterate over all directions where the cell occupied by
+        # the ``mid_label``
+        for direction in gameboard.offset_directions(
+            coordinate=start_coordinate, label=mid_label
+        ):
+            next_coordinate, label = gameboard.get_offset_cell(
+                start_coordinate, direction
+            )
+            # Iterate over all cells in this direction
+            while label == mid_label:
+                next_coordinate, label = gameboard.get_offset_cell(
+                    next_coordinate, direction
+                )
+            else:
+                # Check there is the cell occupied by the ``end_label``
+                # behind the cells with ``mid_label``
+                if label == end_label:
+                    if reverse:
+                        available_steps.append(next_coordinate)
+                    else:
                         # if successful, other directions can be not
                         # checked
-                        break
-        self._available_steps_cache[count_empty_cell][
-            surface, current_player_label
-        ] = tuple(actual_available_steps)
-        return self._available_steps_cache[count_empty_cell][
-            surface, current_player_label
-        ]
+                        return (start_coordinate,)
+        return tuple(available_steps)
 
     def step(
         self,
@@ -201,11 +199,11 @@ class Reversi(GameBase):
             print("You cannot go here!")
             return score
 
-        current_player_label: Label = player.label
-        score += gameboard.label(coordinate=coordinate, label=current_player_label)
+        player_label: Label = player.label
+        score += gameboard.label(coordinate=coordinate, label=player_label)
         if score:
-            for shift in self._adversary_occupied_directions(
-                coordinate=coordinate, gameboard=gameboard, player_label=player.label
+            for shift in gameboard.offset_directions(
+                coordinate=coordinate, label=self._get_adversary_label(player_label)
             ):
                 adversary_occupied_cells: List[Coordinate] = list()
                 analyzed_coordinate, label = gameboard.get_offset_cell(
@@ -213,7 +211,7 @@ class Reversi(GameBase):
                 )
                 # Iterate over all cells in this direction while label is
                 # occupied adversary
-                while label and label not in (EMPTY, current_player_label):
+                while label and label not in (EMPTY, player_label):
                     # Save the coordinate of the current occupied cell
                     adversary_occupied_cells.append(analyzed_coordinate)
                     analyzed_coordinate, label = gameboard.get_offset_cell(
@@ -222,11 +220,11 @@ class Reversi(GameBase):
                 else:
                     # Label all adversary cells if there is a cell behind
                     # them occupied by the current player
-                    if label == current_player_label:
+                    if label == player_label:
                         while adversary_occupied_cells:
                             score += gameboard.label(
                                 coordinate=adversary_occupied_cells.pop(),
-                                label=current_player_label,
+                                label=player_label,
                                 force=True,
                             )
             if len(self._available_steps_cache) > self.available_steps_cache_size:

@@ -33,7 +33,6 @@ Step = NamedTuple(
 )
 
 Label = Literal["X", "O"]
-Labels = Tuple[Union[Literal[' '], Label, str], ...]
 SupportedPlayers = Dict[str, Type["Player"]]
 
 Size = int

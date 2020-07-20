@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+from collections import Counter
 
 # from ap_games.log import log
 from ap_games.ap_types import Cell
@@ -14,6 +15,7 @@ from ap_games.ap_types import O
 
 if TYPE_CHECKING:
     from typing import Any
+    from typing import Counter as typing_Counter
     from typing import ClassVar
     from typing import Dict
     from typing import Final
@@ -21,7 +23,6 @@ if TYPE_CHECKING:
     from typing import Tuple
 
     from ap_games.ap_types import Directions
-    from ap_games.ap_types import Labels
     from ap_games.ap_types import Side
     from ap_games.ap_types import Size
 
@@ -159,7 +160,7 @@ class SquareGameboard:
         self._cells_dict: Dict[Tuple[int, int], Cell] = dict()
         self._colors: Dict[Tuple[int, int], str] = dict()
         self._offset_directions_cache: Dict[
-            Tuple[Coordinate, Labels], Directions,
+            Tuple[Coordinate, str], Directions,
         ] = dict()
         self._surface_cache: str = ""
 
@@ -208,7 +209,21 @@ class SquareGameboard:
         return self._size
 
     @property
+    def counter(self) -> typing_Counter[str]:
+        return Counter(self.surface)
+
+    @property
     def surface(self) -> str:
+        """Return gameboard surface as a string.
+
+        Example::
+
+          -------
+          | 0 1 |
+          | 2 3 |   ===>   "0123"
+          -------
+
+        """
         if not self._surface_cache:
             self._surface_cache = "".join(
                 cell.label for cell in self._cells_dict.values()
@@ -288,6 +303,9 @@ class SquareGameboard:
         """
         return tuple(cell.coordinate for cell in self.cells if cell.label == EMPTY)
 
+    def coordinates_with_label(self, label: str) -> Tuple[Coordinate, ...]:
+        return tuple(cell.coordinate for cell in self.cells if cell.label == label)
+
     @property
     def copy(self) -> SquareGameboard:
         """Return copy of current gameboard with exactly the same
@@ -311,20 +329,20 @@ class SquareGameboard:
         return self.surface.count(label)
 
     def offset_directions(
-        self, coordinate: Coordinate, *, exclude_labels: Labels = (),
+        self, coordinate: Coordinate, *, label: str,
     ) -> Tuple[Coordinate, ...]:
         # Reason for commenting: -7% of processing time.
         # if coordinate not in self.registry.all_coordinates:
         #     raise ValueError(f"The {coordinate}  out of range!")
-        if (coordinate, exclude_labels) not in self._offset_directions_cache:
-            self._offset_directions_cache[coordinate, exclude_labels] = tuple(
+        if (coordinate, label) not in self._offset_directions_cache:
+            self._offset_directions_cache[coordinate, label] = tuple(
                 offset_direction
                 for offset_coordinate, offset_direction in self.registry.offsets[
                     coordinate
                 ]
-                if self._cells_dict[offset_coordinate].label not in exclude_labels
+                if self._cells_dict[offset_coordinate].label == label
             )
-        return self._offset_directions_cache[coordinate, exclude_labels]
+        return self._offset_directions_cache[coordinate, label]
 
     def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
         """Return "Cell" by coordinate calculated as algebraic sum of
