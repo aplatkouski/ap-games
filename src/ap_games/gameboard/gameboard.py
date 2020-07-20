@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from collections import Counter
 
-# from ap_games.log import log
 from ap_games.ap_types import Cell
 from ap_games.ap_types import Coordinate
 from ap_games.ap_types import EMPTY
@@ -42,7 +41,6 @@ class BColors:
 
 
 class GameboardRegistry:
-
     __slots__ = ["offsets", "all_coordinates", "index_to_coordinate", "__dict__"]
 
     _directions: Final[ClassVar[Directions]] = (
@@ -362,7 +360,6 @@ class SquareGameboard:
             result: str = "\n".join(f"{indent}{line}" for line in str(self).split("\n"))
         else:
             result = str(self)
-        # log.info(result)
         print(result)
         self._default_paint()
 

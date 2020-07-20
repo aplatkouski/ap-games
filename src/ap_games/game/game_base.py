@@ -5,13 +5,11 @@ from collections import deque
 from itertools import cycle
 from typing import TYPE_CHECKING
 
-from ap_games.gameboard.gameboard import SquareGameboard
-
-# from ap_games.log import log
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
 from ap_games.ap_types import O
 from ap_games.ap_types import X
+from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.player.ai_player import AIPlayer
 from ap_games.player.human_player import HumanPlayer
 
@@ -240,7 +238,6 @@ class GameBase:
         while self.status.active:
             coordinate: Coordinate = self.players[0].go()
             if self.step(coordinate=coordinate):
-                # log.info(str(self.gameboard))
                 self.gameboard.print()
                 self.players.rotate(1)
                 self.status = self.get_status()
