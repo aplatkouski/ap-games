@@ -58,7 +58,7 @@ class TicTacToe(GameBase):
         if gameboard is None:
             gameboard = self.gameboard
 
-        game_status: GameStatus = GameStatus(active=True, message="")
+        game_status: GameStatus = GameStatus(active=True, message="", must_skip=False)
         if (
             abs(
                 gameboard.count(self.players[0].label)
@@ -66,13 +66,13 @@ class TicTacToe(GameBase):
             )
             > 1
         ):
-            game_status = GameStatus(False, "Impossible\n")
+            game_status = GameStatus(False, "Impossible\n", must_skip=False)
         else:
             winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
             if not winners and not self.available_steps(gameboard=gameboard):
-                game_status = GameStatus(False, "Draw\n")
+                game_status = GameStatus(False, "Draw\n", must_skip=False)
             elif len(winners) == 1:
-                game_status = GameStatus(False, f"{winners[0].label} wins\n")
+                game_status = GameStatus(False, f"{winners[0].label} wins\n", must_skip=False)
             elif len(winners) > 1:
-                game_status = GameStatus(False, "Impossible\n")
+                game_status = GameStatus(False, "Impossible\n", must_skip=False)
         return game_status

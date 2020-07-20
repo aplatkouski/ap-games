@@ -27,7 +27,7 @@ Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]
 Offset = NamedTuple("Offset", [("coordinate", Coordinate), ("direction", Coordinate)])
 
-GameStatus = NamedTuple("GameStatus", [("active", bool), ("message", str)])
+GameStatus = NamedTuple("GameStatus", [("active", bool), ("message", str), ("must_skip", bool)])
 Step = NamedTuple(
     "Step", [("coordinate", Coordinate), ("score", int), ("percentage", int)]
 )

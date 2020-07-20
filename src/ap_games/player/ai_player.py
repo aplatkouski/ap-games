@@ -1,25 +1,26 @@
 from __future__ import annotations
 
-from itertools import cycle
-import random
 from random import choice as random_choice
 from typing import TYPE_CHECKING
+import random
 
 from ap_games.gameboard.gameboard import SquareGameboard
 
 # from ap_games.log import log
-from ap_games.player.player import Player
 from ap_games.ap_types import Step
+from ap_games.player.player import Player
 from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
     from typing import ClassVar
     from typing import Dict
-    from typing import Iterator
     from typing import List
     from typing import Optional
     from typing import Tuple
+
     from ap_games.ap_types import Coordinate
+    from ap_games.ap_types import Label
+    from ap_games.game.game_base import GameBase
 
 __ALL__ = ['AIPlayer']
 
@@ -28,11 +29,15 @@ if TEST_MODE:
 
 
 class AIPlayer(Player):
-    max_depth: ClassVar[Dict[str, int]] = {
+    _max_depth: ClassVar[Dict[str, int]] = {
         "easy": 0,
         "medium": 2,
         "hard": 4,
     }
+
+    def __init__(self, type_: str, /, *, game: GameBase, label: Label) -> None:
+        super(AIPlayer, self).__init__(type_, game=game, label=label)
+        self.max_depth = self._max_depth[type_]
 
     def _get_terminal_score(
         self, *, depth: int, gameboard: SquareGameboard, player: Player
@@ -76,7 +81,7 @@ class AIPlayer(Player):
         factor: int = 1
 
         if self.game.get_status(gameboard=gameboard, player=player).active:
-            if depth < self.max_depth[self.type]:
+            if depth < self.max_depth:
                 _, score, percentage = self._minimax(
                     depth=depth + 1, gameboard=gameboard, player=player
                 )
@@ -84,16 +89,10 @@ class AIPlayer(Player):
                 score = self.game.get_score(gameboard=gameboard, player=self)
                 percentage = 100
         else:
-            factor *= self.max_depth[self.type] + 1 - depth
+            factor *= self.max_depth + 1 - depth
             score = self.game.get_score(gameboard=gameboard, player=self)
             percentage = 100
         return score * factor, percentage
-
-    def _get_next_player(self, current_player: Player) -> Player:
-        players_cycle: Iterator[Player] = cycle(self.game.players)
-        while next(players_cycle) != current_player:
-            pass
-        return next(players_cycle)
 
     def _extract_desired_steps(
         self, depth: int, steps: List[Step], player: Player
@@ -168,7 +167,7 @@ class AIPlayer(Player):
             player = self
 
         steps: List[Step] = list()
-        for coordinate in player.game.available_steps(
+        for coordinate in self.game.available_steps(
             gameboard=gameboard, player_label=player.label
         ):
             fake_gameboard: SquareGameboard = gameboard.copy
@@ -183,7 +182,7 @@ class AIPlayer(Player):
             #     )
             # )
 
-            next_player = self._get_next_player(current_player=player)
+            next_player = self.game.get_next_player(current_player=player)
 
             terminal_score, percentage = self._get_terminal_score(
                 depth=depth, gameboard=fake_gameboard, player=next_player
@@ -209,6 +208,6 @@ class AIPlayer(Player):
         print(f'Making move level "{self.type}" [{self.label}]')
 
         depth: int = 0
-        if depth < self.max_depth[self.type]:
+        if depth < self.max_depth:
             return self._minimax(depth=depth + 1).coordinate
         return self._random_coordinate()

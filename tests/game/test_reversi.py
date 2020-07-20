@@ -34,4 +34,4 @@ def test_get_score(reversi_w_2users):
 
 
 def test_get_status(reversi_w_2users):
-    assert GameStatus(True, '') == reversi_w_2users.get_status()
+    assert GameStatus(True, '', False) == reversi_w_2users.get_status()

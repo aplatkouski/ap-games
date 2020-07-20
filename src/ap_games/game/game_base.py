@@ -1,24 +1,26 @@
 from __future__ import annotations
 
-from collections import deque
 from collections import defaultdict
+from collections import deque
+from itertools import cycle
 from typing import TYPE_CHECKING
 
 from ap_games.gameboard.gameboard import SquareGameboard
 
 # from ap_games.log import log
-from ap_games.player.ai_player import AIPlayer
-from ap_games.player.human_player import HumanPlayer
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
-from ap_games.ap_types import X
 from ap_games.ap_types import O
+from ap_games.ap_types import X
+from ap_games.player.ai_player import AIPlayer
+from ap_games.player.human_player import HumanPlayer
 
 if TYPE_CHECKING:
     from typing import ClassVar
     from typing import DefaultDict
     from typing import Deque
     from typing import Dict
+    from typing import Iterator
     from typing import Optional
     from typing import Tuple
 
@@ -94,7 +96,7 @@ class GameBase:
                 f"Gameboard must contain only ' ', '_' and symbols from {self.labels}."
             )
 
-        self.status: GameStatus = GameStatus(active=True, message="")
+        self.status: GameStatus = GameStatus(active=True, message="", must_skip=False)
         self.gameboard: SquareGameboard = SquareGameboard(
             surface=surface_without_underscore, gap=self.gap, axis=self.axis
         )
@@ -127,6 +129,12 @@ class GameBase:
 
         """
         return tuple()
+
+    def get_next_player(self, current_player: Player) -> Player:
+        players_cycle: Iterator[Player] = cycle(self.players)
+        while next(players_cycle) != current_player:
+            pass
+        return next(players_cycle)
 
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
         winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
@@ -170,8 +178,8 @@ class GameBase:
             player = self.players[0]
 
         if self.available_steps(gameboard=gameboard, player_label=player.label):
-            return GameStatus(active=True, message="")
-        return GameStatus(active=False, message="")
+            return GameStatus(active=True, message="", must_skip=False)
+        return GameStatus(active=False, message="", must_skip=False)
 
     def available_steps(
         self,

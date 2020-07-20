@@ -84,16 +84,28 @@ class Reversi(GameBase):
         if player is None:
             player = self.players[0]
 
-        game_status = GameStatus(active=True, message="")
+        game_status = GameStatus(active=True, message="", must_skip=False)
 
         if not self.available_steps(gameboard=gameboard, player_label=player.label):
-            winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
-            if len(winners) == 1:
-                game_status = GameStatus(False, f"{winners[0].label} wins\n")
-            elif len(winners) > 1:
-                game_status = GameStatus(False, "Draw\n")
-            else:  # len(winners) == 0
-                game_status = GameStatus(False, "Impossible\n")
+            next_player: Player = self.get_next_player(player)
+            if not self.available_steps(
+                gameboard=gameboard, player_label=next_player.label
+            ):
+                winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
+                if len(winners) == 1:
+                    game_status = GameStatus(
+                        False, f"{winners[0].label} wins\n", must_skip=False
+                    )
+                elif len(winners) > 1:
+                    game_status = GameStatus(False, "Draw\n", must_skip=False)
+                else:  # len(winners) == 0
+                    game_status = GameStatus(False, "Impossible\n", must_skip=False)
+            else:
+                game_status = GameStatus(
+                    active=False,
+                    message=f"The player [{player.label}] has no steps available!\n",
+                    must_skip=True,
+                )
         return game_status
 
     def available_steps(
