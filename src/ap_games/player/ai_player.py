@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from random import choice as random_choice
 from typing import TYPE_CHECKING
+import logging
 import random
 
 from ap_games.ap_types import Step
 from ap_games.gameboard.gameboard import SquareGameboard
+from ap_games.log import log
 from ap_games.player.player import Player
 from ap_games.player.player import TEST_MODE
 
@@ -119,6 +121,10 @@ class AIPlayer(Player):
         desired_steps: List[Step] = [
             step for step in steps if step.score == desired_score
         ]
+        if logging.DEBUG >= log.level:
+            log.debug(
+                "\t" * depth + f"desired score steps ({score_func}) -> {desired_steps}"
+            )
         return desired_steps
 
     def _extract_most_likely_steps(
@@ -139,6 +145,12 @@ class AIPlayer(Player):
         most_likely_steps: List[Step] = [
             step for step in steps if step.percentage == desired_percentage
         ]
+        if logging.DEBUG >= log.level:
+            log.debug(
+                "\t" * depth
+                + f"desired percentage steps ({percentage_func}) -> "
+                + str(most_likely_steps)
+            )
         return most_likely_steps
 
     def _minimax(
@@ -179,6 +191,15 @@ class AIPlayer(Player):
             self.game.step(
                 coordinate, gameboard=fake_gameboard, player_label=player.label
             )
+
+            if logging.DEBUG >= log.level:
+                log.debug("\n " + ("\t" * depth) + f"[{player.label}] {coordinate}")
+                log.debug(
+                    "\n".join(
+                        '\t' * depth + line for line in str(fake_gameboard).split("\n")
+                    )
+                )
+
             next_player = self.game.get_next_player(current_player=player)
 
             terminal_score, percentage = self._get_terminal_score(
@@ -197,6 +218,10 @@ class AIPlayer(Player):
         step = random_choice(most_likely_steps)
         # compute and replace ``percentage`` in the selected step
         step = step._replace(percentage=int(len(desired_steps) / len(steps) * 100))
+
+        if logging.DEBUG >= log.level:
+            log.debug("\t" * depth + f"selected step: {step}")
+
         return step
 
     def go(self) -> Coordinate:

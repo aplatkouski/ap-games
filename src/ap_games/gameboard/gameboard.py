@@ -1,16 +1,18 @@
 from __future__ import annotations
 
-import functools
+from collections import Counter
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-from collections import Counter
+import functools
+import logging
 
 from ap_games.ap_types import Cell
 from ap_games.ap_types import Coordinate
 from ap_games.ap_types import EMPTY
+from ap_games.ap_types import O
 from ap_games.ap_types import Offset
 from ap_games.ap_types import X
-from ap_games.ap_types import O
+from ap_games.log import log
 
 if TYPE_CHECKING:
     from typing import Any
@@ -42,6 +44,7 @@ class BColors:
 
 
 class GameboardRegistry:
+
     __slots__ = ["offsets", "all_coordinates", "index_to_coordinate", "__dict__"]
 
     _directions: Final[ClassVar[Directions]] = (
@@ -361,6 +364,8 @@ class SquareGameboard:
             result: str = "\n".join(f"{indent}{line}" for line in str(self).split("\n"))
         else:
             result = str(self)
+        if logging.INFO >= log.level:
+            log.info(result)
         print(result)
         self._default_paint()
 
