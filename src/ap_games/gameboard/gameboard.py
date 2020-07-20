@@ -344,7 +344,7 @@ class SquareGameboard:
             )
         return self._offset_directions_cache[coordinate, label]
 
-    def get_offset_cell(self, coordinate: Coordinate, shift: Coordinate) -> Cell:
+    def get_offset_cell(self, *, coordinate: Coordinate, shift: Coordinate) -> Cell:
         """Return "Cell" by coordinate calculated as algebraic sum of
         vectors ``coordinate`` and ``shift``.
 
