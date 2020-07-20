@@ -31,6 +31,7 @@ class AIPlayer(Player):
         "easy": 0,
         "medium": 2,
         "hard": 4,
+        "nightmare": 6,
     }
 
     def __init__(self, type_: str, /, *, game: GameBase, label: Label) -> None:
@@ -55,8 +56,11 @@ class AIPlayer(Player):
         TicTacToe(surface="X_OXX_O__", player_types=("easy", "hard")).play()
 
         hint: "hard" select cell randomly from all empty cells and
-        can lose to "easy" without ``percentage``."""
+        can lose to "easy" without ``percentage``.
+        
+        """
         percentage: int
+
         """In the minimax algorithm, it doesn't matter when you lose:
         now or later. Therefore, the AI "stops fighting" if it
         in any case loses the next steps, regardless of how it takes
@@ -75,13 +79,24 @@ class AIPlayer(Player):
         TicTacToe(surface="X_OX_____", player_types=("easy", "hard")).play()
 
         hint: "hard" select cell randomly from all empty cells and
-        can lose to "easy" without ``factor``."""
+        can lose to "easy" without ``factor``.
+        
+        """
         factor: int = 1
 
-        if self.game.get_status(gameboard=gameboard, player=player).active:
+        depth_correction: int = 0
+        game_status = self.game.get_status(gameboard=gameboard, player=player)
+        if game_status.must_skip:
+            player = self.game.get_next_player(player)
+            depth_correction = 1
+            game_status = game_status._replace(active=True)
+
+        if game_status.active:
             if depth < self.max_depth:
                 _, score, percentage = self._minimax(
-                    depth=depth + 1, gameboard=gameboard, player=player
+                    depth=depth + 1 - depth_correction,
+                    gameboard=gameboard,
+                    player=player,
                 )
             else:
                 score = self.game.get_score(gameboard=gameboard, player=self)

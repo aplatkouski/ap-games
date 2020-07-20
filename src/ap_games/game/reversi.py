@@ -2,16 +2,19 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ap_games.game.game_base import GameBase
 from ap_games.ap_types import Coordinate
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
+from ap_games.game.game_base import GameBase
 
 if TYPE_CHECKING:
     from typing import ClassVar
+    from typing import Counter as typing_Counter
     from typing import List
     from typing import Optional
     from typing import Tuple
+
+    from ap_games.ap_types import Label
     from ap_games.ap_types import Labels
     from ap_games.gameboard.gameboard import SquareGameboard
     from ap_games.player.player import Player
@@ -67,17 +70,6 @@ class Reversi(GameBase):
          ``GameStatus`` with two fields: ``active`` and ``message``.
          ``GameStatus.active == False`` if game cannot be continued.
 
-        TODO: implement the rotation of the players, if only the current
-         player doesn't have available steps.
-
-        Draft::
-
-            if not self.available_steps(gameboard=gameboard, player=self.players[1]):
-                pass
-            else:
-                print(f"Player '{self.players[0].label}' doesn't have available steps!")
-                self.players.rotate(1)
-
         """
         if gameboard is None:
             gameboard = self.gameboard
@@ -103,7 +95,7 @@ class Reversi(GameBase):
             else:
                 game_status = GameStatus(
                     active=False,
-                    message=f"The player [{player.label}] has no steps available!\n",
+                    message=f"\nThe player [{player.label}] has no steps available!\n",
                     must_skip=True,
                 )
         return game_status
@@ -112,7 +104,7 @@ class Reversi(GameBase):
         self,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player_label: Optional[Labels] = None,
+        player_label: Optional[Label] = None,
     ) -> Tuple[Coordinate, ...]:
         """Return coordinates of only that cells where ``player`` can
         flip at least one another player label using Reversi game's
@@ -131,26 +123,28 @@ class Reversi(GameBase):
 
         if (surface, player_label) not in self._available_steps_cache[count_empty_cell]:
             actual_available_steps: List[Coordinate] = list()
-            adversary_label = self._get_adversary_label(player_label)
-            counter = gameboard.counter
-            if counter[EMPTY] <= counter[player_label]:
-                reverse: bool = False
+            adversary_label: Label = self._get_adversary_label(player_label)
+
+            label_counter: typing_Counter[Labels] = gameboard.counter
+            if label_counter[EMPTY] <= label_counter[player_label]:
                 start_label: str = EMPTY
                 end_label: str = player_label
+                reverse: bool = False
             else:
-                reverse = True
                 start_label = player_label
                 end_label = EMPTY
-            for coordinate in gameboard.coordinates_with_label(start_label):
-                result = self._check_directions(
+                reverse = True
+
+            for coordinate in gameboard.labeled_coordinates(label=start_label):
+                available_coordinates: Tuple[Coordinate, ...] = self._check_directions(
                     gameboard,
                     start_coordinate=coordinate,
                     mid_label=adversary_label,
                     end_label=end_label,
                     reverse=reverse,
                 )
-                if result:
-                    actual_available_steps.extend(result)
+                if available_coordinates:
+                    actual_available_steps.extend(available_coordinates)
             # use ``set`` to remove possible duplicates
             self._available_steps_cache[count_empty_cell][
                 surface, player_label
@@ -197,7 +191,7 @@ class Reversi(GameBase):
         coordinate: Coordinate,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player_label: Optional[str] = None,
+        player_label: Optional[Label] = None,
     ) -> int:
         if gameboard is None:
             gameboard = self.gameboard
@@ -214,7 +208,8 @@ class Reversi(GameBase):
 
         score += gameboard.label(coordinate=coordinate, label=player_label)
         if score:
-            adversary_label: str = self._get_adversary_label(player_label)
+            adversary_label: Label = self._get_adversary_label(player_label)
+
             for direction in gameboard.offset_directions(
                 coordinate=coordinate, label=adversary_label
             ):

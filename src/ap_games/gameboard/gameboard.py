@@ -14,14 +14,15 @@ from ap_games.ap_types import O
 
 if TYPE_CHECKING:
     from typing import Any
-    from typing import Counter as typing_Counter
     from typing import ClassVar
+    from typing import Counter as typing_Counter
     from typing import Dict
     from typing import Final
     from typing import List
     from typing import Tuple
 
     from ap_games.ap_types import Directions
+    from ap_games.ap_types import Labels
     from ap_games.ap_types import Side
     from ap_games.ap_types import Size
 
@@ -207,7 +208,7 @@ class SquareGameboard:
         return self._size
 
     @property
-    def counter(self) -> typing_Counter[str]:
+    def counter(self) -> typing_Counter[Labels]:
         return Counter(self.surface)
 
     @property
@@ -301,7 +302,7 @@ class SquareGameboard:
         """
         return tuple(cell.coordinate for cell in self.cells if cell.label == EMPTY)
 
-    def coordinates_with_label(self, label: str) -> Tuple[Coordinate, ...]:
+    def labeled_coordinates(self, label: str) -> Tuple[Coordinate, ...]:
         return tuple(cell.coordinate for cell in self.cells if cell.label == label)
 
     @property

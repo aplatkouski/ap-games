@@ -24,7 +24,6 @@ if TYPE_CHECKING:
 
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import Label
-    from ap_games.ap_types import Labels
     from ap_games.ap_types import SupportedPlayers
     from ap_games.player.player import Player
 
@@ -70,6 +69,7 @@ class GameBase:
         "easy": AIPlayer,
         "medium": AIPlayer,
         "hard": AIPlayer,
+        "nightmare": AIPlayer,
     }
 
     def __init__(
@@ -106,12 +106,12 @@ class GameBase:
             self.players.rotate(1)
 
         self._available_steps_cache: DefaultDict[
-            int, Dict[Tuple[str, Labels], Tuple[Coordinate, ...],]
+            int, Dict[Tuple[str, Label], Tuple[Coordinate, ...],]
         ] = defaultdict(dict)
         self.available_steps_cache_size: int = 7  # depth
 
     @staticmethod
-    def _get_adversary_label(player_label: str) -> str:
+    def _get_adversary_label(player_label: Label) -> Label:
         return X if player_label == O else O
 
     def _clean_cache(self) -> None:
@@ -183,7 +183,7 @@ class GameBase:
         self,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player_label: Optional[Labels] = None,
+        player_label: Optional[Label] = None,
     ) -> Tuple[Coordinate, ...]:
         """Return a tuple of coordinates of all available cells on the
         :param:`gameboard` for the :param:`player`.
@@ -206,7 +206,7 @@ class GameBase:
         coordinate: Coordinate,
         *,
         gameboard: Optional[SquareGameboard] = None,
-        player_label: Optional[Labels] = None,
+        player_label: Optional[Label] = None,
     ) -> int:
         """Change the label of the cell with ``coordinate`` on the
         gameboard.
