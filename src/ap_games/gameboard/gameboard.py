@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
-import functools
+from functools import cached_property
 import logging
 
 from ap_games.ap_types import Cell
@@ -206,7 +206,7 @@ class SquareGameboard:
         )
         return board
 
-    @functools.cached_property
+    @cached_property
     def size(self) -> int:
         return self._size
 
