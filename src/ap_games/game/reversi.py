@@ -10,6 +10,7 @@ from ap_games.game.game_base import GameBase
 if TYPE_CHECKING:
     from typing import ClassVar
     from typing import Counter as typing_Counter
+    from typing import Dict
     from typing import List
     from typing import Optional
     from typing import Tuple
@@ -35,6 +36,14 @@ class Reversi(GameBase):
     default_surface: ClassVar[str] = (
         (EMPTY * 27) + "XO" + (EMPTY * 6) + "OX" + (EMPTY * 27)
     )
+
+    # coordinate and its additional score
+    high_priority_coordinates: Dict[Coordinate, int] = {
+        Coordinate(1, 1): 5,
+        Coordinate(1, 8): 5,
+        Coordinate(8, 8): 5,
+        Coordinate(8, 1): 5,
+    }
 
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Define and return the set of all players who have the maximum
@@ -109,8 +118,6 @@ class Reversi(GameBase):
         """Return coordinates of only that cells where ``player`` can
         flip at least one another player label using Reversi game's
         rule.
-
-        TODO: add max priority to corner cells.
 
         """
         if gameboard is None:

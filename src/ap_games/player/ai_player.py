@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from operator import add
+from operator import sub
 from random import choice as random_choice
 from typing import TYPE_CHECKING
 import logging
@@ -109,6 +111,27 @@ class AIPlayer(Player):
             percentage = 100
         return score * factor, percentage
 
+    def _fix_high_priority_coordinates_score(
+        self, depth: int, steps: List[Step], player: Player
+    ) -> List[Step]:
+        if player == self:
+            op = add
+        else:
+            op = sub
+
+        high_priority_coordinates: Dict[Coordinate, int] = getattr(
+            self.game, "high_priority_coordinates", dict()
+        )
+
+        if high_priority_coordinates:
+            return [
+                step._replace(
+                    score=op(step.score, high_priority_coordinates.get(step.coordinate, 0))
+                )
+                for step in steps
+            ]
+        return steps
+
     def _extract_desired_steps(
         self, depth: int, steps: List[Step], player: Player
     ) -> List[Step]:
@@ -168,7 +191,8 @@ class AIPlayer(Player):
         3. or call the minimax function on each available spot
            (recursion).
         4. Evaluate returning values from function calls
-           (:meth:`._extract_desired_steps` and
+           (:meth:`_fix_high_priority_coordinates_score`,
+           :meth:`._extract_desired_steps` and
            :meth:`._extract_most_likely_steps`);
         5. And return the best value (Step).
 
@@ -207,8 +231,12 @@ class AIPlayer(Player):
             )
             steps.append(Step(coordinate, terminal_score, percentage))
 
-        desired_steps: List[Step] = self._extract_desired_steps(
+        fixed_steps: List[Step] = self._fix_high_priority_coordinates_score(
             depth=depth, steps=steps, player=player
+        )
+
+        desired_steps: List[Step] = self._extract_desired_steps(
+            depth=depth, steps=fixed_steps, player=player
         )
 
         most_likely_steps: List[Step] = self._extract_most_likely_steps(
