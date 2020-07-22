@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import logging
+import random
 from operator import add
 from operator import sub
 from random import choice as random_choice
 from typing import TYPE_CHECKING
-import logging
-import random
 
 from ap_games.ap_types import Step
 from ap_games.gameboard.gameboard import SquareGameboard
@@ -31,6 +31,8 @@ if TEST_MODE:
 
 
 class AIPlayer(Player):
+    """AIPlayer in the game."""
+
     _max_depth: ClassVar[Dict[str, int]] = {
         "easy": 0,
         "medium": 2,
@@ -46,8 +48,8 @@ class AIPlayer(Player):
         self, *, depth: int, gameboard: SquareGameboard, player: Player
     ) -> Tuple[int, int]:
         """Return ``score`` and ``percentage`` of terminal state."""
-
         score: int
+
         """In the minimax algorithm, it doesn't matter how many ways
         to win AI at the end of the game. Therefore, the AI
         "stops fighting" and​is not trying to "steal" one of them.
@@ -189,7 +191,7 @@ class AIPlayer(Player):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> Step:
-        """Algorithm:
+        """Mini-max algorithm.
 
         1. Go through available spots on the board;
         2. Return a value (score) if a terminal state is found
@@ -264,6 +266,7 @@ class AIPlayer(Player):
         return step
 
     def go(self) -> Coordinate:
+        """Return coordinate of the next step."""
         print(f'Making move level "{self.type}" [{self.label}]')
 
         depth: int = 0

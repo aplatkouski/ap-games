@@ -13,6 +13,7 @@ __ALL__ = ["cli"]
 
 
 def cli() -> None:
+    """Aks user about desired game and run it."""
     choice: str = ""
     while choice != "exit":
         if TEST_MODE:

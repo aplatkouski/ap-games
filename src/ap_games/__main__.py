@@ -1,18 +1,17 @@
+import sys
+from configparser import ConfigParser
+from importlib import resources
 from typing import Optional
 
 from ap_games.cli import cli
 from ap_games.game.game_base import GameBase
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
-from configparser import ConfigParser
-from importlib import resources
-import sys
-
 from ap_games.log import log
 
 
 def main() -> None:
-    """
+    """Read config and argv parameters and pass them to ``cli`` of the game.
 
     TODO: Add implementation of argparser
     TODO: Import TEST_MODE from config.ini

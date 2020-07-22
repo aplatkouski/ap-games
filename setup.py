@@ -1,65 +1,30 @@
-from setuptools import setup, find_packages
-import pathlib
-
-BASE_DIR = pathlib.Path(__file__).parent.resolve()
-
-readme = (BASE_DIR / "README.md").read_text(encoding="utf-8")
+from setuptools import setup  # type: ignore
 
 setup(
-    name="ap-games",
-    version="0.0.1b2",
-    description="Games Tic-Tac-Toe and Reversi with CLI.",
-    long_description=readme,
-    long_description_content_type="text/markdown",
-    url="https://github.com/aplatkouski/ap-games",
-    author="Artsiom Platkouski",
-    author_email="komukc.apt@gmail.com",
-    license="MIT",
-    classifiers=[
-        "Development Status :: 4 - Beta",
-        "Environment :: Console",
-        "Intended Audience :: Developers",
-        "Intended Audience :: End Users/Desktop",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Natural Language :: English",
-        "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3 :: Only",
-        "Topic :: Games/Entertainment :: Board Games",
-        "Topic :: Software Development :: Libraries :: Python Modules",
-    ],
-    keywords="board game, console game, tic-tac-toe, reversi",
-    package_dir={"": "src"},
-    packages=find_packages(where="src"),
-    python_requires=">=3.8, <4",
+    use_scm_version=True,
     extras_require=dict(
-        tests=["pytest", "coverage"],
+        test=["coverage==5.2.1", "pytest==5.4.3"],
         dev=[
-            "flake8",
-            "black",
-            "isort",
-            "mypy",
-            "mypy-extensions",
-            "pyre-check",
-            "pyre-extensions",
-            "typing-extensions",
-            "typing-inspect",
+            "black==stable",
+            "bump2version==1.0.0",
+            "check-manifest==0.42",
+            "flake8==3.8.3",
+            "flake8-bugbear==20.1.4",
+            "flake8-mypy==17.8.0",
+            "flake8-typing-imports==1.9.0",
+            "mypy==0.782",
+            "mypy-extensions==0.4.3",
+            "pre-commit==2.6.0",
+            "pre-commit-hooks==3.1.0",
+            "pydocstyle==5.0.2",
+            "pyupgrade==2.7.2",
+            "reorder-python-imports==2.3.2",
+            "setup-cfg-fmt==1.11.0",
+            "setuptools_scm==4.1.2",
+            "tox==3.18.0",
+            "twine==3.2.0",
+            "typing-extensions==3.7.4.2",
+            "typing-inspect==0.6.0",
         ],
     ),
-    package_data={
-        "ap_games": ["py.typed"],
-        "player": ["py.typed", "player.pyi"],
-        "gameboard": ["py.typed"],
-        "game": ["py.typed"],
-    },
-    include_package_data=True,
-    entry_points={"console_scripts": ["ap_games=ap_games.cli:cli"]},
-    project_urls={
-        "Bug Reports": "https://github.com/aplatkouski/ap-games/issues",
-        "Source": "https://github.com/aplatkouski/ap-games",
-    },
-    # mypy requirements for py.typed files:
-    zip_safe=False,
 )

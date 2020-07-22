@@ -1,10 +1,12 @@
 # Project description
 
 ## AP Games
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 
 The AP Games is the result of the completion of the project
 [Tic-Tac-Toe with AI] at [JetBrains Academy]. This project
-was developed just for fun and to learn Python and some 
+was developed just for fun and to learn Python and some
 concepts of a decision-making algorithm.
 
 ## Tic-Tac-Toe with AI + bonus **Reversi** game
@@ -34,17 +36,17 @@ Please choose the game:
 Print 'exit' to exit the program.
 
 Input command: 1
-Type 'start user_1_type user_2_type' to run the selected game, 
-where user_X_type is one of the supported values: 
+Type 'start user_1_type user_2_type' to run the selected game,
+where user_X_type is one of the supported values:
 user, easy, hard and nightmare;
-Type 'rules' to get game rules or type 'exit' to return 
+Type 'rules' to get game rules or type 'exit' to return
 to the main menu.
 
 Input command: rules
-You must place the piece so that an opponent's piece, or a row 
+You must place the piece so that an opponent's piece, or a row
 of opponent's pieces, is flanked by your pieces.
-All of the opponent's pieces between your pieces are then 
-turned over to become your color. The object of the game is 
+All of the opponent's pieces between your pieces are then
+turned over to become your color. The object of the game is
 to own more pieces than your opponent when the game is over.
 
 Input command: start user hard
@@ -94,17 +96,15 @@ Enter the coordinate [X]:
 ## Installation
 
 The project has been tested only with [python 3.8][python] on
-Ubuntu Linux. If you have python 3.8 and above installed in
-your machine, just install the AP Games from [PyPI]:
+Ubuntu Linux and Windows 10. If you have python 3.8 and above
+installed in your machine, just install the AP Games from [PyPI]:
 
 ```shell script
 pip install ap-games
 ```
 
 You can find source code of this package on [github].
-See [aplatkouski/ap-games] repository. Feel free
-to fork or download it. You can find a short guide on how
-to do this in the [CONTRIBUTING.md].
+See [aplatkouski/ap-games] repository.
 
 ## How to use
 
@@ -116,7 +116,7 @@ Where:
  * ``game`` is a value from the following set:
    * ``0`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
    * ``1`` or ``reversi`` for Reversi game.
- * ``user-1`` and ``user-2`` are values from the following 
+ * ``user-1`` and ``user-2`` are values from the following
    set:
    * ``user`` for human player;
    * ``easy``, ``medium``, ``hard`` and ``nightmare`` for AI
@@ -149,10 +149,18 @@ structures:
 Thanks to Gaurav Sen for his video
 [What is the Minimax Algorithm? - Artificial Intelligence][minimax algorithm video]
 
+# Development & Contributing
+
+Development of this happens on GitHub, patches including tests,
+documentation are very welcome, as well as bug reports!
+
+See also our [CONTRIBUTING.md].
+
 # Copyright
 
-Copyright (c) 2020 Artsiom Platkouski. See [LICENSE.txt]
-for further details.
+Copyright (c) 2020 Artsiom Platkouski.
+``AP_games`` is licensed under the MIT License - see the [LICENSE.txt] file
+for details.
 
 [Tic-Tac-Toe with AI]: https://hyperskill.org/projects/82
 [JetBrains Academy]: https://hyperskill.org/join/0482410e

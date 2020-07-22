@@ -34,8 +34,7 @@ __ALL__ = ["GameBase"]
 
 
 class GameBase:
-    """Base class which are used to specify the various categories of
-    games.
+    """GameBase class specifies the public methods of game.
 
     Then concrete classes providing the standard game implementations.
 
@@ -58,7 +57,6 @@ class GameBase:
     :ivar players: The queue with players.  Player is an instance of
      :class:`.Player`.  Player with index ``0`` is a current player.
 
-
     """
 
     labels: ClassVar[Tuple[Label, ...]] = (X, O)
@@ -80,7 +78,7 @@ class GameBase:
     def __init__(
         self,
         *,
-        surface: str = '',
+        surface: str = "",
         player_types: Tuple[str, ...] = ("user", "user"),
     ):
         if not surface:
@@ -136,20 +134,22 @@ class GameBase:
             outdated += 1
 
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
-        """Must be overridden by subclasses and must return
-        a set of instance(s) ot the :class:`.Player` defined as
-        winner(s).
+        """Return a tuple of :class:`.Player` instances defined as winner(s).
+
+        Must be overridden by subclasses.
 
         """
         return tuple()
 
     def get_next_player(self, current_player: Player) -> Player:
+        """Return ``player`` who is next to ``current_player``."""
         players_cycle: Iterator[Player] = cycle(self.players)
         while next(players_cycle) != current_player:
             pass
         return next(players_cycle)
 
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
+        """Return the score relative to the given gameboard and player."""
         winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
         if len(winners) == 1:
             if player in winners:
@@ -165,8 +165,7 @@ class GameBase:
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> GameStatus:
-        """Return the current game status calculated for the
-        :param:`gameboard` in accordance with the game rule.
+        """Return the game status relative to the ``gameboard`` and ``player``.
 
         :param gameboard: Optional.  If undefined, use
          :attr:`.GameBase.gameboard`.
@@ -174,7 +173,8 @@ class GameBase:
          :attr:`.GameBase.players[0]`.
 
         :return: Game status as the instance of namedtuple
-         ``GameStatus`` with two fields: ``active`` and ``message``.
+         ``GameStatus`` with three fields: ``active``, ``message`` and
+         ``must_skip``.
          ``GameStatus.active == False`` if game cannot be continued.
 
         Must be overridden by subclasses if there is a more complex rule
@@ -202,8 +202,7 @@ class GameBase:
         gameboard: Optional[SquareGameboard] = None,
         player_label: Optional[Label] = None,
     ) -> Tuple[Coordinate, ...]:
-        """Return a tuple of coordinates of all available cells on the
-        :param:`gameboard` for the :param:`player`.
+        """Return coordinates of all ``EMPTY`` cells on the ``gameboard``.
 
         This method should be overridden by subclasses if there is a
         more complex rule for determining which cell is available.
@@ -225,8 +224,7 @@ class GameBase:
         gameboard: Optional[SquareGameboard] = None,
         player_label: Optional[Label] = None,
     ) -> int:
-        """Change the label of the cell with ``coordinate`` on the
-        gameboard.
+        """Change the label of the cell with ``coordinate`` on the ``gameboard``.
 
         :param coordinate: coordinate of cell which player label.
         :param gameboard: Optional.  If undefined, use
@@ -249,7 +247,7 @@ class GameBase:
         return gameboard.label(coordinate, player_label)
 
     def play(self) -> None:
-        """The main public interface that run the game."""
+        """Start new game."""
         self.gameboard.print()
         self.status = self.get_status()
         while self.status.active:
@@ -271,17 +269,18 @@ class GameBase:
 
     @classmethod
     def cli(cls, user_1_type: str = "", user_2_type: str = "") -> None:
+        """Create an instance of the game with the given parameters."""
         if not (user_1_type and user_2_type):
             if TEST_MODE:
                 command: str = "start medium hard"
             else:
                 print(
-                    "Type 'start user_1_type user_2_type' "
-                    "to run the selected game, where user_X_type "
-                    "is one of the supported values: "
+                    "Type 'start user_1 user_2' to run the selected "
+                    "game, where 'user_1' and 'user_2' is one of the "
+                    "supported values: "
                     "user, easy, hard and nightmare; "
-                    "Type 'rules' to get game rules or "
-                    "type 'exit' to return to the main menu."
+                    "Type 'rules' to get game rules or type 'exit' to "
+                    "return to the main menu."
                 )
                 command = input("\nInput command: ").strip()
         else:

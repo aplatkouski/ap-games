@@ -2,13 +2,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ap_games.game.game_base import GameBase
 from ap_games.ap_types import GameStatus
+from ap_games.game.game_base import GameBase
 
 if TYPE_CHECKING:
-    from typing import Optional
     from typing import List
+    from typing import Optional
     from typing import Tuple
+
     from ap_games.gameboard.gameboard import SquareGameboard
     from ap_games.player.player import Player
 
@@ -16,7 +17,7 @@ __ALL__ = ["TicTacToe"]
 
 
 class TicTacToe(GameBase):
-    """TicTacToe class introduces Tic-Tac-Toe game.
+    """Tic-Tac-Toe game supports human user and some types of AI.
 
     For details see :class:`.GameBase`.
 
@@ -30,7 +31,7 @@ class TicTacToe(GameBase):
     )
 
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
-        """Define and return the set of all players who draw solid line.
+        """Return players who draw solid line.
 
         If all characters on a "side" are the same and equal to the
         label of player from :attr:`.players`, this player is added to
@@ -54,8 +55,7 @@ class TicTacToe(GameBase):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> GameStatus:
-        """Return the Tic-Tac-Toe game status calculated for the
-        :param:`gameboard` in accordance with the game rule.
+        """Return difference in number of labels between players.
 
         :return: Game status as the instance of namedtuple
          ``GameStatus`` with two fields: ``active`` and ``message``.

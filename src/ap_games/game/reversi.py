@@ -24,8 +24,7 @@ __ALL__ = ['Reversi']
 
 
 class Reversi(GameBase):
-    """Reversi game supports human user and three types of AI (easy,
-    medium, hard).
+    """Reversi game supports human user and some types of AI.
 
     For details see :class:`.GameBase`.
 
@@ -54,10 +53,7 @@ class Reversi(GameBase):
     )
 
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
-        """Define and return the set of all players who have the maximum
-        count of player labels on the gameboard.
-
-        """
+        """Return players who have the maximum count of labels."""
         player_scores: List[Tuple[Player, int]] = [
             (player, gameboard.count(player.label)) for player in self.players
         ]
@@ -67,6 +63,7 @@ class Reversi(GameBase):
         )
 
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
+        """Return difference in number of labels between players."""
         player_score: int = 0
         another_players_score: int = 0
         for p in self.players:
@@ -82,8 +79,7 @@ class Reversi(GameBase):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> GameStatus:
-        """Return the Reversi game status calculated for the
-        :param:`gameboard` in accordance with the game rule.
+        """Return game status calculated in accordance with game rule.
 
         :return: Game status as the instance of namedtuple
          ``GameStatus`` with two fields: ``active`` and ``message``.
@@ -134,11 +130,7 @@ class Reversi(GameBase):
         gameboard: Optional[SquareGameboard] = None,
         player_label: Optional[Label] = None,
     ) -> Tuple[Coordinate, ...]:
-        """Return coordinates of only that cells where ``player`` can
-        flip at least one another player label using Reversi game's
-        rule.
-
-        """
+        """Return coordinates of available cells using Reversi game's rule."""
         if gameboard is None:
             gameboard = self.gameboard
         if player_label is None:
@@ -225,6 +217,7 @@ class Reversi(GameBase):
         gameboard: Optional[SquareGameboard] = None,
         player_label: Optional[Label] = None,
     ) -> int:
+        """Player's step at given coordinate on gameboard."""
         if gameboard is None:
             gameboard = self.gameboard
         if player_label is None:
