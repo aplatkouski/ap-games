@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
 from functools import cached_property
+from platform import platform
+from typing import TYPE_CHECKING
 import logging
 
 from ap_games.ap_types import Cell
@@ -161,7 +162,9 @@ class SquareGameboard:
         _safety: bool = True,
     ) -> None:
 
-        self.colorized: bool = colorized if _safety else False
+        self.colorized: bool = colorized if _safety and platform().startswith(
+            "Linux"
+        ) else False
 
         size: int = int(len(surface) ** (1 / 2))
         self._size: Final[int] = size
