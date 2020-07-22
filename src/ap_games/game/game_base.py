@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import logging
 from collections import defaultdict
 from collections import deque
 from itertools import cycle
 from typing import TYPE_CHECKING
-import logging
 
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
@@ -14,6 +14,7 @@ from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import log
 from ap_games.player.ai_player import AIPlayer
 from ap_games.player.human_player import HumanPlayer
+from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
     from typing import ClassVar
@@ -73,6 +74,8 @@ class GameBase:
         "hard": AIPlayer,
         "nightmare": AIPlayer,
     }
+
+    rules: str = ""
 
     def __init__(
         self, *, surface: str = '', player_types: Tuple[str, ...] = ("user", "user"),
@@ -239,7 +242,10 @@ class GameBase:
         self.status = self.get_status()
         while self.status.active:
             coordinate: Coordinate = self.players[0].go()
-            if self.step(coordinate=coordinate):
+            if (
+                    coordinate != self.gameboard.undefined_coordinate
+                    and self.step(coordinate=coordinate)
+            ):
                 if logging.INFO >= log.level:
                     log.info(str(self.gameboard))
                 self.gameboard.print()
@@ -250,3 +256,36 @@ class GameBase:
                 if self.status.must_skip:
                     self.players.rotate(1)
                     self.status = self.status._replace(active=True)
+
+    @classmethod
+    def cli(cls) -> None:
+        print(
+            "Type 'start user_1_type user_2_type' "
+            "to run the selected game, where user_X_type "
+            "is one of the supported values: "
+            "user, easy, hard and nightmare; "
+            "Type 'rules' to get game rules or "
+            "type 'exit' to return to the main menu."
+        )
+        if TEST_MODE:
+            command: str = "start medium hard"
+        else:
+            command = input("\nInput command: ").strip()
+        while command != "exit":
+            parameters = command.split()
+            if (
+                    len(parameters) == 3
+                    and parameters[0] == "start"
+                    and parameters[1] in cls.supported_players
+                    and parameters[2] in cls.supported_players
+            ):
+                game = cls(player_types=(parameters[1], parameters[2]))
+                game.play()
+            elif command == "rules":
+                print(cls.rules)
+            else:
+                print("Bad parameters!")
+            if TEST_MODE:
+                command = "exit"
+            else:
+                command = input("\nInput command: ").strip()

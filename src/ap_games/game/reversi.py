@@ -45,6 +45,14 @@ class Reversi(GameBase):
         Coordinate(8, 1): 5,
     }
 
+    rules: str = (
+        "You must place the piece so that an opponent's piece, or a "
+        "row of opponent's pieces, is flanked by your pieces.\nAll of "
+        "the opponent's pieces between your pieces are then turned "
+        "over to become your color. The object of the game is to own "
+        "more pieces than your opponent when the game is over."
+    )
+
     def _winners(self, *, gameboard: SquareGameboard) -> Tuple[Player, ...]:
         """Define and return the set of all players who have the maximum
         count of player labels on the gameboard.

@@ -18,12 +18,12 @@ class HumanPlayer(Player):
          if the coordinate is incorrect.
 
         """
-        input_list = input("Enter the coordinate: ").split()
+        input_list = input(f"Enter the coordinate [{self._label}]: ").split()
         if len(input_list) >= 2:
             x, y = input_list[:2]
         else:
             x, y = EMPTY, EMPTY
         if x.isdigit() and y.isdigit():
             return Coordinate(int(x), int(y))
-        print("You should enter numbers!")
+        print("You should enter two numbers!")
         return self.game.gameboard.undefined_coordinate

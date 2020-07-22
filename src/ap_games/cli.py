@@ -1,41 +1,25 @@
 from __future__ import annotations
 
+import sys
+
+if sys.version_info < (3, 8):
+    raise RuntimeError("This package requires Python 3.8+!")
+
 from typing import TYPE_CHECKING
+
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
 from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
     from typing import Type
+
     from ap_games.game.game_base import GameBase
 
 __ALL__ = ["cli"]
 
 
-def cli(game_class: Type[GameBase] = TicTacToe) -> None:
-    if TEST_MODE:
-        command: str = "start medium hard"
-    else:
-        command = input("Input command: ")
-    while command != "exit":
-        parameters = command.split()
-        if (
-            len(parameters) == 3
-            and parameters[0] == "start"
-            and parameters[1] in game_class.supported_players
-            and parameters[2] in game_class.supported_players
-        ):
-            game = game_class(player_types=(parameters[1], parameters[2]))
-            game.play()
-        else:
-            print("Bad parameters!")
-        if TEST_MODE:
-            command = "exit"
-        else:
-            command = input("Input command: ")
-
-
-if __name__ == "__main__":
+def cli() -> None:
     choice: str = ""
     while choice != "exit":
         if TEST_MODE:
@@ -44,12 +28,16 @@ if __name__ == "__main__":
             choice = input(
                 "Please choose the game:\n"
                 "\t0 - Tic-Tac-Toe;\n"
-                "\t1 - Reversi [by default].\n"
-                "Print 'exit' to exit the program.\n> "
-            )
+                "\t1 - Reversi.\n"
+                "Print 'exit' to exit the program.\n\nInput command: "
+            ).strip()
         if choice == "0":
-            cli(game_class=TicTacToe)
+            TicTacToe.cli()
         elif choice == "1":
-            cli(game_class=Reversi)
+            Reversi.cli()
         if TEST_MODE:
             choice = "exit"
+
+
+if __name__ == "__main__":
+    cli()

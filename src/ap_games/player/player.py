@@ -2,7 +2,7 @@ from functools import cached_property
 from random import choice as random_choice
 import random
 
-TEST_MODE = False
+TEST_MODE = True
 
 __ALL__ = ["Player", "TEST_MODE"]
 
