@@ -4,6 +4,8 @@ from typing import Tuple
 from typing import Type
 from typing import Union
 
+from ap_games.player.player import Player
+
 from typing_extensions import Literal
 
 __ALL__ = [
@@ -25,15 +27,19 @@ Coordinate = NamedTuple("Coordinate", [("x", int), ("y", int)])
 Cell = NamedTuple("Cell", [("coordinate", Coordinate), ("label", str)])
 Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]
-Offset = NamedTuple("Offset", [("coordinate", Coordinate), ("direction", Coordinate)])
+Offset = NamedTuple(
+    "Offset", [("coordinate", Coordinate), ("direction", Coordinate)]
+)
 
-GameStatus = NamedTuple("GameStatus", [("active", bool), ("message", str), ("must_skip", bool)])
+GameStatus = NamedTuple(
+    "GameStatus", [("active", bool), ("message", str), ("must_skip", bool)]
+)
 Step = NamedTuple(
     "Step", [("coordinate", Coordinate), ("score", int), ("percentage", int)]
 )
 
 Label = Literal["X", "O"]
 Labels = Union[Label, str]
-SupportedPlayers = Dict[str, Type["Player"]]
+SupportedPlayers = Dict[str, Type[Player]]
 
 Size = int

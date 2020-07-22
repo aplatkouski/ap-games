@@ -23,7 +23,7 @@ class TicTacToe(GameBase):
     """
 
     rules: str = (
-        "Tic-tac-toe, is a paper-and-pencil game for two players, " 
+        "Tic-tac-toe, is a paper-and-pencil game for two players, "
         "X and O, who take turns marking the spaces in a 3×3 grid.\n"
         "The player who succeeds in placing three of their marks in "
         "a horizontal, vertical, or diagonal row is the winner."
@@ -65,7 +65,9 @@ class TicTacToe(GameBase):
         if gameboard is None:
             gameboard = self.gameboard
 
-        game_status: GameStatus = GameStatus(active=True, message="", must_skip=False)
+        game_status: GameStatus = GameStatus(
+            active=True, message="", must_skip=False
+        )
         if (
             abs(
                 gameboard.count(self.players[0].label)
@@ -79,7 +81,11 @@ class TicTacToe(GameBase):
             if not winners and not self.available_steps(gameboard=gameboard):
                 game_status = GameStatus(False, "Draw\n", must_skip=False)
             elif len(winners) == 1:
-                game_status = GameStatus(False, f"{winners[0].label} wins\n", must_skip=False)
+                game_status = GameStatus(
+                    False, f"{winners[0].label} wins\n", must_skip=False
+                )
             elif len(winners) > 1:
-                game_status = GameStatus(False, "Impossible\n", must_skip=False)
+                game_status = GameStatus(
+                    False, "Impossible\n", must_skip=False
+                )
         return game_status

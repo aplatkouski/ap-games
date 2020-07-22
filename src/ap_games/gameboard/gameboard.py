@@ -45,7 +45,12 @@ class BColors:
 
 class GameboardRegistry:
 
-    __slots__ = ["offsets", "all_coordinates", "index_to_coordinate", "__dict__"]
+    __slots__ = [
+        "offsets",
+        "all_coordinates",
+        "index_to_coordinate",
+        "__dict__",
+    ]
 
     _directions: Final[ClassVar[Directions]] = (
         Coordinate(0, 1),  # top
@@ -60,7 +65,9 @@ class GameboardRegistry:
 
     def __init__(self, *, size: int) -> None:
         if (size <= 1) or (size > 9):
-            raise ValueError("The size of the gameboard must be between 2 and 9!")
+            raise ValueError(
+                "The size of the gameboard must be between 2 and 9!"
+            )
         self.index_to_coordinate: Dict[int, Coordinate] = dict()
         self.offsets: Dict[Coordinate, Tuple[Offset, ...]] = dict()
         self._fill_index_to_coordinate(size=size)
@@ -119,7 +126,9 @@ class SquareGameboard:
     """
 
     undefined_coordinate: ClassVar[Coordinate] = Coordinate(x=0, y=0)
-    undefined_cell: ClassVar[Cell] = Cell(coordinate=undefined_coordinate, label="")
+    undefined_cell: ClassVar[Cell] = Cell(
+        coordinate=undefined_coordinate, label=""
+    )
 
     label_colors: Dict[str, str] = {
         X: BColors.BLUE,
@@ -179,7 +188,7 @@ class SquareGameboard:
             + "-" * (self._size + len(self._gap) * (self._size + 1) + 2)
         )
 
-        surface: str = f"\n".join(
+        surface: str = "\n".join(
             (f"{self._size - num} " if self._axis else "")
             + f"|{self._gap}"
             + f"{self._gap}".join(
@@ -271,7 +280,8 @@ class SquareGameboard:
     def diagonals(self) -> Tuple[Side, ...]:
         """Return main and reverse diagonals as a tuple."""
         main_diagonal: Side = tuple(
-            self._cells_dict[num + 1, self._size - num] for num in range(self._size)
+            self._cells_dict[num + 1, self._size - num]
+            for num in range(self._size)
         )
         reverse_diagonal: Side = tuple(
             self._cells_dict[num, num] for num in range(1, self._size + 1)
@@ -303,10 +313,14 @@ class SquareGameboard:
         coordinates of all ``EMPTY`` cells.
 
         """
-        return tuple(cell.coordinate for cell in self.cells if cell.label == EMPTY)
+        return tuple(
+            cell.coordinate for cell in self.cells if cell.label == EMPTY
+        )
 
     def labeled_coordinates(self, label: str) -> Tuple[Coordinate, ...]:
-        return tuple(cell.coordinate for cell in self.cells if cell.label == label)
+        return tuple(
+            cell.coordinate for cell in self.cells if cell.label == label
+        )
 
     @property
     def copy(self) -> SquareGameboard:
@@ -339,14 +353,16 @@ class SquareGameboard:
         if (coordinate, label) not in self._offset_directions_cache:
             self._offset_directions_cache[coordinate, label] = tuple(
                 offset_direction
-                for offset_coordinate, offset_direction in self.registry.offsets[
+                for coordinate, offset_direction in self.registry.offsets[
                     coordinate
                 ]
-                if self._cells_dict[offset_coordinate].label == label
+                if self._cells_dict[coordinate].label == label
             )
         return self._offset_directions_cache[coordinate, label]
 
-    def get_offset_cell(self, *, coordinate: Coordinate, shift: Coordinate) -> Cell:
+    def get_offset_cell(
+        self, *, coordinate: Coordinate, shift: Coordinate
+    ) -> Cell:
         """Return "Cell" by coordinate calculated as algebraic sum of
         vectors ``coordinate`` and ``shift``.
 
@@ -355,13 +371,16 @@ class SquareGameboard:
 
         """
         return self._cells_dict.get(
-            (coordinate.x + shift.x, coordinate.y + shift.y), self.undefined_cell
+            (coordinate.x + shift.x, coordinate.y + shift.y),
+            self.undefined_cell,
         )
 
     def print(self, indent: str = "") -> None:
         """Print gameboard."""
         if indent:
-            result: str = "\n".join(f"{indent}{line}" for line in str(self).split("\n"))
+            result: str = "\n".join(
+                f"{indent}{line}" for line in str(self).split("\n")
+            )
         else:
             result = str(self)
         if logging.INFO >= log.level:
@@ -369,7 +388,9 @@ class SquareGameboard:
         print(result)
         self._default_paint()
 
-    def label(self, coordinate: Coordinate, label: str, *, force: bool = False,) -> int:
+    def label(
+        self, coordinate: Coordinate, label: str, *, force: bool = False,
+    ) -> int:
         """Label cell of the gameboard with the ``coordinate``.
 
         :param coordinate: Position of cell as instance of namedtuple
@@ -384,7 +405,8 @@ class SquareGameboard:
         """
         if (
             force
-            or self._cells_dict.get(coordinate, self.undefined_cell).label == EMPTY
+            or self._cells_dict.get(coordinate, self.undefined_cell).label
+            == EMPTY
         ):
             self._cells_dict[coordinate] = Cell(coordinate, label)
             if self.colorized:

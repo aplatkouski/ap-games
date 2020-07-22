@@ -62,7 +62,9 @@ class Reversi(GameBase):
             (player, gameboard.count(player.label)) for player in self.players
         ]
         max_score = max(score for _, score in player_scores)
-        return tuple(player for player, score in player_scores if score == max_score)
+        return tuple(
+            player for player, score in player_scores if score == max_score
+        )
 
     def get_score(self, *, gameboard: SquareGameboard, player: Player,) -> int:
         player_score: int = 0
@@ -95,12 +97,16 @@ class Reversi(GameBase):
 
         game_status = GameStatus(active=True, message="", must_skip=False)
 
-        if not self.available_steps(gameboard=gameboard, player_label=player.label):
+        if not self.available_steps(
+            gameboard=gameboard, player_label=player.label
+        ):
             next_player: Player = self.get_next_player(player)
             if not self.available_steps(
                 gameboard=gameboard, player_label=next_player.label
             ):
-                winners: Tuple[Player, ...] = self._winners(gameboard=gameboard)
+                winners: Tuple[Player, ...] = self._winners(
+                    gameboard=gameboard
+                )
                 if len(winners) == 1:
                     game_status = GameStatus(
                         False, f"{winners[0].label} wins\n", must_skip=False
@@ -108,11 +114,16 @@ class Reversi(GameBase):
                 elif len(winners) > 1:
                     game_status = GameStatus(False, "Draw\n", must_skip=False)
                 else:  # len(winners) == 0
-                    game_status = GameStatus(False, "Impossible\n", must_skip=False)
+                    game_status = GameStatus(
+                        False, "Impossible\n", must_skip=False
+                    )
             else:
                 game_status = GameStatus(
                     active=False,
-                    message=f"\nThe player [{player.label}] has no steps available!\n",
+                    message=(
+                        f"\nThe player [{player.label}] has no steps "
+                        "available!\n"
+                    ),
                     must_skip=True,
                 )
         return game_status
@@ -136,7 +147,9 @@ class Reversi(GameBase):
         surface: str = gameboard.surface
         count_empty_cell: int = surface.count(EMPTY)
 
-        if (surface, player_label) not in self._available_steps_cache[count_empty_cell]:
+        if (surface, player_label) not in self._available_steps_cache[
+            count_empty_cell
+        ]:
             actual_available_steps: List[Coordinate] = list()
             adversary_label: Label = self._get_adversary_label(player_label)
 
@@ -151,7 +164,9 @@ class Reversi(GameBase):
                 reverse = True
 
             for coordinate in gameboard.labeled_coordinates(label=start_label):
-                available_coordinates: Tuple[Coordinate, ...] = self._check_directions(
+                available_coordinates: Tuple[
+                    Coordinate, ...
+                ] = self._check_directions(
                     gameboard,
                     start_coordinate=coordinate,
                     mid_label=adversary_label,
@@ -164,7 +179,9 @@ class Reversi(GameBase):
             self._available_steps_cache[count_empty_cell][
                 surface, player_label
             ] = tuple(set(actual_available_steps))
-        return self._available_steps_cache[count_empty_cell][surface, player_label]
+        return self._available_steps_cache[count_empty_cell][
+            surface, player_label
+        ]
 
     @staticmethod
     def _check_directions(
@@ -249,6 +266,9 @@ class Reversi(GameBase):
                                 label=player_label,
                                 force=True,
                             )
-            if len(self._available_steps_cache) > self.available_steps_cache_size:
+            if (
+                len(self._available_steps_cache)
+                > self.available_steps_cache_size
+            ):
                 self._clean_cache()
         return score

@@ -78,40 +78,50 @@ class GameBase:
     rules: str = ""
 
     def __init__(
-        self, *, surface: str = '', player_types: Tuple[str, ...] = ("user", "user"),
+        self,
+        *,
+        surface: str = '',
+        player_types: Tuple[str, ...] = ("user", "user"),
     ):
         if not surface:
             surface = self.default_surface
 
         if len(player_types) != 2:
-            raise ValueError(f"The number of players should be 2!")
+            raise ValueError("The number of players should be 2!")
 
         self.players: Deque[Player] = deque()
         for num, player_type in enumerate(player_types):
             label: Label = self.labels[num]
             self.players.append(
-                self.supported_players[player_type](player_type, game=self, label=label)
+                self.supported_players[player_type](
+                    player_type, game=self, label=label
+                )
             )
 
         surface_without_underscore = surface.replace("_", EMPTY)
-        if not frozenset(surface_without_underscore).issubset({*self.labels, EMPTY}):
+        if not frozenset(surface_without_underscore).issubset(
+            {*self.labels, EMPTY}
+        ):
             raise ValueError(
-                f"Gameboard must contain only ' ', '_' and symbols from {self.labels}."
+                "Gameboard must contain only ' ', '_' and symbols "
+                f"from {self.labels}."
             )
 
-        self.status: GameStatus = GameStatus(active=True, message="", must_skip=False)
+        self.status: GameStatus = GameStatus(
+            active=True, message="", must_skip=False
+        )
         self.gameboard: SquareGameboard = SquareGameboard(
             surface=surface_without_underscore, gap=self.gap, axis=self.axis
         )
         # move the player with the least number of "label" to the front
         # of the queue
-        while self.gameboard.count(self.players[0].label) > self.gameboard.count(
-            self.players[1].label
-        ):
+        while self.gameboard.count(
+            self.players[0].label
+        ) > self.gameboard.count(self.players[1].label):
             self.players.rotate(1)
 
         self._available_steps_cache: DefaultDict[
-            int, Dict[Tuple[str, Label], Tuple[Coordinate, ...],]
+            int, Dict[Tuple[str, Label], Tuple[Coordinate, ...]]
         ] = defaultdict(dict)
         self.available_steps_cache_size: int = 7  # depth
 
@@ -180,7 +190,9 @@ class GameBase:
         if player is None:
             player = self.players[0]
 
-        if self.available_steps(gameboard=gameboard, player_label=player.label):
+        if self.available_steps(
+            gameboard=gameboard, player_label=player.label
+        ):
             return GameStatus(active=True, message="", must_skip=False)
         return GameStatus(active=False, message="", must_skip=False)
 
@@ -243,8 +255,8 @@ class GameBase:
         while self.status.active:
             coordinate: Coordinate = self.players[0].go()
             if (
-                    coordinate != self.gameboard.undefined_coordinate
-                    and self.step(coordinate=coordinate)
+                coordinate != self.gameboard.undefined_coordinate
+                and self.step(coordinate=coordinate)
             ):
                 if logging.INFO >= log.level:
                     log.info(str(self.gameboard))
@@ -274,10 +286,10 @@ class GameBase:
         while command != "exit":
             parameters = command.split()
             if (
-                    len(parameters) == 3
-                    and parameters[0] == "start"
-                    and parameters[1] in cls.supported_players
-                    and parameters[2] in cls.supported_players
+                len(parameters) == 3
+                and parameters[0] == "start"
+                and parameters[1] in cls.supported_players
+                and parameters[2] in cls.supported_players
             ):
                 game = cls(player_types=(parameters[1], parameters[2]))
                 game.play()

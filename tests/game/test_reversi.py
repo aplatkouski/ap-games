@@ -29,7 +29,8 @@ def test_available_steps(reversi_w_2users):
 
 def test_get_score(reversi_w_2users):
     assert 0 == reversi_w_2users.get_score(
-        gameboard=reversi_w_2users.gameboard, player=reversi_w_2users.players[0]
+        gameboard=reversi_w_2users.gameboard,
+        player=reversi_w_2users.players[0],
     )
 
 

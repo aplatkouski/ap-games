@@ -5,16 +5,9 @@ import sys
 if sys.version_info < (3, 8):
     raise RuntimeError("This package requires Python 3.8+!")
 
-from typing import TYPE_CHECKING
-
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
 from ap_games.player.player import TEST_MODE
-
-if TYPE_CHECKING:
-    from typing import Type
-
-    from ap_games.game.game_base import GameBase
 
 __ALL__ = ["cli"]
 

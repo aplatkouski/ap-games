@@ -43,7 +43,9 @@ def square_gameboard_2x2(surface_4) -> SquareGameboard:
 
 
 @pytest.fixture
-def cells(cell_1_2_x, cell_2_2_o, cell_1_1_empty, cell_2_1_x) -> Tuple[Side, ...]:
+def cells(
+    cell_1_2_x, cell_2_2_o, cell_1_1_empty, cell_2_1_x
+) -> Tuple[Side, ...]:
     return cell_1_2_x, cell_2_2_o, cell_1_1_empty, cell_2_1_x
 
 

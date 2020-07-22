@@ -61,7 +61,7 @@ class AIPlayer(Player):
 
         hint: "hard" select cell randomly from all empty cells and
         can lose to "easy" without ``percentage``.
-        
+
         """
         percentage: int
 
@@ -84,7 +84,7 @@ class AIPlayer(Player):
 
         hint: "hard" select cell randomly from all empty cells and
         can lose to "easy" without ``factor``.
-        
+
         """
         factor: int = 1
 
@@ -126,7 +126,10 @@ class AIPlayer(Player):
         if high_priority_coordinates:
             return [
                 step._replace(
-                    score=op(step.score, high_priority_coordinates.get(step.coordinate, 0))
+                    score=op(
+                        step.score,
+                        high_priority_coordinates.get(step.coordinate, 0),
+                    )
                 )
                 for step in steps
             ]
@@ -146,7 +149,8 @@ class AIPlayer(Player):
         ]
         if logging.DEBUG >= log.level:
             log.debug(
-                "\t" * depth + f"desired score steps ({score_func}) -> {desired_steps}"
+                "\t" * depth
+                + f"desired score steps ({score_func}) -> {desired_steps}"
             )
         return desired_steps
 
@@ -164,7 +168,9 @@ class AIPlayer(Player):
             percentage_func = max
         else:
             percentage_func = min
-        desired_percentage: int = percentage_func(step.percentage for step in steps)
+        desired_percentage: int = percentage_func(
+            step.percentage for step in steps
+        )
         most_likely_steps: List[Step] = [
             step for step in steps if step.percentage == desired_percentage
         ]
@@ -217,10 +223,13 @@ class AIPlayer(Player):
             )
 
             if logging.DEBUG >= log.level:
-                log.debug("\n " + ("\t" * depth) + f"[{player.label}] {coordinate}")
+                log.debug(
+                    "\n " + ("\t" * depth) + f"[{player.label}] {coordinate}"
+                )
                 log.debug(
                     "\n".join(
-                        '\t' * depth + line for line in str(fake_gameboard).split("\n")
+                        '\t' * depth + line
+                        for line in str(fake_gameboard).split("\n")
                     )
                 )
 
@@ -245,7 +254,9 @@ class AIPlayer(Player):
 
         step = random_choice(most_likely_steps)
         # compute and replace ``percentage`` in the selected step
-        step = step._replace(percentage=int(len(desired_steps) / len(steps) * 100))
+        step = step._replace(
+            percentage=int(len(desired_steps) / len(steps) * 100)
+        )
 
         if logging.DEBUG >= log.level:
             log.debug("\t" * depth + f"selected step: {step}")
