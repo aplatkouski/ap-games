@@ -270,19 +270,22 @@ class GameBase:
                     self.status = self.status._replace(active=True)
 
     @classmethod
-    def cli(cls) -> None:
-        print(
-            "Type 'start user_1_type user_2_type' "
-            "to run the selected game, where user_X_type "
-            "is one of the supported values: "
-            "user, easy, hard and nightmare; "
-            "Type 'rules' to get game rules or "
-            "type 'exit' to return to the main menu."
-        )
-        if TEST_MODE:
-            command: str = "start medium hard"
+    def cli(cls, user_1_type: str = "", user_2_type: str = "") -> None:
+        if not (user_1_type and user_2_type):
+            if TEST_MODE:
+                command: str = "start medium hard"
+            else:
+                print(
+                    "Type 'start user_1_type user_2_type' "
+                    "to run the selected game, where user_X_type "
+                    "is one of the supported values: "
+                    "user, easy, hard and nightmare; "
+                    "Type 'rules' to get game rules or "
+                    "type 'exit' to return to the main menu."
+                )
+                command = input("\nInput command: ").strip()
         else:
-            command = input("\nInput command: ").strip()
+            command = f"start {user_1_type} {user_2_type}"
         while command != "exit":
             parameters = command.split()
             if (

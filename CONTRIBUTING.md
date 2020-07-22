@@ -1,22 +1,22 @@
 # Development process
 
 ## First-time
- 1. Go to ``https://github.com/aplatkouski/tic-tac-toe``
+ 1. Go to ``https://github.com/aplatkouski/ap-games``
     and click the "fork" to create own copy of the project.
 
  2. Using [git] clone the project to local computer and add the upstream
     repository:
     ```shell script
-    git clone https://github.com/your-username/tic-tac-toe.git
-    cd tic-tac-toe
-    git remote add upstream  https://github.com/aplatkouski/tic-tac-toe.git
+    git clone https://github.com/your-username/ap-games.git
+    cd ap-games
+    git remote add upstream  https://github.com/aplatkouski/ap-games.git
     git remote -v
     ```
 
  3. Create [virtual environment] and active it.
 
     All commands should be run in the project directory
-    "tic-tac-toe" by default
+    "ap-games" by default
     ```shell script
     python3 -m venv .venv
     source .venv/bin/activate
@@ -85,7 +85,7 @@
 $ git push origin my-feature
 ```
 
-On ``https://github.com/your-username/tic-tac-toe`` click 
+On ``https://github.com/your-username/ap-games`` click 
 **Open pull request**.
 
 For details see [GitHub.com Help Documentation]
@@ -98,6 +98,11 @@ Test are written using the [pytest] testing framework.
 Run all tests in project directory:
 ```shell script
 (.venv) $ python -m pytest
+```
+or run tests using ``tox``
+```shell script
+(.venv) $ pip install tox
+(.venv) $ tox
 ```
 
 Run tests in a directory:

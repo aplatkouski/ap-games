@@ -8,3 +8,8 @@ pyre-extensions>=0.0.18
 typing-extensions>=3.7.4.2
 typing-inspect>=0.6.0
 pytest>=5.4.3
+bump2version>=1.0.0
+coverage>=5.2
+tox>=3.17.1
+virtualenv>=20.0.27
+

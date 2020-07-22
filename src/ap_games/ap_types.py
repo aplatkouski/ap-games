@@ -1,12 +1,11 @@
 from typing import Dict
+from typing import Literal
 from typing import NamedTuple
 from typing import Tuple
 from typing import Type
 from typing import Union
 
 from ap_games.player.player import Player
-
-from typing_extensions import Literal
 
 __ALL__ = [
     "Cell",

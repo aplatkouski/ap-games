@@ -1,7 +1,9 @@
-include CHANGES.md
+include CHANGELOG.md
 include CONTRIBUTING.md
-include requirements-dev.txt
-include mypy.ini
-include pytest.ini
-# recursive-include src *.pyi
-# recursive-include src *.typed
+exclude requirements-dev.txt
+exclude mypy.ini
+exclude pytest.ini
+exclude .bumpversion.cfg
+recursive-include src *.ini
+recursive-include src *.pyi
+recursive-include src *.typed
