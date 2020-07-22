@@ -7,7 +7,7 @@ readme = (BASE_DIR / "README.md").read_text(encoding="utf-8")
 
 setup(
     name="ap-games",
-    version="0.0.1b1",
+    version="0.0.1b2",
     description="Games Tic-Tac-Toe and Reversi with CLI.",
     long_description=readme,
     long_description_content_type="text/markdown",

@@ -2,10 +2,17 @@
 
 ## 0.1 Changelog
 
-### unreleased
+### **unreleased**
  * Build Command Line Interface (``argparse`` or ``click``)
 
-### 0.0.1b1
+
+### **v0.0.1b2**
+ * Game board is colored only in OS Linux
+
+Released: Wed July 22 2020
+
+
+### **0.0.1b1**
 
 Released: Wed July 22 2020
 
