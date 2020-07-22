@@ -35,6 +35,7 @@ setup(
     extras_require=dict(
         tests=["pytest", "coverage"],
         dev=[
+            "flake8",
             "black",
             "isort",
             "mypy",

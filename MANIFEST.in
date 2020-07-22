@@ -1,1 +1,7 @@
 include CHANGES.md
+include CONTRIBUTING.md
+include requirements-dev.txt
+include mypy.ini
+include pytest.ini
+# recursive-include src *.pyi
+# recursive-include src *.typed
