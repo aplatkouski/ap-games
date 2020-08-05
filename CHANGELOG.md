@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog][], and this project adheres to
 
 ## [Unreleased]
 
-## [0.0.2] - 2020-08-05
+## [0.0.1rc0] - 2020-08-05
 ### Changed
 - rename ``Label`` to ``PlayerMark``;
 - rename ``GameBase`` class to ``TwoPlayerBoardGame``;
@@ -54,8 +54,8 @@ The format is based on [Keep a Changelog][], and this project adheres to
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [PEP 440]: https://www.python.org/dev/peps/pep-0440/
-[Unreleased]: https://github.com/aplatkouski/ap-games/compare/v0.0.2...HEAD
-[0.0.2]: https://github.com/aplatkouski/ap-games/compare/v0.0.2...v0.0.1b3
+[Unreleased]: https://github.com/aplatkouski/ap-games/compare/v0.0.1rc0...HEAD
+[0.0.1rc0]: https://github.com/aplatkouski/ap-games/compare/v0.0.1rc0...v0.0.1b3
 [0.0.1b3]: https://github.com/aplatkouski/ap-games/compare/v0.0.1b3...v0.0.1b2
 [0.0.1b2]: https://github.com/aplatkouski/ap-games/compare/v0.0.1b2...v0.0.1b1
 [0.0.1b1]: https://github.com/aplatkouski/ap-games/releases/tag/v0.0.1b1
