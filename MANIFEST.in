@@ -1,5 +1,4 @@
 exclude .bumpversion.cfg
-exclude .github
 exclude .gitignore
 exclude .pre-commit-config.yaml
 exclude .travis.yml
@@ -8,8 +7,9 @@ exclude tox.ini
 include CHANGELOG.md
 include CODE_OF_CONDUCT.md
 include CONTRIBUTING.md
+recursive-exclude .github *
 recursive-exclude scripts *.py
 recursive-exclude src .pydocstyle.ini
-recursive-exclude tests *.py
+recursive-exclude tests *
 recursive-include src *.ini
 recursive-include src *.typed
