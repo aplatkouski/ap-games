@@ -1,4 +1,5 @@
 from typing import Dict
+from typing import Final
 from typing import Literal
 from typing import NamedTuple
 from typing import Tuple
@@ -7,34 +8,30 @@ from typing import Union
 
 from ap_games.player.player import Player
 
-__ALL__ = [
-    "Cell",
-    "Coordinate",
-    "EMPTY",
-    "GameStatus",
-    "Label",
-    "Side",
-    "Step",
-    "SupportedPlayers",
-]
+EMPTY: Final[Literal[' ']] = ' '
+O_MARK: Final[Literal['O']] = 'O'
+X_MARK: Final[Literal['X']] = 'X'
+UNDEFINED_MARK: Final[Literal['']] = ''
 
-EMPTY: Literal[" "] = " "
-X: Literal["X"] = "X"
-O: Literal["O"] = "O"
+PlayerMark = Literal['X', 'O']
+Mark = Union[Literal['X'], Literal['O'], Literal[' '], Literal['']]
+
+SupportedPlayers = Dict[str, Type[Player]]
+Size = int
 
 
 class Coordinate(NamedTuple):
     """Coordinate(x: int, y: int)."""
 
-    x: int
-    y: int
+    x: int  # noqa: WPS111
+    y: int  # noqa: WPS111
 
 
 class Cell(NamedTuple):
-    """Cell(coordinate: Coordinate, label: str)."""
+    """Cell(coordinate: Coordinate, mark: str)."""
 
     coordinate: Coordinate
-    label: str
+    mark: Mark
 
 
 class Offset(NamedTuple):
@@ -62,7 +59,4 @@ class Step(NamedTuple):
 
 Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]
-Label = Literal["X", "O"]
-Labels = Union[Label, str]
-SupportedPlayers = Dict[str, Type[Player]]
-Size = int
+Coordinates = Tuple[Coordinate, ...]

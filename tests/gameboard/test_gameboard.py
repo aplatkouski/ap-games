@@ -3,13 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest  # type: ignore
-from ap_games.gameboard.gameboard import SquareGameboard
 
-from .conftest import SIZE_2
+from ap_games.gameboard.gameboard import SquareGameboard
+from .conftest import SIZE_2  # noqa: T484
 
 if TYPE_CHECKING:
-    from typing import NoReturn
-    from typing import Optional
     from typing import Tuple
 
     from ap_games.ap_types import Cell
@@ -17,92 +15,82 @@ if TYPE_CHECKING:
     from ap_games.ap_types import Side
 
 
-def test_size(square_gameboard_2x2: SquareGameboard) -> Optional[NoReturn]:
+def test_size(square_gameboard_2x2: SquareGameboard) -> None:
     assert SIZE_2 == square_gameboard_2x2.size
 
 
-def test_surface(
-    square_gameboard_2x2: SquareGameboard, surface_4: str
-) -> Optional[NoReturn]:
-    assert surface_4 == square_gameboard_2x2.surface
+def test_grid(square_gameboard_2x2: SquareGameboard, grid_4: str) -> None:
+    assert grid_4 == square_gameboard_2x2.grid
 
 
 def test_columns(
     square_gameboard_2x2: SquareGameboard, columns: Tuple[Side, ...]
-) -> Optional[NoReturn]:
+) -> None:
     assert columns == square_gameboard_2x2.columns
 
 
 def test_rows(
     square_gameboard_2x2: SquareGameboard, rows: Tuple[Side, ...]
-) -> Optional[NoReturn]:
+) -> None:
     assert rows == square_gameboard_2x2.rows
 
 
 def test_diagonals(
     square_gameboard_2x2: SquareGameboard, diagonals: Tuple[Side, ...]
-) -> Optional[NoReturn]:
+) -> None:
     assert diagonals == square_gameboard_2x2.diagonals
 
 
 def test_cells(
     square_gameboard_2x2: SquareGameboard, cells: Tuple[Cell, ...]
-) -> Optional[NoReturn]:
+) -> None:
     assert cells == square_gameboard_2x2.cells
 
 
-def test_available_steps(
+def test_get_available_moves(
     square_gameboard_2x2: SquareGameboard, coordinate_1_1_empty: Coordinate
-) -> Optional[NoReturn]:
-    assert (coordinate_1_1_empty,) == square_gameboard_2x2.available_steps
+) -> None:
+    assert (coordinate_1_1_empty,) == square_gameboard_2x2.available_moves
 
 
-def test_count(square_gameboard_2x2: SquareGameboard) -> Optional[NoReturn]:
-    assert 1 == square_gameboard_2x2.count(label=" ")
-    assert 1 == square_gameboard_2x2.count(label="O")
-    assert 2 == square_gameboard_2x2.count(label="X")
+def test_count(square_gameboard_2x2: SquareGameboard) -> None:
+    assert 1 == square_gameboard_2x2.count(mark=' ')
+    assert 1 == square_gameboard_2x2.count(mark='O')
+    assert 2 == square_gameboard_2x2.count(mark='X')
 
 
 def test_get_offset_cell(
     square_gameboard_2x2: SquareGameboard,
     cell_2_2_o: Cell,
     coordinate_1_1_empty: Coordinate,
-) -> Optional[NoReturn]:
+) -> None:
     assert cell_2_2_o == square_gameboard_2x2.get_offset_cell(
-        coordinate=coordinate_1_1_empty, shift=coordinate_1_1_empty
+        start_coordinate=coordinate_1_1_empty, direction=coordinate_1_1_empty
     )
 
 
-def test_label(
+def test_mark(
     square_gameboard_2x2: SquareGameboard, coordinate_1_1_empty: Coordinate
-) -> Optional[NoReturn]:
-    assert 1 == square_gameboard_2x2.label(
-        coordinate=coordinate_1_1_empty, label="X"
+) -> None:
+    assert 1 == square_gameboard_2x2.place_mark(
+        coordinate=coordinate_1_1_empty, mark='X'
     )
 
 
-def test_gameboard_1x1_too_small() -> Optional[NoReturn]:
-    with pytest.raises(ValueError) as exc:
-        SquareGameboard(surface=" ")
-    assert "The size of the gameboard must be between 2 and 9!" == str(
-        exc.value
-    )
+def test_gameboard_1x1_too_small() -> None:
+    with pytest.raises(ValueError, match='between 2 and 9') as e:
+        SquareGameboard(grid=' ')
+    assert 'The size of the gameboard must be between 2 and 9!' == str(e.value)
 
 
-def test_gameboard_10x10_too_large() -> Optional[NoReturn]:
-    with pytest.raises(ValueError) as exc:
-        SquareGameboard(surface=" " * 100)
-    assert "The size of the gameboard must be between 2 and 9!" == str(
-        exc.value
-    )
+def test_gameboard_10x10_too_large() -> None:
+    with pytest.raises(ValueError, match='between 2 and 9') as e:
+        SquareGameboard(grid=' ' * 100)
+    assert 'The size of the gameboard must be between 2 and 9!' == str(e.value)
 
 
-def test_not_square_gameboard() -> Optional[NoReturn]:
-    surface: str = " " * 5
-    with pytest.raises(ValueError) as exc:
-        SquareGameboard(surface=surface)
-    assert (
-        "The gameboard must be square "
-        f"({int(len(surface) ** (1 / 2))}^2 != {len(surface)})!"
-        == str(exc.value)
-    )
+def test_not_square_gameboard() -> None:
+    grid: str = ' ' * 5
+    with pytest.raises(ValueError, match='must be square') as e:
+        SquareGameboard(grid=grid)
+    assert 'The gameboard must be square (2^2 != 5)!' == str(e.value)

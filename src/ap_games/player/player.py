@@ -1,70 +1,79 @@
 from __future__ import annotations
 
-import random
 from functools import cached_property
-from random import choice as random_choice
+import random
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from typing import Tuple
 
     from ap_games.ap_types import Coordinate
-    from ap_games.ap_types import Label
-    from ap_games.game.game_base import GameBase
+    from ap_games.ap_types import PlayerMark
+    from ap_games.game.game_base import TwoPlayerBoardGame
 
+# TODO: Move TEST_MODE to settings class
 TEST_MODE: bool = False
 
-__ALL__ = ["Player", "TEST_MODE"]
+__ALL__ = ('Player', 'TEST_MODE')
 
 if TEST_MODE:
-    random.seed(123)
+    random.seed(42)
 
 
 class Player:
     """Class introduces the player in a board game."""
 
-    def __init__(self, type_: str, /, *, game: GameBase, label: Label):
+    def __init__(
+        self, type_: str, /, *, mark: PlayerMark, game: TwoPlayerBoardGame
+    ):
         self._type: str = type_
-        self._game: GameBase = game
-        self._label: Label = label
+        self._game: TwoPlayerBoardGame = game
+        self._mark: PlayerMark = mark
 
     def __str__(self) -> str:
-        """Return label."""
-        return self._label
+        """Return mark."""
+        return self._mark
 
     @cached_property
-    def type(self) -> str:
+    def type_(self) -> str:
         """Return type."""
         return self._type
 
     @cached_property
-    def game(self) -> GameBase:
-        """Return game as instance of :class:`GameBase`."""
+    def game(self) -> TwoPlayerBoardGame:
+        """Return game as instance of :class:`TwoPlayerBoardGame`."""
         return self._game
 
     @cached_property
-    def label(self) -> Label:
-        """Return label."""
-        return self._label
+    def mark(self) -> PlayerMark:
+        """Return mark."""
+        return self._mark
 
-    def _random_coordinate(self) -> Coordinate:
-        """Return coordinate of randomly selected cell on the gameboard.
-
-        If there're no cells available, return ``undefined_coordinate``.
-
-        """
-        available_steps: Tuple[Coordinate, ...] = self.game.available_steps()
-        return (
-            random_choice(available_steps)
-            if available_steps
-            else self.game.gameboard.undefined_coordinate
-        )
-
-    def go(self) -> Coordinate:
+    def move(self) -> Coordinate:
         """Return the randomly selected coordinate.
 
-        This method should be overridden by subclasses if there is a
-        more complex rule for determining coordinates.
+        .. note::
+
+            This method should be overridden by subclasses if there is a
+            more complex rule for determining coordinate of move.
+
+        :returns: User-selected cell coordinate.
 
         """
         return self._random_coordinate()
+
+    def _random_coordinate(self) -> Coordinate:
+        """Return randomly selected coordinate on the gameboard.
+
+        :returns: One randomly selected coordinate if there are
+            available coordinates, else ``undefined_coordinate``.
+
+        """
+        available_moves: Tuple[
+            Coordinate, ...
+        ] = self.game.get_available_moves()
+        return (
+            random.choice(available_moves)
+            if available_moves
+            else self.game.gameboard.undefined_coordinate
+        )

@@ -3,9 +3,8 @@
 ## AP Games
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-
 The AP Games is the result of the completion of the project
-[Tic-Tac-Toe with AI] at [JetBrains Academy]. This project
+[Tic-Tac-Toe with AI][] at [JetBrains Academy][]. This project
 was developed just for fun and to learn Python and some
 concepts of a decision-making algorithm.
 
@@ -36,7 +35,7 @@ Please choose the game:
 Print 'exit' to exit the program.
 
 Input command: 1
-Type 'start user_1_type user_2_type' to run the selected game,
+Type 'start user1_type user2_type' to run the selected game,
 where user_X_type is one of the supported values:
 user, easy, hard and nightmare;
 Type 'rules' to get game rules or type 'exit' to return
@@ -103,8 +102,8 @@ installed in your machine, just install the AP Games from [PyPI]:
 pip install ap-games
 ```
 
-You can find source code of this package on [github].
-See [aplatkouski/ap-games] repository.
+You can find source code of this package on [github][].
+See [aplatkouski/ap-games][] repository.
 
 ## How to use
 
@@ -113,21 +112,22 @@ Run module:
 python -m ap_games [game] [user-1 user-2]
 ```
 Where:
- * ``game`` is a value from the following set:
-   * ``0`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
-   * ``1`` or ``reversi`` for Reversi game.
- * ``user-1`` and ``user-2`` are values from the following
-   set:
-   * ``user`` for human player;
-   * ``easy``, ``medium``, ``hard`` and ``nightmare`` for AI
-     player.
+- ``game`` is a value from the following set:
+    - ``0`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
+    - ``1`` or ``reversi`` for Reversi game.
+- ``user-1`` and ``user-2`` are values from the following
+  set:
+    - ``user`` for human player;
+    - ``easy``, ``medium``, ``hard`` and ``nightmare`` for AI
+      player.
 
-*Note: Parameters in brackets are optional.*
+**Note**: Parameters in brackets are optional.
 
 Or open the python console and type:
 ```python
->>> import ap_games
->>> ap_games.cli.cli()
+# Python version 3.8+
+from ap_games import cli
+cli.main()
 ```
 
 ## Notes
@@ -135,32 +135,31 @@ Or open the python console and type:
 This package can be run as a console game or integrated into
 another application. This project provides the following basic
 structures:
- * ``SquareGameboard``
- * ``GameBase``
-   * ``TicTacToe``
-   * ``Reversi``
- * ``Player``
-   * ``HumanPlayer``
-   * ``AIPlayer`` - uses mini-max as decision-making algorithm.
+- ``SquareGameboard``
+- ``GameBase``
+    - ``TicTacToe``
+    - ``Reversi``
+- ``Player``
+    - ``HumanPlayer``
+    - ``AIPlayer`` - uses mini-max as decision-making algorithm.
 
-
-# Credits
+## Credits
 
 Thanks to Gaurav Sen for his video
 [What is the Minimax Algorithm? - Artificial Intelligence][minimax algorithm video]
 
-# Development & Contributing
+## Development & Contributing
 
 Development of this happens on GitHub, patches including tests,
 documentation are very welcome, as well as bug reports!
 
-See also our [CONTRIBUTING.md].
+See also our [CONTRIBUTING.md][].
 
-# Copyright
+## Copyright
 
 Copyright (c) 2020 Artsiom Platkouski.
-``AP_games`` is licensed under the MIT License - see the [LICENSE.txt] file
-for details.
+``AP_games`` is licensed under the MIT License - see the [LICENSE.txt][]
+file for details.
 
 [Tic-Tac-Toe with AI]: https://hyperskill.org/projects/82
 [JetBrains Academy]: https://hyperskill.org/join/0482410e

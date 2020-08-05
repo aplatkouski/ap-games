@@ -1,14 +1,21 @@
-import logging.handlers
+import logging
 import os
-from pathlib import Path
+import pathlib
+import sys
 
-__ALL__ = ["log"]
+__ALL__ = ('logger',)
 
-BASE_DIR = Path(__file__).parent.parent.parent.resolve(strict=True)
+BASE_DIR = pathlib.Path(__file__).parent.parent.parent.resolve(strict=True)
+LOG_LEVEL = os.environ.get('AP_GAMES_LOGLEVEL', 'ERROR')
+LOG_FILE = os.environ.get('AP_GAMES_LOGFILE', f'{BASE_DIR}/ap_games.log')
 
-handler = logging.handlers.WatchedFileHandler(
-    os.environ.get("AP_GAMES_LOGFILE", f"{BASE_DIR}/ap_games.log")
+
+file_handler = logging.FileHandler(LOG_FILE)
+console_handler = logging.StreamHandler(sys.stdout)
+handlers = [file_handler, console_handler]
+file_handler.setLevel(logging.WARNING)
+logging.basicConfig(
+    format='%(message)s', level=logging.INFO, handlers=handlers,
 )
-log = logging.getLogger()
-log.setLevel(os.environ.get("AP_GAMES_LOGLEVEL", "ERROR"))
-log.addHandler(handler)
+
+logger = logging.getLogger()
