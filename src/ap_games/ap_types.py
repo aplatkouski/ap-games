@@ -17,6 +17,7 @@ PlayerMark = Literal['X', 'O']
 Mark = Union[Literal['X'], Literal['O'], Literal[' '], Literal['']]
 
 SupportedPlayers = Dict[str, Type[Player]]
+OptionalPlayerTypes = Union[Tuple[str, str], Tuple[()]]
 Size = int
 
 

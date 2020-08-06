@@ -13,7 +13,6 @@ from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.ai_player import AIPlayer
 from ap_games.player.human_player import HumanPlayer
-from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
     from typing import ClassVar
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
 
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import Coordinates
+    from ap_games.ap_types import OptionalPlayerTypes
     from ap_games.ap_types import PlayerMark
     from ap_games.ap_types import SupportedPlayers
     from ap_games.player.player import Player
@@ -105,12 +105,7 @@ class TwoPlayerBoardGame:
             raise ValueError('The number of players should be 2!')
 
         self.players: Deque[Player] = deque()
-        for num, player_type in enumerate(player_types):
-            self.players.append(
-                self.supported_players[player_type](
-                    player_type, mark=self.marks[num], game=self  # noqa: T484
-                )
-            )
+        self._add_players(player_types=player_types)
 
         grid_without_underscore = grid.replace('_', EMPTY)
         if not set(grid_without_underscore).issubset({*self.marks, EMPTY}):
@@ -288,30 +283,23 @@ class TwoPlayerBoardGame:
             else self.players[0]
         )
 
-    @classmethod
-    def cli(  # noqa: C901
-        cls, user1_type: str = '', user2_type: str = ''
-    ) -> None:
-        """Create an instance of the game with the given parameters.
+    def cli(self, player_types: OptionalPlayerTypes = ()) -> None:
+        """Command line interface of the game.
 
-        TODO: Fix C901
-
-        :param user1_type: Type of first user as string from
-            :attr:`.supported_players`.
-        :param user2_type: Type of second user.
+        :param player_types: A tuple of strings with two elements from
+            :attr:`.TwoPlayerBoardGame.supported_players.keys` which
+            determine the types of players.
 
         """
-        if user1_type and user2_type:
-            command: str = f'start {user1_type} {user2_type}'
-        elif TEST_MODE:
-            command = 'start medium hard'
+        if player_types and len(player_types) == 2:
+            command: str = f'start {player_types[0]} {player_types[1]}'
         else:
             logger.info(
-                'Type "start user1_type user2_type" to run the selected '
-                'game, where "user1_type" and "user2_type" is one of the '
-                f'supported values: {", ".join(cls.supported_players)}; '
+                'Type "start user1_type user2_type" to run the game, '
+                'where "user1_type" and "user2_type" is one of the '
+                f'supported values: {", ".join(self.supported_players)}; '
                 'Type "rules" to get game rules or type "exit" to '
-                'return to the main menu.\nInput command: '
+                'exit from the game.\nInput command: '
             )
             command = sys.stdin.readline().strip()
         logger.debug(f'{command=}')
@@ -320,21 +308,37 @@ class TwoPlayerBoardGame:
             if (
                 len(parameters) == 3
                 and parameters[0] == 'start'
-                and parameters[1] in cls.supported_players
-                and parameters[2] in cls.supported_players
+                and parameters[1] in self.supported_players
+                and parameters[2] in self.supported_players
             ):
-                game = cls(player_types=(parameters[1], parameters[2]))
-                game.play()
+                self._add_players(player_types=(parameters[1], parameters[2]))
+                self.gameboard = SquareGameboard(
+                    grid=self.default_grid, gap=self.gap, axis=self.axis
+                )
+                self.play()
             elif command == 'rules':
-                logger.info(cls.rules)
+                logger.info(self.rules)
             else:
                 logger.warning('Bad parameters!')
-            if TEST_MODE:
-                command = 'exit'
-            else:
-                logger.info('\nInput command: ')
-                command = sys.stdin.readline().strip()
+            logger.info('\nInput command: ')
+            command = sys.stdin.readline().strip()
             logger.debug(f'{command=}')
+
+    def _add_players(self, *, player_types: Tuple[str, str]) -> None:
+        """Create instances of `Player` and add them to :attr:`.players`.
+
+        :param player_types: A tuple of strings with two elements from
+            :attr:`.TwoPlayerBoardGame.supported_players`.keys() which
+            determine the types of players.
+
+        """
+        self.players.clear()
+        for num, player_type in enumerate(player_types):
+            self.players.append(
+                self.supported_players[player_type](
+                    player_type, mark=self.marks[num], game=self  # noqa: T484
+                )
+            )
 
     def _get_winners(
         self, *, gameboard: SquareGameboard

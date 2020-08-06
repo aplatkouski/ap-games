@@ -3,6 +3,7 @@ from __future__ import annotations
 from configparser import ConfigParser
 from importlib import resources
 import sys
+from typing import NamedTuple
 from typing import TYPE_CHECKING
 
 from ap_games.game.reversi import Reversi
@@ -18,16 +19,55 @@ if sys.version_info < (3, 8):
 
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Dict
+    from typing import Tuple
+    from typing import Type
 
+    from ap_games.ap_types import OptionalPlayerTypes
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 
-def read_config() -> None:
-    """Read config and argv params and pass them to ``cli`` of the game.
+class Game(NamedTuple):
+    """Game(name: str, game_class: Type[TwoPlayerBoardGame])."""
 
-    TODO: Add implementation of argparse or click
-    TODO: Import TEST_MODE from config.ini
+    name: str
+    game_class: Type[TwoPlayerBoardGame]
+
+
+supported_games: Dict[str, Game] = {
+    '1': Game(name='Tic-Tac-Toe', game_class=TicTacToe),
+    '2': Game(name='Reversi', game_class=Reversi),
+}
+
+
+def main() -> None:
+    """Aks user about desired game and run it."""
+    choice: str
+    player_types: OptionalPlayerTypes
+    read_config()
+    check_test_mode()
+
+    choice, player_types = read_argv()
+    games: str = ";\n\t".join(
+        f'{num} - {game.name}' for num, game in supported_games.items()
+    )
+    message: str = (
+        f'Please choose the game:\n\t{games}.\n'
+        'Print "exit" to exit the program.\n\nInput command: '
+    )
+    while choice != 'exit':
+        if choice in supported_games:
+            logger.debug(f'{choice=}')
+            game: TwoPlayerBoardGame = supported_games[choice].game_class()
+            game.cli(player_types=player_types)
+        logger.info(message)
+        choice = sys.stdin.readline().strip()
+
+
+def read_config() -> None:
+    """Read the log level from the config.ini and set it.
+
+    TODO: Read TEST_MODE from config.ini
 
     """
     cfg = ConfigParser()
@@ -37,42 +77,42 @@ def read_config() -> None:
     log_level: str = cfg.get('ap-games', 'log_level').upper()
     logger.setLevel(log_level if log_level == 'DEBUG' else 'INFO')
 
-    game: Optional[TwoPlayerBoardGame] = None
-    user1_type: str = ''
-    user2_type: str = ''
-    if len(sys.argv) >= 2:
-        game_name: str = sys.argv[1].lower()
-        if game_name in {'0', 'tic-tac-toe'}:
-            game = TicTacToe()
-        elif game_name in {'1', 'reversi'}:
-            game = Reversi()
-    if len(sys.argv) >= 4:
-        user1_type = sys.argv[2]
-        user2_type = sys.argv[3]
-    if game is not None:
-        game.cli(user1_type, user2_type)
+
+def check_test_mode() -> None:
+    """Run the predefined configuration if ``TEST_MODE=True`` and exit.
+
+    # TODO: Move this configuration to config.ini
+
+    """
+    if TEST_MODE:
+        logger.debug(f'{TEST_MODE=}')
+        game: TwoPlayerBoardGame = Reversi(player_types=('medium', 'hard'))
+        game.play()
+        sys.exit()
 
 
-def main() -> None:
-    """Aks user about desired game and run it."""
-    read_config()
-    choice: str = ''
-    while choice != 'exit':
-        if TEST_MODE:
-            choice = '1'
-        else:
-            logger.info(
-                'Please choose the game:\n\t0 - Tic-Tac-Toe;\n\t1 - Reversi.\n'
-                'Print "exit" to exit the program.\n\nInput command: '
-            )
-            choice = sys.stdin.readline().strip()
-        logger.debug(f'{choice=}')
-        if choice == '0':
-            TicTacToe.cli()
-        elif choice == '1':
-            Reversi.cli()
-        if TEST_MODE:
-            choice = 'exit'
+def read_argv() -> Tuple[str, OptionalPlayerTypes]:
+    """Read command-line arguments and return them.
+
+    :returns: Two-element tuple, where:
+
+        * ``game_num`` - a value from ``supported_games.keys()`` or
+            empty string;
+        * ``player_types`` - a two-element tuple, where each element is
+          a player-type string or empty tuple.
+
+    """
+    sys.argv.pop(0)
+    game_num: str = ''
+    player_types: OptionalPlayerTypes = ()
+    if len(sys.argv) >= 1:
+        game_num = sys.argv[0]
+        game_num.title()
+        for num, game in supported_games.items():
+            game_num = game_num.replace(game.name, num)
+        if len(sys.argv) >= 4:
+            player_types = (sys.argv[2], sys.argv[3])
+    return (game_num, player_types)
 
 
 if __name__ == '__main__':
