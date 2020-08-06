@@ -10,7 +10,7 @@ from ap_games.player.player import Player
 if TYPE_CHECKING:
     from typing import List
 
-__ALL__ = ('HumanPlayer',)
+__all__ = ('HumanPlayer',)
 
 
 class HumanPlayer(Player):

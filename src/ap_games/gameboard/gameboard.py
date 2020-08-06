@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import Side
     from ap_games.ap_types import Size
 
-__ALL__ = ('SquareGameboard',)
+__all__ = ('SquareGameboard',)
 
 
 @dataclass(frozen=True)

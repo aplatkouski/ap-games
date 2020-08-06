@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 
-__ALL__ = ('logger',)
+__all__ = ('logger',)
 
 BASE_DIR = pathlib.Path(__file__).parent.parent.parent.resolve(strict=True)
 LOG_LEVEL = os.environ.get('AP_GAMES_LOGLEVEL', 'ERROR')

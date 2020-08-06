@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 # TODO: Move TEST_MODE to settings class
 TEST_MODE: bool = False
 
-__ALL__ = ('Player', 'TEST_MODE')
+__all__ = ('Player', 'TEST_MODE')
 
 if TEST_MODE:
     random.seed(42)

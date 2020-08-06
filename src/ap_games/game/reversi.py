@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import PlayerMark
     from ap_games.gameboard.gameboard import SquareGameboard
 
-__ALL__ = ('Reversi',)
+__all__ = ('Reversi',)
 
 
 class Reversi(TwoPlayerBoardGame):

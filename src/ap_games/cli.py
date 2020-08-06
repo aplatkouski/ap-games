@@ -10,7 +10,7 @@ from ap_games.game.tictactoe import TicTacToe
 from ap_games.log import logger
 from ap_games.player.player import TEST_MODE
 
-__ALL__ = ('main',)
+__all__ = ('main',)
 
 
 if sys.version_info < (3, 8):

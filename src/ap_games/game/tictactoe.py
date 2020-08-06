@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import PlayerMark
     from ap_games.gameboard.gameboard import SquareGameboard
 
-__ALL__ = ('TicTacToe',)
+__all__ = ('TicTacToe',)
 
 
 class TicTacToe(TwoPlayerBoardGame):

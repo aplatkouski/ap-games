@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import PlayerMark
     from ap_games.game.game_base import TwoPlayerBoardGame
 
-__ALL__ = ('AIPlayer',)
+__all__ = ('AIPlayer',)
 
 if TEST_MODE:
     random.seed(42)
