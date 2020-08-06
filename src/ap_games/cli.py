@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 def read_config() -> None:
     """Read config and argv params and pass them to ``cli`` of the game.
 
-    TODO: Add implementation of argparser or click
+    TODO: Add implementation of argparse or click
     TODO: Import TEST_MODE from config.ini
 
     """

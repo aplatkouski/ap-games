@@ -14,7 +14,7 @@ setup(
             'flake8-docstrings==1.5.0',
             'flake8-import-order==0.18.1',
             'flake8-mypy==17.8.0',
-            'flake8-pytest-style==1.2.2',
+            'flake8-pytest-style==1.2.3',
             'flake8-rst-docstrings==0.0.13',
             'flake8-typing-imports==1.9.0',
             'keyring==21.3.0',
