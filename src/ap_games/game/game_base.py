@@ -77,7 +77,7 @@ class TwoPlayerBoardGame:
 
     marks: ClassVar[Tuple[PlayerMark, PlayerMark]] = (X_MARK, O_MARK)
 
-    default_grid: ClassVar[str] = ' OXXXO XO'  # EMPTY * 9
+    default_grid: ClassVar[str] = EMPTY * 9
     axis: ClassVar[bool] = True
     gap: ClassVar[str] = ' '
 
