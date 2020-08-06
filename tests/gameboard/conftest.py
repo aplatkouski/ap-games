@@ -16,7 +16,7 @@ SIZE_2: int = 2
 
 
 @pytest.fixture()
-def grid_4() -> str:
+def grid_2x2_as_str() -> str:
     return 'XO X'
 
 
@@ -46,8 +46,8 @@ def coordinate_1_1_empty() -> Coordinate:
 
 
 @pytest.fixture()
-def square_gameboard_2x2(grid_4: str) -> SquareGameboard:
-    return SquareGameboard(grid=grid_4)
+def square_gameboard_2x2(grid_2x2_as_str: str) -> SquareGameboard:
+    return SquareGameboard(grid=grid_2x2_as_str)
 
 
 @pytest.fixture()

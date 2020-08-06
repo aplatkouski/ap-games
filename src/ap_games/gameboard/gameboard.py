@@ -104,7 +104,7 @@ class _GameboardRegistry:
     def _fill_index_to_coordinate(self) -> None:
         """Convert index of cell into coordinate of cell.
 
-        Where an example for a 3x3 ``self.grid``::
+        Where an example for a 3x3 grid::
 
             0 1 2         (1, 3) (2, 3) (3, 3)
             3 4 5   ==>   (1, 2) (2, 2) (3, 2)
@@ -261,7 +261,7 @@ class SquareGameboard:
         return self._size
 
     @property
-    def grid(self) -> str:
+    def grid_as_str(self) -> str:
         """Return all marks of the gameboard as a string.
 
         Example::
@@ -281,7 +281,7 @@ class SquareGameboard:
     @property
     def counter(self) -> TypingCounter[str]:
         """Count marks on the gameboard and return ``Counter``."""
-        return Counter(self.grid)
+        return Counter(self.grid_as_str)
 
     @property
     def columns(self) -> Tuple[Side, ...]:
@@ -467,12 +467,15 @@ class SquareGameboard:
             matched by.
 
         """
-        return self.grid.count(mark)
+        return self.grid_as_str.count(mark)
 
     def copy(self) -> SquareGameboard:
         """Return copy of current gameboard with exactly the same grid."""
         sg: SquareGameboard = SquareGameboard(
-            grid=self.grid, gap=self._gap, axis=self._axis, _safety=False
+            grid=self.grid_as_str,
+            gap=self._gap,
+            axis=self._axis,
+            _safety=False,
         )
         sg._cells_dict = dict(self._cells_dict)
         sg._marked_directions_cache = dict(self._marked_directions_cache)

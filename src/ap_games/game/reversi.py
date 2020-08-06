@@ -191,7 +191,7 @@ class Reversi(TwoPlayerBoardGame):
         if player_mark is None:
             player_mark = self.players[0].mark
 
-        grid: str = gameboard.grid
+        grid: str = gameboard.grid_as_str
         count_empty_cell: int = grid.count(EMPTY)
 
         if (grid, player_mark) not in self._available_moves_cache[
