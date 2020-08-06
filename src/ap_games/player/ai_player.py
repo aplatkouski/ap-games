@@ -225,21 +225,18 @@ class AIPlayer(Player):
         percentage: int
         factor: int = 1
 
-        depth_correction: int = 0
         game_status = self.game.get_status(
             gameboard=gameboard, player_mark=player.mark
         )
         if game_status.must_skip:
             player = self.game.get_next_player(player)
-            depth_correction = 1
+            depth -= 1
             game_status = game_status._replace(active=True)
 
         if game_status.active:
             if depth < self.max_depth:
                 _, score, percentage = self._minimax(
-                    depth=depth + 1 - depth_correction,
-                    gameboard=gameboard,
-                    player=player,
+                    depth=depth + 1, gameboard=gameboard, player=player,
                 )
             else:
                 score = self.game.get_score(
