@@ -178,10 +178,6 @@ class TwoPlayerBoardGame:
         :param player_mark: Optional.  If undefined, use mark of player
             with index ``0`` in :attr:`.players` (current player mark).
 
-            .. versionchanged:: 0.0.2  Change argument ``player`` to
-                ``player mark``. ``gameboard`` and ``player_mark`` are
-                not keyword-only arguments.
-
         :returns: Game status as the instance of namedtuple
             ``GameStatus`` with three fields: ``active``, ``message``
             and ``must_skip``.   ``GameStatus.active == False`` if game
