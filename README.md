@@ -99,6 +99,7 @@ Ubuntu Linux and Windows 10. If you have python 3.8 and above
 installed in your machine, just install the AP Games from [PyPI]:
 
 ```shell script
+python --version
 pip install ap-games
 ```
 
