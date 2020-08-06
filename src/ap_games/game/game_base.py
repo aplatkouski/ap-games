@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import SupportedPlayers
     from ap_games.player.player import Player
 
-__ALL__ = ('TwoPlayerBoardGame', 'TwoPlayerBoardGame')
+__ALL__ = ('TwoPlayerBoardGame',)
 
 
 class TwoPlayerBoardGame:
