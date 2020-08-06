@@ -152,12 +152,12 @@ class Reversi(TwoPlayerBoardGame):
         ):
             adversary_occupied_cells: List[Coordinate] = []
             next_coordinate, mark = gameboard.get_offset_cell(
-                coordinate, direction
+                start_coordinate=coordinate, direction=direction
             )
             while mark == adversary_mark:
                 adversary_occupied_cells.append(next_coordinate)
                 next_coordinate, mark = gameboard.get_offset_cell(
-                    next_coordinate, direction
+                    start_coordinate=next_coordinate, direction=direction
                 )
             if mark == player_mark:
                 while adversary_occupied_cells:
@@ -313,11 +313,11 @@ class Reversi(TwoPlayerBoardGame):
             start_coordinate=start_coordinate, offset_cell_mark=mid_mark
         ):
             next_coordinate, mark = gameboard.get_offset_cell(
-                start_coordinate, direction
+                start_coordinate=start_coordinate, direction=direction
             )
             while mark == mid_mark:
                 next_coordinate, mark = gameboard.get_offset_cell(
-                    next_coordinate, direction
+                    start_coordinate=next_coordinate, direction=direction
                 )
             if mark == end_mark:
                 if reverse:

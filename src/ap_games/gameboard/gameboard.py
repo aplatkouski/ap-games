@@ -394,7 +394,7 @@ class SquareGameboard:
         return 0
 
     def get_offset_cell(
-        self, start_coordinate: Coordinate, direction: Coordinate
+        self, *, start_coordinate: Coordinate, direction: Coordinate
     ) -> Cell:
         """Return cell by coordinate calculated as algebraic sum of parameters.
 
