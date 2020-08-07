@@ -68,8 +68,10 @@ class Reversi(TwoPlayerBoardGame):
             with index ``0`` in :attr:`.players` (current player mark).
 
         :returns: Game status as the instance of namedtuple
-            :class:`GameStatus`.  ``GameStatus.active == False`` if game
-            cannot be continued.
+            :class:`GameStatus`.
+            ``GameStatus.active == False`` if game cannot be continued.
+            ``GameStatus.must_skip == True`` means that the game can
+            only be continued after the rotation of the players.
 
         """
         if gameboard is None:
