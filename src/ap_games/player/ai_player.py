@@ -190,17 +190,17 @@ class AIPlayer(Player):
             moves are the same bad, but this is wrong.
 
             Because the adversary can make a mistake, and adding the
-            variable ``factor`` allows the AI to use a possible
-            adversary errors in the future.
+            variable ``last_step_coefficient`` allows the AI to use a
+            possible adversary errors in the future.
 
-            With the ``factor``, losing now is worse than losing later.
-            Therefore, the AI is trying not to 'give up' now and wait
-            for better chances in the future.
+            With the ``last_step_coefficient``, losing now is worse than
+            losing later.  Therefore, the AI is trying not to 'give up'
+            now and wait for better chances in the future.
             This is especially important if the 'depth' of analysis is
             limited.
 
-            Run example below with and without variable factor once or
-            twice:
+            Run example below with and without variable
+            ``last_step_coefficient`` once or twice:
 
                 >>> TicTacToe(
                 ...     grid='X_OX_____',
@@ -210,7 +210,7 @@ class AIPlayer(Player):
             .. note::
 
                 'hard' select cell randomly from all empty cells and
-                can lose to 'easy' without ``factor``.
+                can lose to 'easy' without ``last_step_coefficient``.
 
         :returns: ``score`` and ``percentage``.  Where ``score`` is the
             score of the game with the given parameters, and ``percentage``
@@ -219,7 +219,7 @@ class AIPlayer(Player):
         """
         score: int
         percentage: int
-        factor: int = 1
+        last_step_coefficient: int = 1
 
         game_status = self.game.get_status(
             gameboard=gameboard, player_mark=player.mark
@@ -231,21 +231,18 @@ class AIPlayer(Player):
 
         if game_status.active:
             if depth < self.max_depth:
+                # TODO: I need to save only tree of coordinates in cache
                 _, score, percentage = self._minimax(
                     depth=depth + 1, gameboard=gameboard, player=player,
                 )
-            else:
-                score = self.game.get_score(
-                    gameboard=gameboard, player_mark=self.mark
-                )
-                percentage = 100
+                return score, percentage
         else:
-            factor *= self.max_depth + 1 - depth
-            score = self.game.get_score(
-                gameboard=gameboard, player_mark=self.mark
-            )
-            percentage = 100
-        return score * factor, percentage
+            # when add ``+1`` AI will try to win with finishing game
+            # as soon as possible
+            last_step_coefficient += self.max_depth - depth + 1
+        score = self.game.get_score(gameboard=gameboard, player_mark=self.mark)
+        percentage = 100
+        return score * last_step_coefficient, percentage
 
     def _fix_high_priority_coordinates_score(
         self, depth: int, moves: List[Step], player: Player

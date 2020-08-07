@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="ap_games 1 medium hard" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="ap_games 1 easy medium" type="PythonConfigurationType" factoryName="Python">
     <module name="ap-games" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -13,7 +13,7 @@
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="SCRIPT_NAME" value="ap_games" />
-    <option name="PARAMETERS" value="1 medium hard" />
+    <option name="PARAMETERS" value="1 easy medium" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="true" />
