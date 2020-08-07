@@ -96,7 +96,7 @@ class AIPlayer(Player):
         if player is None:
             player = self
 
-        moves: List[Step] = []
+        steps: List[Step] = []
         for coordinate in self.game.get_available_moves(
             gameboard, player.mark
         ):
@@ -114,7 +114,7 @@ class AIPlayer(Player):
             terminal_score, percentage = self._get_terminal_score(
                 depth=depth, gameboard=fake_gameboard, player=next_player
             )
-            moves.append(
+            steps.append(
                 Step(
                     coordinate=coordinate,
                     score=terminal_score,
@@ -122,29 +122,29 @@ class AIPlayer(Player):
                 )
             )
 
-        fixed_moves: List[Step] = self._fix_high_priority_coordinates_score(
-            depth=depth, moves=moves, player=player
+        fixed_step: List[Step] = self._fix_high_priority_coordinates_score(
+            depth=depth, moves=steps, player=player
         )
 
-        desired_moves: List[Step] = self._extract_desired_moves(
-            depth=depth, moves=fixed_moves, player=player
+        desired_steps: List[Step] = self._extract_desired_moves(
+            depth=depth, moves=fixed_step, player=player
         )
 
-        most_likely_moves: List[Step] = self._extract_most_likely_moves(
-            depth=depth, moves=desired_moves, player=player
+        most_likely_steps: List[Step] = self._extract_most_likely_moves(
+            depth=depth, moves=desired_steps, player=player
         )
 
-        move = random.choice(most_likely_moves)
+        step = random.choice(most_likely_steps)
         # compute and replace ``percentage`` in the selected move
-        move = move._replace(
-            percentage=int(len(desired_moves) / len(moves) * 100)
+        step = step._replace(
+            percentage=int(len(desired_steps) / len(steps) * 100)
         )
 
         if logger.level == logging.DEBUG:
             indent = '\t' * depth
-            logger.debug(f'{indent}selected move: {move}')
+            logger.debug(f'{indent}selected move: {step}')
 
-        return move
+        return step
 
     def _get_terminal_score(
         self, *, depth: int, gameboard: SquareGameboard, player: Player
