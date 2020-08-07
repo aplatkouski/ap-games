@@ -73,13 +73,18 @@ class TwoPlayerBoardGame:
     :ivar available_moves_cache_size: Limit len of
         ``_available_moves_cache`` dict.
 
+    :cvar maximize_score_gap:  ``False`` by default. Set this variable
+        to ``True`` if it is important how big the difference in the
+        score between the players is at the end of the game.
+
     """
 
     marks: ClassVar[Tuple[PlayerMark, PlayerMark]] = (X_MARK, O_MARK)
 
     default_grid: ClassVar[str] = EMPTY * 9
-    axis: ClassVar[bool] = True
-    gap: ClassVar[str] = ' '
+    grid_axis: ClassVar[bool] = True
+    grid_gap: ClassVar[str] = ' '
+    maximize_score_gap: ClassVar[bool] = False
 
     supported_players: ClassVar[SupportedPlayers] = {
         'user': HumanPlayer,
@@ -118,7 +123,9 @@ class TwoPlayerBoardGame:
             active=True, message='', must_skip=False
         )
         self.gameboard: SquareGameboard = SquareGameboard(
-            grid=grid_without_underscore, gap=self.gap, axis=self.axis
+            grid=grid_without_underscore,
+            gap=self.grid_gap,
+            axis=self.grid_axis,
         )
 
         self._available_moves_cache: DefaultDict[
@@ -313,7 +320,9 @@ class TwoPlayerBoardGame:
             ):
                 self._add_players(player_types=(parameters[1], parameters[2]))
                 self.gameboard = SquareGameboard(
-                    grid=self.default_grid, gap=self.gap, axis=self.axis
+                    grid=self.default_grid,
+                    gap=self.grid_gap,
+                    axis=self.grid_axis,
                 )
                 self.play()
             elif command == 'rules':
