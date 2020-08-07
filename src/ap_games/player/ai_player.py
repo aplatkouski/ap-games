@@ -17,9 +17,9 @@ if TYPE_CHECKING:
     from typing import Dict
     from typing import List
     from typing import Optional
-    from typing import Tuple
 
     from ap_games.ap_types import Coordinate
+    from ap_games.ap_types import GameStatus
     from ap_games.ap_types import PlayerMark
     from ap_games.game.game_base import TwoPlayerBoardGame
 
@@ -65,97 +65,33 @@ class AIPlayer(Player):
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
     ) -> Step:
-        """Mini-max algorithm.
+        """Return the step selected by the minimax algorithm.
 
-        TODO: swap the first and second item.
-            In the current implementation, there may be an error if
-            running the method with the ``gameboard`` without the
-            available moves.
+        Mini-max algorithm:
 
-        1. Go through available spots on the board;
-        2. Return a value (score) if a terminal state is found
-           (``_get_terminal_score``);
-        3. or call the minimax function on each available spot
-           (recursion).
-        4. Evaluate returning values from function calls
-           (``_fix_high_priority_coordinates_score``,
-           ``_extract_desired_moves`` and
-           ``_extract_most_likely_moves``);
-        5. And return the best value (Step).
+            1. Return the selected step with the terminal score, if a
+               terminal state is chieved;
+            2. Go through available moves on the board. See
+               :meth:`._get_terminal_score` docstrings for details;
+            3. Call the :meth:`._minimax` method on each available move
+               (recursion);
+            4. Evaluate returning values from method calls. See next
+               methods for details:
 
-        :param depth:  Current depth of tree.
+               * :meth:`._fix_high_priority_coordinates_score`;
+               * :meth:`._extract_desired_moves`;
+               * :meth:`_extract_most_likely_moves`.
+
+            5. Return the best ``Step``.
+
+        :param depth:  The current depth of tree.
         :param gameboard:  Optional.  If undefined, use
-            :attr:`.game.gameboard`.
-        :param player:  Optional.  If undefined, use ``self``.
+            :attr:`.game.gameboard`.  The gameboard relative to which
+            the terminal score of the game will be calculated.
+        :param player:  Optional.  If undefined, use ``self``.  The
+            player relative to whom the terminal score of the game will
+            be calculated.
 
-        :returns:  Step chosen according to the minimax algorithm.
-
-        """
-        if gameboard is None:
-            gameboard = self.game.gameboard
-        if player is None:
-            player = self
-
-        steps: List[Step] = []
-        for coordinate in self.game.get_available_moves(
-            gameboard, player.mark
-        ):
-            fake_gameboard: SquareGameboard = gameboard.copy()
-            fake_gameboard.indent = '\t' * depth
-            self.game.place_mark(coordinate, player.mark, fake_gameboard)
-
-            if logger.level == logging.DEBUG:
-                indent: str = '\t' * depth
-                logger.debug(f'\n{indent}[{player.mark}] {coordinate}')
-                logger.debug(fake_gameboard)
-
-            next_player: Player = self.game.get_next_player(player)
-
-            terminal_score, percentage = self._get_terminal_score(
-                depth=depth, gameboard=fake_gameboard, player=next_player
-            )
-            steps.append(
-                Step(
-                    coordinate=coordinate,
-                    score=terminal_score,
-                    percentage=percentage,
-                )
-            )
-
-        fixed_step: List[Step] = self._fix_high_priority_coordinates_score(
-            depth=depth, moves=steps, player=player
-        )
-
-        desired_steps: List[Step] = self._extract_desired_moves(
-            depth=depth, moves=fixed_step, player=player
-        )
-
-        most_likely_steps: List[Step] = self._extract_most_likely_moves(
-            depth=depth, moves=desired_steps, player=player
-        )
-
-        step = random.choice(most_likely_steps)
-        # compute and replace ``percentage`` in the selected move
-        step = step._replace(
-            percentage=int(len(desired_steps) / len(steps) * 100)
-        )
-
-        if logger.level == logging.DEBUG:
-            indent = '\t' * depth
-            logger.debug(f'{indent}selected move: {step}')
-
-        return step
-
-    def _get_terminal_score(
-        self, *, depth: int, gameboard: SquareGameboard, player: Player
-    ) -> Tuple[int, int]:
-        """Return ``score`` and ``percentage`` of terminal state.
-
-        :param depth: The current depth of tree.
-        :param gameboard: The gameboard relative to which the terminal
-            score of the game will be calculated.
-        :param player: The player relative to whom the terminal score
-            of the game will be calculated.
 
         ``Percentage``::
 
@@ -212,37 +148,115 @@ class AIPlayer(Player):
                 'hard' select cell randomly from all empty cells and
                 can lose to 'easy' without ``last_step_coefficient``.
 
-        :returns: ``score`` and ``percentage``.  Where ``score`` is the
-            score of the game with the given parameters, and ``percentage``
-            is a number greater 0 and less than or equal to 100.
+        :returns:  The step is selected according to the minimax
+            algorithm as a namedtuple :class:`Step` instance with three
+            fields:
+
+                * ``coordinate``.  The coordinate of selected cell or
+                  ``undefined_coordinate`` if game status is ``False``;
+                * ``score``.  The game score with specified parameters;
+                * ``percentage``.  The percentage to reach ``score`` as
+                  a number greater 0 and less than or equal to 100.  See
+                  description above.
 
         """
-        score: int
-        percentage: int
+        if gameboard is None:
+            gameboard = self.game.gameboard
+        if player is None:
+            player = self
+
         last_step_coefficient: int = 1
 
-        game_status = self.game.get_status(
-            gameboard=gameboard, player_mark=player.mark
-        )
+        game_status: GameStatus = self.game.get_status(gameboard, player.mark)
+
         if game_status.must_skip:
             player = self.game.get_next_player(player)
             depth -= 1
             game_status = game_status._replace(active=True)
 
         if game_status.active:
-            if depth < self.max_depth:
-                # TODO: I need to save only tree of coordinates in cache
-                _, score, percentage = self._minimax(
-                    depth=depth + 1, gameboard=gameboard, player=player,
+            if depth <= self.max_depth:
+                return self._get_terminal_score(
+                    depth=depth, gameboard=gameboard, player=player,
                 )
-                return score, percentage
         else:
             # when add ``+1`` AI will try to win with finishing game
             # as soon as possible
             last_step_coefficient += self.max_depth - depth + 1
-        score = self.game.get_score(gameboard=gameboard, player_mark=self.mark)
-        percentage = 100
-        return score * last_step_coefficient, percentage
+
+        # in minimax algorithm ``score`` is always computed relative to
+        # current (``self``) player
+        score: int = self.game.get_score(gameboard, player_mark=self.mark)
+        return Step(
+            coordinate=self.game.gameboard.undefined_coordinate,
+            score=score * last_step_coefficient,
+            percentage=100,
+        )
+
+    def _get_terminal_score(
+        self, *, depth: int, gameboard: SquareGameboard, player: Player,
+    ) -> Step:
+        """Call minimax method on each available move.
+
+        :param depth:  The current depth of tree.
+        :param gameboard:  The gameboard relative to which the terminal
+            score of the game will be calculated.
+        :param player:  The player relative to whom the terminal score
+            of the game will be calculated.
+
+        :returns:  The step selected by the minimax algorithm as
+            instance of namedtuple :class:`.Step`.
+
+        """
+        steps: List[Step] = []
+        indent: str = '\t' * depth
+
+        for coordinate in self.game.get_available_moves(
+            gameboard, player.mark
+        ):
+            fake_gameboard: SquareGameboard = gameboard.copy()
+            fake_gameboard.indent = indent
+            self.game.place_mark(coordinate, player.mark, fake_gameboard)
+
+            if logger.level == logging.DEBUG:
+                logger.debug(f'\n{indent}[{player.mark}] {coordinate}')
+                logger.debug(fake_gameboard)
+
+            next_player: Player = self.game.get_next_player(player)
+
+            _, terminal_score, percentage = self._minimax(
+                depth=depth + 1, gameboard=fake_gameboard, player=next_player
+            )
+            steps.append(
+                Step(
+                    coordinate=coordinate,
+                    score=terminal_score,
+                    percentage=percentage,
+                )
+            )
+
+        fixed_step: List[Step] = self._fix_high_priority_coordinates_score(
+            depth=depth, moves=steps, player=player
+        )
+
+        desired_steps: List[Step] = self._extract_desired_moves(
+            depth=depth, moves=fixed_step, player=player
+        )
+
+        most_likely_steps: List[Step] = self._extract_most_likely_moves(
+            depth=depth, moves=desired_steps, player=player
+        )
+
+        step = random.choice(most_likely_steps)
+        # compute and replace ``percentage`` in the selected move
+        step = step._replace(
+            percentage=int(len(desired_steps) / len(steps) * 100)
+        )
+
+        if logger.level == logging.DEBUG:
+            logger.debug(f'{indent}selected move: {step}')
+
+        return step
 
     def _fix_high_priority_coordinates_score(
         self, depth: int, moves: List[Step], player: Player
