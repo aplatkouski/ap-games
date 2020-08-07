@@ -402,10 +402,10 @@ class SquareGameboard:
         ):
             self._cells_dict[coordinate] = Cell(coordinate, mark)
             if self.colorized:
-                self._default_paint()
                 if force:
                     self._colors_dict[coordinate] = _Colors.turquoise
                 else:
+                    self._default_paint()
                     self._colors_dict[
                         coordinate
                     ] = f'{_Colors.bold}{_Colors.turquoise}'
