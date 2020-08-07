@@ -22,7 +22,7 @@ def test_size(square_gameboard_2x2: SquareGameboard) -> None:
 def test_grid(
     square_gameboard_2x2: SquareGameboard, grid_2x2_as_str: str
 ) -> None:
-    assert grid_2x2_as_str == square_gameboard_2x2.grid_as_str
+    assert grid_2x2_as_str == square_gameboard_2x2.grid_as_string
 
 
 def test_columns(

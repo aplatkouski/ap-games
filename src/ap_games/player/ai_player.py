@@ -101,17 +101,13 @@ class AIPlayer(Player):
             gameboard, player.mark
         ):
             fake_gameboard: SquareGameboard = gameboard.copy()
+            fake_gameboard.indent = '\t' * depth
             self.game.place_mark(coordinate, player.mark, fake_gameboard)
 
             if logger.level == logging.DEBUG:
                 indent: str = '\t' * depth
                 logger.debug(f'\n{indent}[{player.mark}] {coordinate}')
-                logger.debug(
-                    '\n'.join(
-                        f'{indent}{line}'
-                        for line in str(fake_gameboard).split('\n')
-                    )
-                )
+                logger.debug(fake_gameboard)
 
             next_player: Player = self.game.get_next_player(player)
 

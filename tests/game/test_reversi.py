@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 def test_construction() -> None:
     reversi: Reversi = Reversi(grid=' ' * 64, player_types=('user', 'user'))
-    assert ' ' * 64 == reversi.gameboard.grid_as_str
+    assert ' ' * 64 == reversi.gameboard.grid_as_string
     assert 'user' == reversi.players[0].type_
     assert 'user' == reversi.players[1].type_
 

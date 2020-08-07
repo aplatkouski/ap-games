@@ -142,6 +142,16 @@ class SquareGameboard:
     :param gap: ``' '`` by default.  Defines the gap that will be
         printed between cells in a row.
     :param axis: ``False`` by default.  If ``True`` print axis.
+    :param colorized: ``True`` by default.  Determines whether to use
+        colors from :class:`._Colors` when gameboard printed.
+
+        .. warning::
+
+            This attribute is always equal ``False`` on non-Linux
+            platforms.
+
+    :param indent:  The indentation that will be added to the front of
+        grid when printing the gameboard.
 
     :ivar _size: The size of gameboard from 2 to 9.
     :ivar _grid_cache: Save the grid of the gameboard as a string with
@@ -186,17 +196,19 @@ class SquareGameboard:
 
     def __init__(
         self,
-        *,
         grid: str = default_grid,
+        *,
         gap: str = ' ',
         axis: bool = False,
         colorized: bool = True,
+        indent: str = '',
         _safety: bool = True,
     ) -> None:
 
         self.colorized: bool = colorized if _safety and platform().startswith(
             'Linux'
         ) else False
+        self.indent: str = indent
 
         size: int = int(len(grid) ** (1 / 2))
         self._size: Final[int] = size
@@ -220,6 +232,9 @@ class SquareGameboard:
     def __str__(self) -> str:
         """Return SquareGameboard as a grid drawn with ASCII characters.
 
+        TODO: All constants must be evaluated only once outside the
+            method.
+
         See example with ``size=4``, ``gap=' '`` and ``axis=True``::
 
               -----------
@@ -232,12 +247,14 @@ class SquareGameboard:
 
         """
         horizontal_border: str = (
-            ('  ' if self._axis else '')
+            self.indent
+            + ('  ' if self._axis else '')
             + '-' * (self._size + len(self._gap) * (self._size + 1) + 2)
         )
 
         grid: str = '\n'.join(
-            (f'{self._size - num} ' if self._axis else '')
+            self.indent
+            + (f'{self._size - num} ' if self._axis else '')
             + f'|{self._gap}'
             + f'{self._gap}'.join(
                 (self._colors_dict[cell.coordinate] if self.colorized else '')
@@ -249,7 +266,9 @@ class SquareGameboard:
             for num, row in enumerate(self.rows)
         )
 
-        col_nums: str = f'{self._gap}'.join(map(str, range(1, self._size + 1)))
+        col_nums: str = self.indent + f'{self._gap}'.join(
+            map(str, range(1, self._size + 1))
+        )
 
         return f'{horizontal_border}\n{grid}\n{horizontal_border}' + (
             f'\n   {self._gap}{col_nums}{self._gap}' if self._axis else ''
@@ -261,7 +280,7 @@ class SquareGameboard:
         return self._size
 
     @property
-    def grid_as_str(self) -> str:
+    def grid_as_string(self) -> str:
         """Return all marks of the gameboard as a string.
 
         Example::
@@ -281,7 +300,7 @@ class SquareGameboard:
     @property
     def counter(self) -> TypingCounter[str]:
         """Count marks on the gameboard and return ``Counter``."""
-        return Counter(self.grid_as_str)
+        return Counter(self.grid_as_string)
 
     @property
     def columns(self) -> Tuple[Side, ...]:
@@ -299,6 +318,8 @@ class SquareGameboard:
     @property
     def rows(self) -> Tuple[Side, ...]:
         """Return all rows of gameboard as a tuple.
+
+        TODO: Remove ``reversed`` and rewrite __str__
 
         .. note::
 
@@ -381,6 +402,7 @@ class SquareGameboard:
         ):
             self._cells_dict[coordinate] = Cell(coordinate, mark)
             if self.colorized:
+                self._default_paint()
                 if force:
                     self._colors_dict[coordinate] = _Colors.turquoise
                 else:
@@ -467,12 +489,12 @@ class SquareGameboard:
             matched by.
 
         """
-        return self.grid_as_str.count(mark)
+        return self.grid_as_string.count(mark)
 
     def copy(self) -> SquareGameboard:
         """Return copy of current gameboard with exactly the same grid."""
         sg: SquareGameboard = SquareGameboard(
-            grid=self.grid_as_str,
+            grid=self.grid_as_string,
             gap=self._gap,
             axis=self._axis,
             _safety=False,
@@ -483,24 +505,8 @@ class SquareGameboard:
         sg.registry = self.registry
         return sg
 
-    def print_grid(self, indent: str = '') -> None:
-        """Print gameboard.
-
-        :param indent:  Indent which will be added before each line.
-
-        """
-        if indent:
-            grid: str = '\n'.join(
-                f'{indent}{line}' for line in str(self).split('\n')
-            )
-        else:
-            grid = str(self)
-        logger.info(grid)
-        self._default_paint()
-
     def _default_paint(self) -> None:
-        if self.colorized:
-            self._colors_dict = {
-                coordinate: self.mark_colors[self._cells_dict[coordinate].mark]
-                for coordinate in self._cells_dict
-            }
+        self._colors_dict = {
+            coordinate: self.mark_colors[self._cells_dict[coordinate].mark]
+            for coordinate in self._cells_dict
+        }

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import PlayerMark
     from ap_games.game.game_base import TwoPlayerBoardGame
 
-# TODO: Move TEST_MODE to settings class
+# TODO: Read TEST_MODE from config.ini
 TEST_MODE: bool = False
 
 __all__ = ('Player', 'TEST_MODE')

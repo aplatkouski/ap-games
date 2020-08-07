@@ -133,7 +133,7 @@ class TwoPlayerBoardGame:
         TODO: add clean cache after success ``place_mark``.
 
         """
-        self.gameboard.print_grid()
+        logger.info(self.gameboard)
         self.status = self.get_status()
         while self.status.active:
             coordinate: Coordinate = self.players[0].move()
@@ -141,7 +141,7 @@ class TwoPlayerBoardGame:
                 coordinate != self.gameboard.undefined_coordinate
                 and self.place_mark(coordinate)
             ):
-                self.gameboard.print_grid()
+                logger.info(self.gameboard)
                 self.players.rotate(1)
                 self.status = self.get_status()
                 if self.status.message:
