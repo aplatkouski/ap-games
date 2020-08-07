@@ -31,7 +31,6 @@ class Reversi(TwoPlayerBoardGame):
 
     """
 
-    axis: ClassVar[bool] = True
     default_grid: ClassVar[str] = f'{EMPTY * 27}XO{EMPTY * 6}OX{EMPTY * 27}'
     # coordinate with additional score
     high_priority_coordinates: ClassVar[Dict[Coordinate, int]] = {
@@ -307,7 +306,7 @@ class Reversi(TwoPlayerBoardGame):
             direction is added to return tuple, otherwise
             ``start_coordinate`` will be returned.
 
-        :returns: A tuple of coordinates of available steps.
+        :returns: A tuple of coordinates of available moves.
 
         """
         available_moves: List[Coordinate] = []
