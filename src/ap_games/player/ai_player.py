@@ -319,7 +319,7 @@ class AIPlayer(Player):
             indent: str = '\t' * depth
             logger.debug(
                 f'{indent}desired score moves ({score_func}) -> '
-                '{desired_moves}'
+                f'{desired_moves}'
             )
         return desired_moves
 
