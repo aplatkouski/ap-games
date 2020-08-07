@@ -164,7 +164,7 @@ class TwoPlayerBoardGame:
 
         .. note::
 
-            If there is no available move for the ``player`` the method
+            If there is no available moves for the ``player`` the method
             must return ``GameStatus.active == False`` and
             ``GameStatus.must_skip == True``.
 
@@ -243,7 +243,7 @@ class TwoPlayerBoardGame:
         return gameboard.available_moves
 
     def get_score(
-        self, *, gameboard: SquareGameboard, player_mark: PlayerMark
+        self, gameboard: SquareGameboard, player_mark: PlayerMark
     ) -> int:
         """Return the score relative to the given gameboard and player.
 

@@ -233,7 +233,7 @@ class Reversi(TwoPlayerBoardGame):
         return self._available_moves_cache[count_empty_cell][grid, player_mark]
 
     def get_score(
-        self, *, gameboard: SquareGameboard, player_mark: PlayerMark
+        self, gameboard: SquareGameboard, player_mark: PlayerMark
     ) -> int:
         """Return difference in number of marks between players.
 
