@@ -60,9 +60,8 @@ class AIPlayer(Player):
 
     def _minimax(
         self,
-        *,
         gameboard: Optional[SquareGameboard] = None,
-        player: Optional[Player] = None,
+        player_mark: Optional[PlayerMark] = None,
         depth: int = 0,
     ) -> Move:
         """Return the move selected by the minimax algorithm.
@@ -87,9 +86,9 @@ class AIPlayer(Player):
         :param gameboard:  Optional.  If undefined, use
             :attr:`.game.gameboard`.  The gameboard relative to which
             the terminal score of the game will be calculated.
-        :param player:  Optional.  If undefined, use ``self``.  The
-            player relative to whom the terminal score of the game will
-            be calculated.
+        :param player_mark:  Optional.  If undefined, use ``self.mark``.
+            The player relative to whom the terminal score of the game
+            will be calculated.
         :param depth:  Optional.  ``0`` by default. The current depth of
             tree.
 
@@ -163,15 +162,15 @@ class AIPlayer(Player):
         """
         if gameboard is None:
             gameboard = self.game.gameboard
-        if player is None:
-            player = self
+        if player_mark is None:
+            player_mark = self.mark
 
         last_move_coefficient: int = 1
 
-        game_status: GameStatus = self.game.get_status(gameboard, player.mark)
+        game_status: GameStatus = self.game.get_status(gameboard, player_mark)
 
         if game_status.must_skip:
-            player = self.game.get_next_player(player)
+            player_mark = self.game.get_adversary_mark(player_mark)
             depth -= 1
             game_status = game_status._replace(active=True)
 
@@ -179,7 +178,9 @@ class AIPlayer(Player):
             if depth < self.max_depth:
                 # TODO: I need to save only tree of coordinates in cache
                 return self._get_terminal_move(
-                    depth=depth + 1, gameboard=gameboard, player=player,
+                    gameboard=gameboard,
+                    player_mark=player_mark,
+                    depth=depth + 1,
                 )
         else:
             last_move_coefficient = 10 ** (self.max_depth - depth + 1)
@@ -194,14 +195,14 @@ class AIPlayer(Player):
         )
 
     def _get_terminal_move(
-        self, *, gameboard: SquareGameboard, player: Player, depth: int
+        self, gameboard: SquareGameboard, player_mark: PlayerMark, depth: int,
     ) -> Move:
         """Call minimax method on each available move.
 
         :param gameboard:  The gameboard relative to which the terminal
             score of the game will be calculated.
-        :param player:  The player relative to whom the terminal score
-            of the game will be calculated.
+        :param player_mark:  The mark of player relative to whom the
+            terminal score of the game will be calculated.
         :param depth:  The current depth of tree.
 
         :returns:  The move selected by the minimax algorithm as
@@ -212,33 +213,37 @@ class AIPlayer(Player):
         indent: str = '\t' * depth
 
         for coordinate in self.game.get_available_moves(
-            gameboard, player.mark
+            gameboard, player_mark
         ):
             fake_gameboard: SquareGameboard = gameboard.copy()
             fake_gameboard.indent = indent
-            self.game.place_mark(coordinate, player.mark, fake_gameboard)
+            self.game.place_mark(coordinate, player_mark, fake_gameboard)
 
             if logger.level == logging.DEBUG:
-                logger.debug(f'\n{indent}[{player.mark}] {coordinate}')
+                logger.debug(f'\n{indent}[{player_mark}] {coordinate}')
                 logger.debug(fake_gameboard)
 
-            next_player: Player = self.game.get_next_player(player)
+            next_player_mark: PlayerMark = self.game.get_adversary_mark(
+                player_mark
+            )
 
             move: Move = self._minimax(
-                gameboard=fake_gameboard, player=next_player, depth=depth
+                gameboard=fake_gameboard,
+                player_mark=next_player_mark,
+                depth=depth,
             )
             moves.append(move._replace(coordinate=coordinate))
 
         fixed_moves: List[Move] = self._fix_high_priority_coordinates_score(
-            moves=moves, player=player, depth=depth
+            moves=moves, player_mark=player_mark, depth=depth
         )
 
         desired_moves: List[Move] = self._extract_desired_moves(
-            moves=fixed_moves, player=player, depth=depth
+            moves=fixed_moves, player_mark=player_mark, depth=depth
         )
 
         most_likely_moves: List[Move] = self._extract_most_likely_moves(
-            moves=desired_moves, player=player, depth=depth
+            moves=desired_moves, player_mark=player_mark, depth=depth
         )
 
         move = random.choice(most_likely_moves)
@@ -253,7 +258,7 @@ class AIPlayer(Player):
         return move
 
     def _fix_high_priority_coordinates_score(
-        self, moves: List[Move], player: Player, depth: int,
+        self, moves: List[Move], player_mark: PlayerMark, depth: int,
     ) -> List[Move]:
         """Change score of moves from with high priority coordinates.
 
@@ -266,16 +271,16 @@ class AIPlayer(Player):
         current player , and decrease "score" of move if it is move of
         adversary player.
 
-        :param moves: Possible moves that should be checked.
-        :param player: The player who moves.
-        :param depth: Current depth of tree.
+        :param moves:  Possible moves that should be checked.
+        :param player_mark:  The mark of player who moves.
+        :param depth:  Current depth of tree.
 
-        :return: The list of input ``moves`` with changed score of moves
+        :return:  The list of input ``moves`` with changed score of moves
             whose coordinates are in :attr:`.high_priority_coordinates`.
 
         """
         if self.game.high_priority_coordinates:
-            if player is self:
+            if player_mark == self.mark:
                 op = add
             else:
                 op = sub
@@ -293,7 +298,7 @@ class AIPlayer(Player):
         return moves
 
     def _extract_desired_moves(
-        self, moves: List[Move], player: Player, depth: int
+        self, moves: List[Move], player_mark: PlayerMark, depth: int
     ) -> List[Move]:
         """Calculate min-max score and returning moves with that score.
 
@@ -301,14 +306,14 @@ class AIPlayer(Player):
         moves.
 
         :param moves:  Possible moves that should be checked.
-        :param player:  The player who moves.
+        :param player_mark:  The mark of player who moves.
         :param depth:  Current depth of tree.
 
-        :return: A new list of moves that is a subset of the input
+        :return:  A new list of moves that is a subset of the input
             moves.
 
         """
-        if player is self:
+        if player_mark == self.mark:
             score_func = max
         else:
             score_func = min
@@ -326,7 +331,7 @@ class AIPlayer(Player):
         return desired_moves
 
     def _extract_most_likely_moves(
-        self, moves: List[Move], player: Player, depth: int
+        self, moves: List[Move], player_mark: PlayerMark, depth: int
     ) -> List[Move]:
         """Maximize probability of self own winning or adversary losing.
 
@@ -336,17 +341,17 @@ class AIPlayer(Player):
 
         :param depth:  Current depth of tree.
         :param moves:  Possible moves that should be checked.
-        :param player:  The player that moves and relative to which
-            ``percentage_func`` will be determined.
+        :param player_mark:  The mark of player who moves and relative
+            to which ``percentage_func`` will be determined.
 
-        :return: A new list of moves that is a subset of the input
+        :return:  A new list of moves that is a subset of the input
             moves.
 
         """
         desired_score: int = moves[0].score
 
-        if (desired_score >= 0 and player is self) or (
-            desired_score < 0 and player is not self
+        if (desired_score >= 0 and player_mark == self.mark) or (
+            desired_score < 0 and player_mark != self.mark
         ):
             percentage_func = max
         else:
