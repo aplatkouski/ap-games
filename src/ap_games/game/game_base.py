@@ -73,10 +73,6 @@ class TwoPlayerBoardGame:
     :ivar available_moves_cache_size: Limit len of
         ``_available_moves_cache`` dict.
 
-    :cvar maximize_score_gap:  ``False`` by default. Set this variable
-        to ``True`` if it is important how big the difference in the
-        score between the players is at the end of the game.
-
     """
 
     marks: ClassVar[Tuple[PlayerMark, PlayerMark]] = (X_MARK, O_MARK)
@@ -84,7 +80,6 @@ class TwoPlayerBoardGame:
     default_grid: ClassVar[str] = EMPTY * 9
     grid_axis: ClassVar[bool] = True
     grid_gap: ClassVar[str] = ' '
-    maximize_score_gap: ClassVar[bool] = False
 
     supported_players: ClassVar[SupportedPlayers] = {
         'user': HumanPlayer,

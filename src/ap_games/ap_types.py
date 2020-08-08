@@ -50,8 +50,8 @@ class GameStatus(NamedTuple):
     must_skip: bool
 
 
-class Step(NamedTuple):
-    """Step(coordinate: Coordinate, score: int, percentage: int)."""
+class Move(NamedTuple):
+    """Move(coordinate: Coordinate, score: int, percentage: int)."""
 
     coordinate: Coordinate
     score: int

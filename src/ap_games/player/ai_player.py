@@ -6,7 +6,7 @@ from operator import sub
 import random
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import Step
+from ap_games.ap_types import Move
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.player import Player
@@ -55,21 +55,21 @@ class AIPlayer(Player):
         logger.info(f'Making move level "{self.type_}" [{self.mark}]')
 
         if self.max_depth:
-            return self._minimax(depth=1).coordinate
+            return self._minimax().coordinate
         return self._random_coordinate()
 
     def _minimax(
         self,
         *,
-        depth: int,
         gameboard: Optional[SquareGameboard] = None,
         player: Optional[Player] = None,
-    ) -> Step:
-        """Return the step selected by the minimax algorithm.
+        depth: int = 0,
+    ) -> Move:
+        """Return the move selected by the minimax algorithm.
 
         Mini-max algorithm:
 
-            1. Return the selected step with the terminal score, if a
+            1. Return the selected move with the terminal score, if a
                terminal state is chieved;
             2. Go through available moves on the board. See
                :meth:`._get_terminal_score` docstrings for details;
@@ -80,17 +80,18 @@ class AIPlayer(Player):
 
                * :meth:`._fix_high_priority_coordinates_score`;
                * :meth:`._extract_desired_moves`;
-               * :meth:`_extract_most_likely_moves`.
+               * :meth:`._extract_most_likely_moves`.
 
-            5. Return the best ``Step``.
+            5. Return the best ``Move``.
 
-        :param depth:  The current depth of tree.
         :param gameboard:  Optional.  If undefined, use
             :attr:`.game.gameboard`.  The gameboard relative to which
             the terminal score of the game will be calculated.
         :param player:  Optional.  If undefined, use ``self``.  The
             player relative to whom the terminal score of the game will
             be calculated.
+        :param depth:  Optional.  ``0`` by default. The current depth of
+            tree.
 
 
         ``Percentage``::
@@ -126,17 +127,17 @@ class AIPlayer(Player):
             moves are the same bad, but this is wrong.
 
             Because the adversary can make a mistake, and adding the
-            variable ``last_step_coefficient`` allows the AI to use a
+            variable ``last_move_coefficient`` allows the AI to use a
             possible adversary errors in the future.
 
-            With the ``last_step_coefficient``, losing now is worse than
+            With the ``last_move_coefficient``, losing now is worse than
             losing later.  Therefore, the AI is trying not to 'give up'
             now and wait for better chances in the future.
             This is especially important if the 'depth' of analysis is
             limited.
 
             Run example below with and without variable
-            ``last_step_coefficient`` once or twice:
+            ``last_move_coefficient`` once or twice:
 
                 >>> TicTacToe(
                 ...     grid='X_OX_____',
@@ -146,10 +147,10 @@ class AIPlayer(Player):
             .. note::
 
                 'hard' select cell randomly from all empty cells and
-                can lose to 'easy' without ``last_step_coefficient``.
+                can lose to 'easy' without ``last_move_coefficient``.
 
-        :returns:  The step is selected according to the minimax
-            algorithm as a namedtuple :class:`Step` instance with three
+        :returns:  The move is selected according to the minimax
+            algorithm as a namedtuple :class:`Move` instance with three
             fields:
 
                 * ``coordinate``.  The coordinate of selected cell or
@@ -165,7 +166,7 @@ class AIPlayer(Player):
         if player is None:
             player = self
 
-        last_step_coefficient: int = 1
+        last_move_coefficient: int = 1
 
         game_status: GameStatus = self.game.get_status(gameboard, player.mark)
 
@@ -175,40 +176,39 @@ class AIPlayer(Player):
             game_status = game_status._replace(active=True)
 
         if game_status.active:
-            if depth <= self.max_depth:
+            if depth < self.max_depth:
+                # TODO: I need to save only tree of coordinates in cache
                 return self._get_terminal_score(
-                    depth=depth, gameboard=gameboard, player=player,
+                    depth=depth + 1, gameboard=gameboard, player=player,
                 )
         else:
-            # when add ``+1`` AI will try to win with finishing game
-            # as soon as possible
-            last_step_coefficient += self.max_depth - depth + 1
+            last_move_coefficient = 10 ** (self.max_depth - depth + 1)
 
         # in minimax algorithm ``score`` is always computed relative to
         # current (``self``) player
         score: int = self.game.get_score(gameboard, player_mark=self.mark)
-        return Step(
+        return Move(
             coordinate=self.game.gameboard.undefined_coordinate,
-            score=score * last_step_coefficient,
+            score=score * last_move_coefficient,
             percentage=100,
         )
 
     def _get_terminal_score(
-        self, *, depth: int, gameboard: SquareGameboard, player: Player,
-    ) -> Step:
+        self, *, gameboard: SquareGameboard, player: Player, depth: int
+    ) -> Move:
         """Call minimax method on each available move.
 
-        :param depth:  The current depth of tree.
         :param gameboard:  The gameboard relative to which the terminal
             score of the game will be calculated.
         :param player:  The player relative to whom the terminal score
             of the game will be calculated.
+        :param depth:  The current depth of tree.
 
-        :returns:  The step selected by the minimax algorithm as
-            instance of namedtuple :class:`.Step`.
+        :returns:  The move selected by the minimax algorithm as
+            instance of namedtuple :class:`Move`.
 
         """
-        steps: List[Step] = []
+        moves: List[Move] = []
         indent: str = '\t' * depth
 
         for coordinate in self.game.get_available_moves(
@@ -224,47 +224,38 @@ class AIPlayer(Player):
 
             next_player: Player = self.game.get_next_player(player)
 
-            _, terminal_score, percentage = self._minimax(
-                depth=depth + 1, gameboard=fake_gameboard, player=next_player
+            move: Move = self._minimax(
+                gameboard=fake_gameboard, player=next_player, depth=depth
             )
-            steps.append(
-                Step(
-                    coordinate=coordinate,
-                    score=terminal_score,
-                    percentage=percentage,
-                )
-            )
+            moves.append(move._replace(coordinate=coordinate))
 
-        fixed_step: List[Step] = self._fix_high_priority_coordinates_score(
-            depth=depth, moves=steps, player=player
+        fixed_moves: List[Move] = self._fix_high_priority_coordinates_score(
+            moves=moves, player=player, depth=depth
         )
 
-        desired_steps: List[Step] = self._extract_desired_moves(
-            depth=depth, moves=fixed_step, player=player
+        desired_moves: List[Move] = self._extract_desired_moves(
+            moves=fixed_moves, player=player, depth=depth
         )
 
-        most_likely_steps: List[Step] = self._extract_most_likely_moves(
-            depth=depth, moves=desired_steps, player=player
+        most_likely_moves: List[Move] = self._extract_most_likely_moves(
+            moves=desired_moves, player=player, depth=depth
         )
 
-        step = random.choice(most_likely_steps)
+        move = random.choice(most_likely_moves)
         # compute and replace ``percentage`` in the selected move
-        step = step._replace(
-            percentage=int(len(desired_steps) / len(steps) * 100)
+        move = move._replace(
+            percentage=int(len(desired_moves) / len(moves) * 100)
         )
 
         if logger.level == logging.DEBUG:
-            logger.debug(f'{indent}selected move: {step}')
+            logger.debug(f'{indent}selected move: {move}')
 
-        return step
+        return move
 
     def _fix_high_priority_coordinates_score(
-        self, depth: int, moves: List[Step], player: Player
-    ) -> List[Step]:
-        """Change score of coordinates from high_priority_coordinates.
-
-        TODO: FIx function with "switch off" it if there was reached
-            the end of the game.
+        self, moves: List[Move], player: Player, depth: int,
+    ) -> List[Move]:
+        """Change score of moves from with high priority coordinates.
 
         .. note::
 
@@ -275,9 +266,9 @@ class AIPlayer(Player):
         current player , and decrease "score" of move if it is move of
         adversary player.
 
-        :param depth: Current depth of tree.
         :param moves: Possible moves that should be checked.
         :param player: The player who moves.
+        :param depth: Current depth of tree.
 
         :return: The list of input ``moves`` with changed score of moves
             whose coordinates are in :attr:`.high_priority_coordinates`.
@@ -302,16 +293,16 @@ class AIPlayer(Player):
         return moves
 
     def _extract_desired_moves(
-        self, depth: int, moves: List[Step], player: Player
-    ) -> List[Step]:
-        """Calculate minimax score and returning moves with that score.
+        self, moves: List[Move], player: Player, depth: int
+    ) -> List[Move]:
+        """Calculate min-max score and returning moves with that score.
 
         Maximize score of self own move or minimize score of adversary
         moves.
 
-        :param depth:  Current depth of tree.
         :param moves:  Possible moves that should be checked.
         :param player:  The player who moves.
+        :param depth:  Current depth of tree.
 
         :return: A new list of moves that is a subset of the input
             moves.
@@ -323,7 +314,7 @@ class AIPlayer(Player):
             score_func = min
 
         desired_score: int = score_func(move.score for move in moves)
-        desired_moves: List[Step] = [
+        desired_moves: List[Move] = [
             move for move in moves if move.score == desired_score
         ]
         if logger.level == logging.DEBUG:
@@ -335,8 +326,8 @@ class AIPlayer(Player):
         return desired_moves
 
     def _extract_most_likely_moves(
-        self, depth: int, moves: List[Step], player: Player
-    ) -> List[Step]:
+        self, moves: List[Move], player: Player, depth: int
+    ) -> List[Move]:
         """Maximize probability of self own winning or adversary losing.
 
         .. warning::
@@ -363,7 +354,7 @@ class AIPlayer(Player):
         desired_percentage: int = percentage_func(
             move.percentage for move in moves
         )
-        most_likely_moves: List[Step] = [
+        most_likely_moves: List[Move] = [
             move for move in moves if move.percentage == desired_percentage
         ]
         if logger.level == logging.DEBUG:
