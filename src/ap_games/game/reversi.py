@@ -81,7 +81,7 @@ class Reversi(TwoPlayerBoardGame):
         if self.get_available_moves(gameboard, player_mark):
             return GameStatus(active=True, message='', must_skip=False)
 
-        adversary_mark: PlayerMark = self._get_adversary_mark(player_mark)
+        adversary_mark: PlayerMark = self.get_adversary_mark(player_mark)
         if self.get_available_moves(gameboard, adversary_mark):
             game_status = GameStatus(
                 active=False,
@@ -146,7 +146,7 @@ class Reversi(TwoPlayerBoardGame):
             return 0
 
         score: int = gameboard.place_mark(coordinate, player_mark)
-        adversary_mark: PlayerMark = self._get_adversary_mark(player_mark)
+        adversary_mark: PlayerMark = self.get_adversary_mark(player_mark)
 
         for direction in gameboard.get_directions(
             start_coordinate=coordinate, offset_cell_mark=adversary_mark
@@ -199,7 +199,7 @@ class Reversi(TwoPlayerBoardGame):
             count_empty_cell
         ]:
             actual_available_moves: List[Coordinate] = []
-            adversary_mark: PlayerMark = self._get_adversary_mark(player_mark)
+            adversary_mark: PlayerMark = self.get_adversary_mark(player_mark)
 
             mark_counter: TypingCounter[str] = gameboard.counter
             if mark_counter[EMPTY] <= mark_counter[player_mark]:
@@ -246,7 +246,7 @@ class Reversi(TwoPlayerBoardGame):
 
         """
         return gameboard.count(player_mark) - gameboard.count(
-            self._get_adversary_mark(player_mark)
+            self.get_adversary_mark(player_mark)
         )
 
     def _get_winners(
