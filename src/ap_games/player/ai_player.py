@@ -72,7 +72,7 @@ class AIPlayer(Player):
             1. Return the selected move with the terminal score, if a
                terminal state is chieved;
             2. Go through available moves on the board. See
-               :meth:`._get_terminal_score` docstrings for details;
+               :meth:`._get_terminal_move` docstrings for details;
             3. Call the :meth:`._minimax` method on each available move
                (recursion);
             4. Evaluate returning values from method calls. See next
@@ -178,7 +178,7 @@ class AIPlayer(Player):
         if game_status.active:
             if depth < self.max_depth:
                 # TODO: I need to save only tree of coordinates in cache
-                return self._get_terminal_score(
+                return self._get_terminal_move(
                     depth=depth + 1, gameboard=gameboard, player=player,
                 )
         else:
@@ -193,7 +193,7 @@ class AIPlayer(Player):
             percentage=100,
         )
 
-    def _get_terminal_score(
+    def _get_terminal_move(
         self, *, gameboard: SquareGameboard, player: Player, depth: int
     ) -> Move:
         """Call minimax method on each available move.
