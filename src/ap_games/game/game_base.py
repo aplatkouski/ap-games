@@ -38,7 +38,7 @@ class TwoPlayerBoardGame:
     TODO: Separate business logic from develop features. Implement cache
       as decorator of methods.
 
-    TODO: move ``_available_moves_cache`` to :class:`.player.AIPlayer`
+    TODO: move ``_available_moves_cache`` to :class:`AIPlayer`
 
     Then concrete classes providing the standard game implementations.
 
@@ -57,9 +57,9 @@ class TwoPlayerBoardGame:
     :ivar status: This is current status of the game.  ``False`` if game
         can't be continued.
     :ivar gameboard: The gameboard as instance of
-        :class:`.SquareGameboard`.
+        :class:`SquareGameboard`.
     :ivar players: The queue with players.  Player is an instance of
-        :class:`.Player`.  Player with index ``0`` is a current player.
+        :class:`Player`.  Player with index ``0`` is a current player.
     :ivar _available_moves_cache: Cache with available moves as dict.
         Where key of dict is integer corresponding to the number of
         empty cell, and value is a dict where key is tuple with two
@@ -352,7 +352,7 @@ class TwoPlayerBoardGame:
     def _get_winners(
         self, *, gameboard: SquareGameboard
     ) -> Tuple[PlayerMark, ...]:
-        """Return a tuple of :class:`.Player` instances defined as winner(s).
+        """Return a tuple of :class:`Player` instances defined as winner(s).
 
         .. warning::
 

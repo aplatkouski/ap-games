@@ -143,7 +143,7 @@ class SquareGameboard:
         printed between cells in a row.
     :param axis: ``False`` by default.  If ``True`` print axis.
     :param colorized: ``True`` by default.  Determines whether to use
-        colors from :class:`._Colors` when gameboard printed.
+        colors from :class:`_Colors` when gameboard printed.
 
         .. warning::
 
@@ -183,7 +183,7 @@ class SquareGameboard:
     _registries: Dict[Size, _GameboardRegistry] = {}
 
     def __new__(cls, **kwargs: Any) -> Any:
-        """Create instance and set :attr:`_registries[size]` if necessary."""
+        """Create instance and set :attr:`._registries[size]` if necessary."""
         grid: str = kwargs.get('grid', cls.default_grid)
         size: int = int(len(grid) ** (1 / 2))
         if size ** 2 != len(grid):
@@ -424,7 +424,7 @@ class SquareGameboard:
         :param direction: Shift as a coordinate with ``-1<=x<=1`` and
             ``-1<=y<=1``.
 
-        :returns: adjacent cell as instance of :class:`.Cell` if cell
+        :returns: adjacent cell as instance of :class:`Cell` if cell
             exist on the gameboard else :attr:`.undefined_cell`.
 
         """
