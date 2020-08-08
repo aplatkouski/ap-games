@@ -14,6 +14,7 @@ file_handler = logging.FileHandler(LOG_FILE)
 console_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, console_handler]
 file_handler.setLevel(logging.WARNING)
+console_handler.setLevel(logging.DEBUG)
 logging.basicConfig(
     format='%(message)s', level=logging.INFO, handlers=handlers,
 )
