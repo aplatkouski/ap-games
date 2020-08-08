@@ -69,13 +69,13 @@ class AIPlayer(Player):
         Mini-max algorithm:
 
             1. Return the selected move with the terminal score, if a
-               terminal state is chieved;
+               terminal state is achieved;
             2. Go through available moves on the board. See
                :meth:`._get_terminal_move` docstrings for details;
             3. Call the :meth:`._minimax` method on each available move
                (recursion);
-            4. Evaluate returning values from method calls. See next
-               methods for details:
+            4. Evaluate returning values from minimax-method calls. See
+               next methods for details:
 
                * :meth:`._fix_high_priority_coordinates_score`;
                * :meth:`._extract_desired_moves`;
