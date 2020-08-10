@@ -184,14 +184,16 @@ class SquareGameboard:
 
     def __new__(cls, **kwargs: Any) -> Any:
         """Create instance and set :attr:`._registries[size]` if necessary."""
-        grid: str = kwargs.get('grid', cls.default_grid)
-        size: int = int(len(grid) ** (1 / 2))
-        if size ** 2 != len(grid):
-            raise ValueError(
-                f'The gameboard must be square ({size}^2 != {len(grid)})!'
-            )
-        if size not in cls._registries:
-            cls._registries[size] = _GameboardRegistry(size=size)
+        _safety: bool = kwargs.get('_safety', True)
+        if _safety:
+            grid: str = kwargs.get('grid', cls.default_grid)
+            size: int = int(len(grid) ** (1 / 2))
+            if size ** 2 != len(grid):
+                raise ValueError(
+                    f'The gameboard must be square ({size}^2 != {len(grid)})!'
+                )
+            if size not in cls._registries:
+                cls._registries[size] = _GameboardRegistry(size=size)
         return super().__new__(cls)
 
     def __init__(
@@ -209,8 +211,8 @@ class SquareGameboard:
             'Linux'
         ) else False
         self.indent: str = indent
-
         size: int = int(len(grid) ** (1 / 2))
+        self.registry: _GameboardRegistry = self._registries[size]
         self._size: Final[int] = size
         self._gap: Final[str] = gap
         self._axis: Final[bool] = axis
@@ -222,7 +224,6 @@ class SquareGameboard:
         ] = {}
         self._grid_cache: str = ''
         if _safety:
-            self.registry: _GameboardRegistry = self._registries[size]
             for index, mark in enumerate(grid):
                 coordinate = self.registry.index_to_coordinate[index]
                 mark = cast(Mark, mark)
@@ -377,7 +378,9 @@ class SquareGameboard:
     def available_moves(self) -> Coordinates:
         """Return coordinates of all ``EMPTY`` cells."""
         return tuple(
-            cell.coordinate for cell in self.cells if cell.mark == EMPTY
+            cell.coordinate
+            for cell in self._cells_dict.values()
+            if cell.mark == EMPTY
         )
 
     def place_mark(
@@ -444,13 +447,15 @@ class SquareGameboard:
 
         """
         return tuple(
-            cell.coordinate for cell in self.cells if cell.mark == mark
+            cell.coordinate
+            for cell in self._cells_dict.values()
+            if cell.mark == mark
         )
 
     def get_directions(
         self, start_coordinate: Coordinate, offset_cell_mark: Mark
     ) -> Directions:
-        """Return coordinates of offset cells with the given ``mark``.
+        """Return directions with the given ``mark``.
 
         :param start_coordinate:  The coordinate, adjacent cells that
             will be checked.
@@ -491,18 +496,25 @@ class SquareGameboard:
         """
         return self.grid_as_string.count(mark)
 
-    def copy(self) -> SquareGameboard:
-        """Return copy of current gameboard with exactly the same grid."""
+    def copy(self, **kwargs: Any) -> SquareGameboard:
+        """Return copy of current gameboard with exactly the same grid.
+
+        :param kwargs: Arguments that will be override default
+            arguments.
+
+        :returns: The new instance with the same values of attributes.
+
+        """
         sg: SquareGameboard = SquareGameboard(
             grid=self.grid_as_string,
             gap=self._gap,
             axis=self._axis,
             _safety=False,
+            **kwargs,
         )
         sg._cells_dict = dict(self._cells_dict)
         sg._marked_directions_cache = dict(self._marked_directions_cache)
         sg._grid_cache = self._grid_cache
-        sg.registry = self.registry
         return sg
 
     def _default_paint(self) -> None:
