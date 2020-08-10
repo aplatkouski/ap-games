@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict
 from typing import Final
 from typing import Literal
@@ -51,13 +53,35 @@ class GameStatus(NamedTuple):
 
 
 class Move(NamedTuple):
-    """Move(coordinate: Coordinate, score: int, percentage: int)."""
+    """Move(coordinate: Coordinate, score: int, percentage: int, last: bool).
+
+    :ivar coordinate:  The coordinate of selected cell or
+        ``undefined_coordinate`` if game status is ``False``.
+    :ivar score:  The game score with specified parameters.
+    :ivar percentage:  The percentage to reach ``score`` as a number
+        greater 0 and less than or equal to 100.  See description above.
+    :ivar last:  ``True`` if current move finishes the game, ``False`` -
+        otherwise.
+
+    """
 
     coordinate: Coordinate
     score: int
     percentage: int
+    last: bool
 
+
+class Node(NamedTuple):
+    """Move(player_mark: PlayerMark, move: Move, sub_tree: Tree)."""
+
+    player_mark: PlayerMark
+    move: Move
+    sub_tree: 'Tree'  # type: ignore
+
+
+UNDEFINED_MOVE = Move(Coordinate(x=0, y=0), score=0, percentage=0, last=False)
 
 Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]
 Coordinates = Tuple[Coordinate, ...]
+Tree = Dict[str, Node]  # type: ignore
