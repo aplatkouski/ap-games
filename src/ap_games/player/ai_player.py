@@ -92,19 +92,25 @@ class AIPlayer(Player):
         :param depth:  Optional.  ``0`` by default. The current depth of
             tree.
 
+            .. seealso::
+
+                :class:`Node`.
 
         ``Percentage``::
+
+            .. note::
+
+                This is only important when the 'depth' of analysis is
+                limited.
 
             In the minimax algorithm, it doesn't matter how many ways
             to win AI at the end of the game. Therefore, the AI
             'stops fighting' and is not trying to 'steal' one of them.
             With the variable ``percentage``, the case with two
-            possible moves to lose are worse than case with one move.
-            This is especially important if the 'depth' of analysis is
-            limited.
+            possible moves to lose are worse than case with one.
 
-            Run example below with and without variable percentage once
-            or twice::
+            Run example below with and without variable ``percentage``
+            once or twice::
 
                 >>> from ap_games.game.tictactoe import TicTacToe
                 >>> TicTacToe(
@@ -119,11 +125,16 @@ class AIPlayer(Player):
 
         ``Factor``::
 
+            .. note::
+
+                This is only important when the 'depth' of analysis is
+                limited.
+
             In the minimax algorithm, it doesn't matter when you lose:
             now or later. Therefore, the AI 'stops fighting' if it
             in any case loses the next moves, regardless of how it takes
             the move now. In this case, the AI considers that all the
-            moves are the same bad, but this is wrong.
+            moves are the same bad.
 
             Because the adversary can make a mistake, and adding the
             variable ``last_move_coefficient`` allows the AI to use a
@@ -132,8 +143,6 @@ class AIPlayer(Player):
             With the ``last_move_coefficient``, losing now is worse than
             losing later.  Therefore, the AI is trying not to 'give up'
             now and wait for better chances in the future.
-            This is especially important if the 'depth' of analysis is
-            limited.
 
             Run example below with and without variable
             ``last_move_coefficient`` once or twice:
@@ -149,15 +158,11 @@ class AIPlayer(Player):
                 can lose to 'easy' without ``last_move_coefficient``.
 
         :returns:  The move is selected according to the minimax
-            algorithm as a namedtuple :class:`Move` instance with three
-            fields:
+            algorithm as a namedtuple :class:`Move` instance.
 
-                * ``coordinate``.  The coordinate of selected cell or
-                  ``undefined_coordinate`` if game status is ``False``;
-                * ``score``.  The game score with specified parameters;
-                * ``percentage``.  The percentage to reach ``score`` as
-                  a number greater 0 and less than or equal to 100.  See
-                  description above.
+            .. seealso::
+
+                :class:`Move`.
 
         """
         if gameboard is None:
