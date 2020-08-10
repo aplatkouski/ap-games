@@ -290,8 +290,10 @@ class Reversi(TwoPlayerBoardGame):
             2. Iterate over the cells in selected direction;
             3. Check there is the cell occupied by the ``end_mark``
                behind the cells with ``mid_mark``;
-            4. if successful, return ``start_coordinate``. Other
-               directions can be not checked.
+            4. if successful and ``reverse=False``, return
+               ``start_coordinate``. Other directions can be not
+               checked.  When ``reverse=True`` it checks all directions
+               and returns coordinate of cells with ``end_mark``.
 
         :param gameboard:  The gameboard that will be checked.
         :param start_coordinate:  The coordinate relative to which the
