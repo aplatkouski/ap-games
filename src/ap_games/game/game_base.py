@@ -90,7 +90,7 @@ class TwoPlayerBoardGame:
     }
 
     rules: ClassVar[str] = ''
-    high_priority_coordinates: ClassVar[Dict[Coordinate, int]] = {}
+    priority_coordinates: ClassVar[Dict[Coordinate, int]] = {}
 
     def __init__(
         self,

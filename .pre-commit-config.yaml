@@ -21,10 +21,6 @@ repos:
     rev: 19.10b0
     hooks:
       - id: black
-  - repo: https://github.com/mgedmin/check-manifest
-    rev: "0.42"
-    hooks:
-      - id: check-manifest
   - repo: https://github.com/terrencepreilly/darglint
     rev: master
     hooks:

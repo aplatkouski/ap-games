@@ -276,10 +276,10 @@ class AIPlayer(Player):
         :param depth:  Current depth of tree.
 
         :return:  The list of input ``moves`` with changed score of moves
-            whose coordinates are in :attr:`.high_priority_coordinates`.
+            whose coordinates are in :attr:`.priority_coordinates`.
 
         """
-        if self.game.high_priority_coordinates:
+        if self.game.priority_coordinates:
             if player_mark == self.mark:
                 op = add
             else:
@@ -288,9 +288,7 @@ class AIPlayer(Player):
                 move._replace(
                     score=op(
                         move.score,
-                        self.game.high_priority_coordinates.get(
-                            move.coordinate, 0
-                        ),
+                        self.game.priority_coordinates.get(move.coordinate, 0),
                     )
                 )
                 for move in moves

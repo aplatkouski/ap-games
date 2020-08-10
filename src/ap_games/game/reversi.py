@@ -33,11 +33,11 @@ class Reversi(TwoPlayerBoardGame):
 
     default_grid: ClassVar[str] = f'{EMPTY * 27}XO{EMPTY * 6}OX{EMPTY * 27}'
     # coordinate with additional score
-    high_priority_coordinates: ClassVar[Dict[Coordinate, int]] = {
-        Coordinate(1, 1): 5,
-        Coordinate(1, 8): 5,
-        Coordinate(8, 8): 5,
-        Coordinate(8, 1): 5,
+    priority_coordinates: ClassVar[Dict[Coordinate, int]] = {
+        Coordinate(1, 1): 10,
+        Coordinate(1, 8): 10,
+        Coordinate(8, 8): 10,
+        Coordinate(8, 1): 10,
     }
 
     rules: ClassVar[str] = ''.join(
