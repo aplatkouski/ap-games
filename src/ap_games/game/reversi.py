@@ -81,8 +81,8 @@ class Reversi(TwoPlayerBoardGame):
         if self.get_available_moves(gameboard, player_mark):
             return GameStatus(active=True, message='', must_skip=False)
 
-        adversary_mark: PlayerMark = self.get_adversary_mark(player_mark)
-        if self.get_available_moves(gameboard, adversary_mark):
+        enemy_mark: PlayerMark = self.get_enemy_mark(player_mark)
+        if self.get_available_moves(gameboard, enemy_mark):
             game_status = GameStatus(
                 active=False,
                 message=(
@@ -119,10 +119,10 @@ class Reversi(TwoPlayerBoardGame):
         Algorithm::
 
             1. Iterate over all directions where the cell occupied by
-               the "adversary mark";
+               the "enemy mark";
             2. Iterate over the cells in selected direction;
-            3. Save the coordinates of all cells with "adversary mark";
-            4. Mark all adversary cells if there is a cell behind them
+            3. Save the coordinates of all cells with "enemy mark";
+            4. Mark all enemy cells if there is a cell behind them
                occupied by the current player.
 
         :param coordinate: The coordinate of cell where player want to
@@ -146,24 +146,24 @@ class Reversi(TwoPlayerBoardGame):
             return 0
 
         score: int = gameboard.place_mark(coordinate, player_mark)
-        adversary_mark: PlayerMark = self.get_adversary_mark(player_mark)
+        enemy_mark: PlayerMark = self.get_enemy_mark(player_mark)
 
         for direction in gameboard.get_directions(
-            start_coordinate=coordinate, offset_cell_mark=adversary_mark
+            start_coordinate=coordinate, offset_cell_mark=enemy_mark
         ):
-            adversary_occupied_cells: List[Coordinate] = []
+            enemy_occupied_cells: List[Coordinate] = []
             next_coordinate, mark = gameboard.get_offset_cell(
                 start_coordinate=coordinate, direction=direction
             )
-            while mark == adversary_mark:
-                adversary_occupied_cells.append(next_coordinate)
+            while mark == enemy_mark:
+                enemy_occupied_cells.append(next_coordinate)
                 next_coordinate, mark = gameboard.get_offset_cell(
                     start_coordinate=next_coordinate, direction=direction
                 )
             if mark == player_mark:
-                while adversary_occupied_cells:
+                while enemy_occupied_cells:
                     score += gameboard.place_mark(
-                        coordinate=adversary_occupied_cells.pop(),
+                        coordinate=enemy_occupied_cells.pop(),
                         mark=player_mark,
                         force=True,
                     )
@@ -199,7 +199,7 @@ class Reversi(TwoPlayerBoardGame):
             count_empty_cell
         ]:
             actual_available_moves: List[Coordinate] = []
-            adversary_mark: PlayerMark = self.get_adversary_mark(player_mark)
+            enemy_mark: PlayerMark = self.get_enemy_mark(player_mark)
 
             mark_counter: TypingCounter[str] = gameboard.counter
             if mark_counter[EMPTY] <= mark_counter[player_mark]:
@@ -219,7 +219,7 @@ class Reversi(TwoPlayerBoardGame):
                 ] = self._check_directions(
                     gameboard,
                     start_coordinate=coordinate,
-                    mid_mark=adversary_mark,
+                    mid_mark=enemy_mark,
                     end_mark=end_mark,
                     reverse=reverse,
                 )
@@ -246,7 +246,7 @@ class Reversi(TwoPlayerBoardGame):
 
         """
         return gameboard.count(player_mark) - gameboard.count(
-            self.get_adversary_mark(player_mark)
+            self.get_enemy_mark(player_mark)
         )
 
     def _get_winners(

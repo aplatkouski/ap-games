@@ -150,9 +150,9 @@ class AIPlayer(Player):
             the move now. In this case, the AI considers that all the
             moves are the same bad.
 
-            Because the adversary can make a mistake, and adding the
+            Because the enemy can make a mistake, and adding the
             variable ``last_move_coefficient`` allows the AI to use a
-            possible adversary errors in the future.
+            possible enemy errors in the future.
 
             With the ``last_move_coefficient``, losing now is worse than
             losing later.  Therefore, the AI is trying not to 'give up'
@@ -197,7 +197,7 @@ class AIPlayer(Player):
         game_status: GameStatus = self.game.get_status(gameboard, player_mark)
 
         if game_status.must_skip:
-            player_mark = self.game.get_adversary_mark(player_mark)
+            player_mark = self.game.get_enemy_mark(player_mark)
             depth -= 1
             game_status = game_status._replace(active=True)
 
@@ -341,9 +341,7 @@ class AIPlayer(Player):
             logger.debug(f'\n{indent}[{player_mark}] {coordinate}')
             logger.debug(gameboard)
 
-        next_player_mark: PlayerMark = self.game.get_adversary_mark(
-            player_mark
-        )
+        next_player_mark: PlayerMark = self.game.get_enemy_mark(player_mark)
         move: Move = self._minimax(
             gameboard=gameboard,
             player_mark=next_player_mark,
@@ -408,7 +406,7 @@ class AIPlayer(Player):
 
         Function increases "score" of move if it is the move of the
         current player , and decrease "score" of move if it is move of
-        adversary player.
+        enemy player.
 
         :param moves:  Possible moves that should be checked.
         :param player_mark:  The mark of player who moves.
@@ -445,7 +443,7 @@ class AIPlayer(Player):
     ) -> List[Move]:
         """Calculate min-max score and returning moves with that score.
 
-        Maximize score of self own move or minimize score of adversary
+        Maximize score of self own move or minimize score of enemy
         moves.
 
         :param moves:  Possible moves that should be checked.
@@ -476,7 +474,7 @@ class AIPlayer(Player):
     def _extract_most_likely_moves(
         self, moves: List[Move], player_mark: PlayerMark, depth: int
     ) -> List[Move]:
-        """Maximize probability of self own winning or adversary losing.
+        """Maximize probability of self own winning or enemy losing.
 
         .. warning::
 

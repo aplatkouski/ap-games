@@ -382,11 +382,11 @@ class TwoPlayerBoardGame:
             self.players.rotate(1)
 
     @staticmethod
-    def get_adversary_mark(player_mark: PlayerMark) -> PlayerMark:
-        """Return adversary mark relatively to ``player_mark``.
+    def get_enemy_mark(player_mark: PlayerMark) -> PlayerMark:
+        """Return enemy mark relatively to ``player_mark``.
 
         :param player_mark: The player's mark, relative to which the
-            adversary player's mark will be determined.
+            enemy player's mark will be determined.
 
         :returns: The opponent's player's mark.
 
