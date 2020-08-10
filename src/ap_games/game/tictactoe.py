@@ -6,6 +6,7 @@ from ap_games.ap_types import GameStatus
 from ap_games.game.game_base import TwoPlayerBoardGame
 
 if TYPE_CHECKING:
+    from typing import Any
     from typing import ClassVar
     from typing import List
     from typing import Optional
@@ -34,6 +35,10 @@ class TicTacToe(TwoPlayerBoardGame):
             'a horizontal, vertical, or diagonal row is the winner.',
         )
     )
+
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self._rotate_players()
 
     def get_status(
         self,

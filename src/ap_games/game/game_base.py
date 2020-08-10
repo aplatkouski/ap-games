@@ -127,7 +127,6 @@ class TwoPlayerBoardGame:
             int, Dict[Tuple[str, PlayerMark], Coordinates]
         ] = defaultdict(dict)
         self.available_moves_cache_size: int = 7  # depth
-        self._rotate_players()
 
     def play(self) -> None:
         """Start new game.
