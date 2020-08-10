@@ -295,7 +295,11 @@ class AIPlayer(Player):
             else:
                 coordinate: Coordinate = node.move.coordinate
                 player_mark: PlayerMark = node.player_mark
+                indent: str = '\t' * depth
                 if node.sub_tree:
+                    if logger.level == logging.DEBUG:
+                        logger.debug(f'\n{indent}[{player_mark}] {coordinate}')
+                        logger.debug(f'{indent}[{grid}]')
                     move: Move = self._go_through_subtree(
                         depth=depth + 1, tree=node.sub_tree
                     )
@@ -312,7 +316,7 @@ class AIPlayer(Player):
                     # Therefore cached ``tree`` will never be deeper
                     # than ``max_depth``.
                     fake_gameboard: SquareGameboard = SquareGameboard(
-                        grid=grid, indent='\t' * depth, colorized=False,
+                        grid=grid, indent=indent, colorized=False,
                     )
 
                     move = self._get_terminal_score(
@@ -371,6 +375,11 @@ class AIPlayer(Player):
     ) -> Move:
         indent: str = '\t' * depth
 
+        if logger.level == logging.DEBUG:
+            logger.debug(
+                f'{indent}Choose bet move from moves -> ' f'{str(moves)}'
+            )
+
         corrected_moves: List[Move] = self._correct_priority_coordinates(
             moves=moves, player_mark=player_mark, depth=depth
         )
@@ -383,14 +392,14 @@ class AIPlayer(Player):
             moves=desired_moves, player_mark=player_mark, depth=depth
         )
 
-        move = random.choice(most_likely_moves)
+        move: Move = random.choice(most_likely_moves)
         # compute and replace ``percentage`` in the selected move
         move = move._replace(
             percentage=int(len(desired_moves) / len(moves) * move.percentage)
         )
 
         if logger.level == logging.DEBUG:
-            logger.debug(f'{indent}selected move: {move}')
+            logger.debug(f'{indent}Selected move: {move}')
 
         return move
 
@@ -466,7 +475,7 @@ class AIPlayer(Player):
         if logger.level == logging.DEBUG:
             indent: str = '\t' * depth
             logger.debug(
-                f'{indent}desired score moves ({score_func}) -> '
+                f'{indent}Desired score moves ({score_func}) -> '
                 f'{desired_moves}'
             )
         return desired_moves
@@ -506,7 +515,7 @@ class AIPlayer(Player):
         if logger.level == logging.DEBUG:
             indent: str = '\t' * depth
             logger.debug(
-                f'{indent}desired percentage moves ({percentage_func}) -> '
+                f'{indent}Desired percentage moves ({percentage_func}) -> '
                 f'{str(most_likely_moves)}'
             )
         return most_likely_moves
