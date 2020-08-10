@@ -82,7 +82,7 @@ class AIPlayer(Player):
                (:meth:`._go_through_subtree`). See docstrings
                corresponding method for details;
             3. Call the :meth:`._minimax` method on each available move
-               (recursion) (:meth:`._get_terminal_move`);
+               (recursion) (:meth:`._get_terminal_score`);
             4. Evaluate returning values from minimax-method calls
                (:meth:`._choose_best_move`).  See next methods for
                details:
@@ -262,7 +262,7 @@ class AIPlayer(Player):
             )
             self.game.place_mark(coordinate, player_mark, fake_gameboard)
 
-            move: Move = self._get_terminal_move(
+            move: Move = self._get_terminal_score(
                 coordinate=coordinate,
                 player_mark=player_mark,
                 gameboard=fake_gameboard,
@@ -315,7 +315,7 @@ class AIPlayer(Player):
                         grid=grid, indent='\t' * depth, colorized=False,
                     )
 
-                    move = self._get_terminal_move(
+                    move = self._get_terminal_score(
                         coordinate=coordinate,
                         player_mark=player_mark,
                         gameboard=fake_gameboard,
@@ -328,7 +328,7 @@ class AIPlayer(Player):
             raise ValueError("Impossible!")
         return self._choose_best_move(moves, player_marks.pop(), depth)
 
-    def _get_terminal_move(
+    def _get_terminal_score(
         self,
         coordinate: Coordinate,
         player_mark: PlayerMark,
