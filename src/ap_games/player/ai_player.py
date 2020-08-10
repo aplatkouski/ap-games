@@ -388,7 +388,7 @@ class AIPlayer(Player):
         move = random.choice(most_likely_moves)
         # compute and replace ``percentage`` in the selected move
         move = move._replace(
-            percentage=int(len(desired_moves) / len(moves) * 100)
+            percentage=int(len(desired_moves) / len(moves) * move.percentage)
         )
 
         if logger.level == logging.DEBUG:
@@ -493,8 +493,8 @@ class AIPlayer(Player):
         """
         desired_score: int = moves[0].score
 
-        if (desired_score >= 0 and player_mark == self.mark) or (
-            desired_score < 0 and player_mark != self.mark
+        if (desired_score > 0 and player_mark == self.mark) or (
+            desired_score <= 0 and player_mark != self.mark
         ):
             percentage_func = max
         else:
