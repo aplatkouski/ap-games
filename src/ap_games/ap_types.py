@@ -57,7 +57,7 @@ class Move(NamedTuple):
 
     :ivar coordinate:  The coordinate of selected cell or
         ``undefined_coordinate`` if game status is ``False``.
-    :ivar score:  The game score with specified parameters.
+    :ivar score:  The terminal game score.
     :ivar percentage:  The percentage to reach ``score`` as a number
         greater 0 and less than or equal to 100.  See description above.
     :ivar last:  ``True`` if current move finishes the game, ``False`` -
