@@ -230,11 +230,21 @@ class SquareGameboard:
                 self._cells_dict[coordinate] = Cell(coordinate, mark)
             self._default_paint()
 
+        self._horizontal_border: str = (
+            ('  ' if self._axis else '')
+            + '-' * (self._size + len(self._gap) * (self._size + 1) + 2)
+        )
+        _column_nums: str = f'{self._gap}'.join(
+            map(str, range(1, self._size + 1))
+        )
+        self._column_axis: str = (
+            f'\n{self.indent}   {self._gap}{_column_nums}{self._gap}'
+            if self._axis
+            else ''
+        )
+
     def __str__(self) -> str:
         """Return SquareGameboard as a grid drawn with ASCII characters.
-
-        TODO: All constants must be evaluated only once outside the
-            method.
 
         See example with ``size=4``, ``gap=' '`` and ``axis=True``::
 
@@ -247,15 +257,9 @@ class SquareGameboard:
                 1 2 3 4
 
         """
-        horizontal_border: str = (
-            self.indent
-            + ('  ' if self._axis else '')
-            + '-' * (self._size + len(self._gap) * (self._size + 1) + 2)
-        )
-
         grid: str = '\n'.join(
             self.indent
-            + (f'{self._size - num} ' if self._axis else '')
+            + (f'{num} ' if self._axis else '')
             + f'|{self._gap}'
             + f'{self._gap}'.join(
                 (self._colors_dict[cell.coordinate] if self.colorized else '')
@@ -264,15 +268,13 @@ class SquareGameboard:
                 for cell in row
             )
             + f'{self._gap}|'
-            for num, row in enumerate(self.rows)
+            for num, row in reversed(tuple(enumerate(self.rows, 1)))
         )
 
-        col_nums: str = self.indent + f'{self._gap}'.join(
-            map(str, range(1, self._size + 1))
-        )
-
-        return f'{horizontal_border}\n{grid}\n{horizontal_border}' + (
-            f'\n   {self._gap}{col_nums}{self._gap}' if self._axis else ''
+        return (
+            f'{self.indent}{self._horizontal_border}\n'
+            f'{grid}\n{self._horizontal_border}'
+            f'{self._column_axis}'
         )
 
     @cached_property
@@ -318,18 +320,7 @@ class SquareGameboard:
 
     @property
     def rows(self) -> Tuple[Side, ...]:
-        """Return all rows of gameboard as a tuple.
-
-        TODO: Remove ``reversed`` and rewrite __str__
-
-        .. note::
-
-            Rows are returned in the reverse order from top to button.
-            This behavior of the method is necessary for the correct
-            printing ot the gameboard. To get rows in the coordinate order
-            from button to top, use ``sorted`` method.
-
-        """
+        """Return all rows of gameboard as a tuple."""
         return tuple(
             tuple(
                 filter(
@@ -337,7 +328,7 @@ class SquareGameboard:
                     self._cells_dict.values(),
                 )
             )
-            for row in reversed(range(1, self._size + 1))
+            for row in range(1, self._size + 1)
         )
 
     @property
