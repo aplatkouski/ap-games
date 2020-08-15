@@ -77,9 +77,7 @@ class TicTacToe(TwoPlayerBoardGame):
             winners: Tuple[PlayerMark, ...] = self._get_winners(
                 gameboard=gameboard
             )
-            if (not winners) and (
-                not tuple(self.get_available_moves(gameboard))
-            ):
+            if (not winners) and not self.get_available_moves(gameboard):
                 game_status = GameStatus(
                     active=False, message='Draw\n', must_skip=False
                 )
