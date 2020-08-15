@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from collections import deque
 import sys
 from typing import TYPE_CHECKING
@@ -16,7 +15,6 @@ from ap_games.player.human_player import HumanPlayer
 
 if TYPE_CHECKING:
     from typing import ClassVar
-    from typing import DefaultDict
     from typing import Deque
     from typing import Dict
     from typing import Optional
@@ -36,9 +34,8 @@ class TwoPlayerBoardGame:
     """TwoPlayerBoardGame class specifies the public methods of game.
 
     TODO: Separate business logic from develop features. Implement cache
-      as decorator of methods.
-
-    TODO: move ``_available_moves_cache`` to :class:`AIPlayer`
+      as decorator of methods.  See the implementation of this feature
+      in previous commits (was reverted).
 
     Then concrete classes providing the standard game implementations.
 
@@ -61,17 +58,15 @@ class TwoPlayerBoardGame:
     :ivar players: The queue with players.  Player is an instance of
         :class:`Player`.  Player with index ``0`` is a current player.
     :ivar _available_moves_cache: Cache with available moves as dict.
-        Where key of dict is integer corresponding to the number of
-        empty cell, and value is a dict where key is tuple with two
-        field:
+        Where key of dict is a tuple with two fields:
 
-        * ``grid`` of the gameboard in considered move;
-        * ``mark`` of player, who should make move on this turn.
+        * ``grid`` of the gameboard before considered move;
+        * ``mark`` of player, who makes move on this turn.
 
-        Value of sub-dict is tuple with coordinates of all available moves.
-
-    :ivar available_moves_cache_size: Limit len of
-        ``_available_moves_cache`` dict.
+        Value of dict is a sub-dict.  Where keys are coordinates of all
+            available moves, and values of sub-dict are coordinates of
+            enemy marked cells which should be marked in considered
+            move.
 
     """
 
@@ -123,17 +118,12 @@ class TwoPlayerBoardGame:
             axis=self.grid_axis,
         )
 
-        self._available_moves_cache: DefaultDict[
-            int, Dict[Tuple[str, PlayerMark], Coordinates]
-        ] = defaultdict(dict)
-        self.available_moves_cache_size: int = 7  # depth
+        self._available_moves_cache: Dict[
+            Tuple[str, PlayerMark], Dict[Coordinate, Coordinates]
+        ] = {}
 
     def play(self) -> None:
-        """Start new game.
-
-        TODO: add clean cache after success ``place_mark``.
-
-        """
+        """Start new game."""
         logger.info(self.gameboard)
         self.status = self.get_status()
         while self.status.active:
@@ -150,6 +140,7 @@ class TwoPlayerBoardGame:
                 if self.status.must_skip:
                     self.players.rotate(1)
                     self.status = self.status._replace(active=True)
+        self._available_moves_cache.clear()
 
     def get_status(
         self,
@@ -360,19 +351,6 @@ class TwoPlayerBoardGame:
 
         """
         return ()
-
-    def _clean_cache(self) -> None:
-        """Delete outdated items.
-
-        Remove all items from ``_available_moves_cache`` where
-        key (count of empty cell) greater than current count of empty
-        cell.
-
-        """
-        outdated: int = self.gameboard.count(EMPTY) + 1
-        while outdated in self._available_moves_cache:
-            del self._available_moves_cache[outdated]
-            outdated += 1
 
     def _rotate_players(self) -> None:
         """Move player with the least number of mark to the front of queue."""

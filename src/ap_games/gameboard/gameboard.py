@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import Counter
 from dataclasses import dataclass
 from functools import cached_property
 from platform import platform
@@ -19,7 +18,6 @@ from ap_games.log import logger
 if TYPE_CHECKING:
     from typing import Any
     from typing import ClassVar
-    from typing import Counter as TypingCounter
     from typing import Dict
     from typing import Final
     from typing import List
@@ -155,15 +153,11 @@ class SquareGameboard:
 
     :ivar _size: The size of gameboard from 2 to 9.
     :ivar _grid_cache: Save the grid of the gameboard as a string with
-        cell labels. This cache is cleaned in :meth:`.place_mark`.
+        cell labels. This cache is cleared in :meth:`.place_mark`.
 
         .. note::
 
             This attribute adds 25% processing speed.
-
-    :ivar _marked_directions_cache:  Store the mapping of the coordinate
-        and the desired mark to the coordinates of adjacent cells with
-        this mark.  This cache is cleaned in :meth:`.place_mark`.
 
     """
 
@@ -219,9 +213,6 @@ class SquareGameboard:
 
         self._cells_dict: Dict[Tuple[int, int], Cell] = {}
         self._colors_dict: Dict[Tuple[int, int], str] = {}
-        self._marked_directions_cache: Dict[
-            Tuple[Coordinate, str], Directions,
-        ] = {}
         self._grid_cache: str = ''
         if _safety:
             for index, mark in enumerate(grid):
@@ -277,6 +268,10 @@ class SquareGameboard:
             f'{self._column_axis}'
         )
 
+    def __getitem__(self, coordinate: Coordinate) -> Cell:
+        """Return Cell by coordinate."""
+        return self._cells_dict[coordinate]
+
     @cached_property
     def size(self) -> int:
         """Return size of gameboard."""
@@ -299,11 +294,6 @@ class SquareGameboard:
                 cell.mark for cell in self._cells_dict.values()
             )
         return self._grid_cache
-
-    @property
-    def counter(self) -> TypingCounter[str]:
-        """Count marks on the gameboard and return ``Counter``."""
-        return Counter(self.grid_as_string)
 
     @property
     def columns(self) -> Tuple[Side, ...]:
@@ -403,7 +393,6 @@ class SquareGameboard:
                     self._colors_dict[
                         coordinate
                     ] = f'{_Colors.bold}{_Colors.turquoise}'
-            self._marked_directions_cache = {}
             self._grid_cache = ''
             return 1
         logger.warning('This cell is occupied! Choose another one!')
@@ -430,53 +419,21 @@ class SquareGameboard:
             self.undefined_cell,
         )
 
-    def get_marked_coordinates(self, mark: str) -> Coordinates:
-        """Return coordinates of all cells with the given ``mark``.
+    def get_offsets(self, start_coordinate: Coordinate) -> Tuple[Offset, ...]:
+        """Return the offsets of the given coordinate.
 
-        :param mark:  The mark relative to which the cell will be
-            matched by.
-
-        """
-        return tuple(
-            cell.coordinate
-            for cell in self._cells_dict.values()
-            if cell.mark == mark
-        )
-
-    def get_directions(
-        self, start_coordinate: Coordinate, offset_cell_mark: Mark
-    ) -> Directions:
-        """Return directions with the given ``mark``.
-
-        :param start_coordinate:  The coordinate, adjacent cells that
-            will be checked.
-        :param offset_cell_mark:  The mark of adjacent cells whose
-                directions are returned.
+        :param start_coordinate:  The coordinate from which the offsets
+            will be returned.
 
         :raises ValueError: If ``start_coordinate`` out of range.
 
-        :returns: Shifts as a coordinates with ``-1<=x<=1`` and
-            ``-1<=y<=1``.
+        :returns: Tuple of offsets, where each offset is an instance of
+            namedtuple :class:`Offset`.
 
         """
         if start_coordinate not in self.registry.all_coordinates:
             raise ValueError(f'The {start_coordinate} out of range!')
-        if (
-            start_coordinate,
-            offset_cell_mark,
-        ) not in self._marked_directions_cache:
-            self._marked_directions_cache[
-                start_coordinate, offset_cell_mark
-            ] = tuple(
-                direction
-                for coordinate, direction in self.registry.offsets[
-                    start_coordinate
-                ]
-                if self._cells_dict[coordinate].mark == offset_cell_mark
-            )
-        return self._marked_directions_cache[
-            start_coordinate, offset_cell_mark
-        ]
+        return self.registry.offsets[start_coordinate]
 
     def count(self, mark: str) -> int:
         """Return the number of occurrences of ``mark`` on the gameboard.
@@ -504,7 +461,6 @@ class SquareGameboard:
             **kwargs,
         )
         sg._cells_dict = dict(self._cells_dict)
-        sg._marked_directions_cache = dict(self._marked_directions_cache)
         sg._grid_cache = self._grid_cache
         return sg
 

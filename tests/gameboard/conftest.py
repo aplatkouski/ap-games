@@ -64,7 +64,7 @@ def columns(cells: Tuple[Cell, ...]) -> Tuple[Side, ...]:
 
 @pytest.fixture()
 def rows(cells: Tuple[Cell, ...]) -> Tuple[Side, ...]:
-    return (cells[0], cells[1]), (cells[2], cells[3])
+    return (cells[2], cells[3]), (cells[0], cells[1])
 
 
 @pytest.fixture()

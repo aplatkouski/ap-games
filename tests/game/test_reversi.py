@@ -19,9 +19,9 @@ def test_construction() -> None:
 
 def test_get_available_moves(reversi_user_user: Reversi) -> None:
     available_moves: Coordinates = (
-        Coordinate(3, 4),
         Coordinate(5, 6),
         Coordinate(6, 5),
+        Coordinate(3, 4),
         Coordinate(4, 3),
     )
     assert available_moves == reversi_user_user.get_available_moves()
