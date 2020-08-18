@@ -98,11 +98,6 @@ class TicTacToe(TwoPlayerBoardGame):
     ) -> Tuple[PlayerMark, ...]:
         """Return players who draw solid line.
 
-        TODO: need refactoring. Too much nested for loop. It'll be
-            better to get sides as strings, and check
-            ``if side == (player.label * self._size)`` add player to
-            winners, else check another player.
-
         If all characters on a 'side' are the same and equal to the
         mark of player from :attr:`.players`, this player is added to
         the set of winners.
@@ -118,9 +113,13 @@ class TicTacToe(TwoPlayerBoardGame):
             gameboard = self.gameboard
 
         winners: List[PlayerMark] = []
-        for player in self.players:
-            for side in gameboard.all_sides:
-                if all(cell.mark == player.mark for cell in side):
-                    winners.append(player.mark)
-                    break
+        all_sides_as_strings: List[str] = [
+            ''.join(cell.mark for cell in side) for side in gameboard.all_sides
+        ]
+        first_player_side: str = self.players[0].mark * gameboard.size
+        second_player_side: str = self.players[1].mark * gameboard.size
+        if first_player_side in all_sides_as_strings:
+            winners.append(self.players[0].mark)
+        if second_player_side in all_sides_as_strings:
+            winners.append(self.players[1].mark)
         return tuple(winners)
