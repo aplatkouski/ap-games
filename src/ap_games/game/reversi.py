@@ -32,7 +32,7 @@ class Reversi(TwoPlayerBoardGame):
     """
 
     default_grid: ClassVar[str] = f'{EMPTY * 27}XO{EMPTY * 6}OX{EMPTY * 27}'
-    # coordinate with additional score
+    # coordinates with additional score
     priority_coordinates: ClassVar[Dict[Coordinate, int]] = {
         Coordinate(1, 1): 10,
         Coordinate(1, 8): 10,
@@ -151,7 +151,7 @@ class Reversi(TwoPlayerBoardGame):
             del self._available_moves_cache[grid, player_mark]
         return score
 
-    def get_available_moves(  # noqa: C901
+    def get_available_moves(
         self,
         gameboard: Optional[SquareGameboard] = None,
         player_mark: Optional[PlayerMark] = None,
@@ -177,20 +177,16 @@ class Reversi(TwoPlayerBoardGame):
         if (grid, player_mark) not in self._available_moves_cache:
             self._available_moves_cache[grid, player_mark] = defaultdict(list)
             enemy_mark: PlayerMark = self.get_enemy_mark(player_mark)
-            for cell in gameboard.cells:
-                if cell.mark == EMPTY:
-                    reverse: bool = False
-                elif cell.mark == player_mark:
-                    reverse = True
-                else:
-                    continue
+            for cell in filter(
+                lambda x: x.mark != enemy_mark, gameboard.cells
+            ):
                 self._fill_available_moves_cache(
                     gameboard=gameboard,
                     start_coordinate=cell.coordinate,
                     cache_key=(grid, player_mark),
                     player_mark=player_mark,
                     enemy_mark=enemy_mark,
-                    reverse=reverse,
+                    reverse=False if cell.mark == EMPTY else True,
                 )
         return tuple(self._available_moves_cache[grid, player_mark])
 
