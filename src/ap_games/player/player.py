@@ -11,13 +11,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import PlayerMark
     from ap_games.game.game_base import TwoPlayerBoardGame
 
-# TODO: Read TEST_MODE from config.ini
-TEST_MODE: bool = False
-
-__all__ = ('Player', 'TEST_MODE')
-
-if TEST_MODE:
-    random.seed(42)
+__all__ = ('Player',)
 
 
 class Player:

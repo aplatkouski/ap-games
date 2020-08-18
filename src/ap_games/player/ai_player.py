@@ -12,7 +12,6 @@ from ap_games.ap_types import UNDEFINED_MOVE
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.player import Player
-from ap_games.player.player import TEST_MODE
 
 if TYPE_CHECKING:
     from typing import ClassVar
@@ -28,9 +27,6 @@ if TYPE_CHECKING:
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 __all__ = ('AIPlayer',)
-
-if TEST_MODE:
-    random.seed(42)
 
 
 class AIPlayer(Player):
