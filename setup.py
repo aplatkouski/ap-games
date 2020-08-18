@@ -2,7 +2,7 @@ from setuptools import setup  # type: ignore
 
 setup(
     extras_require=dict(
-        test=['coverage==5.2.1', 'pytest==6.0.1', 'pytest-cov==2.10.0'],
+        test=['coverage==5.2.1', 'pytest==6.0.1', 'pytest-cov==2.10.1'],
         dev=[
             'black==19.10b0',
             'bump2version==1.0.0',
@@ -24,7 +24,7 @@ setup(
             'pre-commit-hooks==3.2.0',
             'pydocstyle==5.0.2',
             'pyupgrade==2.7.2',
-            'tox==3.18.1',
+            'tox==3.19.0',
             'twine==3.2.0',
         ],
     ),
