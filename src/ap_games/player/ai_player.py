@@ -377,7 +377,7 @@ class AIPlayer(Player):
 
         if logger.level == logging.DEBUG:
             logger.debug(
-                f'{indent}Choose bet move from moves -> ' f'{str(moves)}'
+                f'{indent}Choose the best move from moves -> ' f'{str(moves)}'
             )
 
         corrected_moves: List[Move] = self._correct_priority_coordinates(
