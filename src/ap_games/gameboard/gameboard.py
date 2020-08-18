@@ -150,8 +150,6 @@ class SquareGameboard:
         a tuple with two coordinates of the corresponding cell.  And the
         value is an instance of :class:`Cell`.
 
-        TODO: rewrite _cells_dict as Dict[Coordinate, PlayerMarkOrEmpty]
-
     :ivar _colors_dict: Dict with colors of each cell of the gameboard.
         Where key is a tuple with two coordinates of the corresponding
         cell.  And the value is a value of :class:`_Colors`.

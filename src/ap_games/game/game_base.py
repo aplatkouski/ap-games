@@ -35,10 +35,6 @@ __all__ = ('TwoPlayerBoardGame',)
 class TwoPlayerBoardGame:
     """TwoPlayerBoardGame class specifies the public methods of game.
 
-    TODO: Separate business logic from develop features. Implement cache
-      as decorator of methods.  See the implementation of this feature
-      in previous commits (was reverted).
-
     Then concrete classes providing the standard game implementations.
 
     .. note::
