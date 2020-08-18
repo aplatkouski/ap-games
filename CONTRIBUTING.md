@@ -198,7 +198,7 @@ uses [bump2version][]
 ```shell script
 (.venv) $ python setup.py --version
 0.0.1b3.dev1+gea9858a.d20200725
-(.venv) $ bump2version --dry-run --list [major|minor|maintenance|pre_release|num]
+(.venv) $ bump2version --dry-run --list [major|minor|maintenance|release|build]
 ```
 Run ``bump2version`` without ``--dry-run`` upon a correct output.
 
