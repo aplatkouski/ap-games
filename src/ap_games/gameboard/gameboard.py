@@ -129,8 +129,6 @@ class _GameboardRegistry:
 class SquareGameboard:
     """Implementation square game board with size from 2 to 9.
 
-    TODO: rewrite _cells_dict as Dict[Coordinate, PlayerMarkOrEmpty]
-
     :param grid: The grid or board, represented as a string, where
         each character is mapped to a cell left to right top to bottom.
     :param gap: ``' '`` by default.  Defines the gap that will be
@@ -148,6 +146,15 @@ class SquareGameboard:
         grid when printing the gameboard.
 
     :ivar _size: The size of gameboard from 2 to 9.
+    :ivar _cells_dict: Dict with cells of the gameboard.  Where key is
+        a tuple with two coordinates of the corresponding cell.  And the
+        value is an instance of :class:`Cell`.
+
+        TODO: rewrite _cells_dict as Dict[Coordinate, PlayerMarkOrEmpty]
+
+    :ivar _colors_dict: Dict with colors of each cell of the gameboard.
+        Where key is a tuple with two coordinates of the corresponding
+        cell.  And the value is a value of :class:`_Colors`.
     :ivar _grid_cache: Save the grid of the gameboard as a string with
         cell labels. This cache is cleared in :meth:`.place_mark`.
 
