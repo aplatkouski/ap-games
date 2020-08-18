@@ -267,7 +267,7 @@ class SquareGameboard:
 
         return (
             f'{self.indent}{self._horizontal_border}\n'
-            f'{grid}\n{self._horizontal_border}'
+            f'{grid}\n{self.indent}{self._horizontal_border}'
             f'{self._column_axis}'
         )
 
