@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from ap_games.ap_types import Coordinate
@@ -136,9 +137,9 @@ class Reversi(TwoPlayerBoardGame):
 
         grid: str = gameboard.grid_as_string
         # the cache was filled in :meth:`.get_available_moves` method.
-        enemy_coordinates: Directions = self._available_moves_cache[
-            grid, player_mark
-        ][coordinate]
+        enemy_coordinates: Directions = tuple(
+            self._available_moves_cache[grid, player_mark][coordinate]
+        )
         score: int = gameboard.place_mark(coordinate, player_mark)
 
         for enemy_coordinate in enemy_coordinates:
@@ -150,7 +151,7 @@ class Reversi(TwoPlayerBoardGame):
             del self._available_moves_cache[grid, player_mark]
         return score
 
-    def get_available_moves(
+    def get_available_moves(  # noqa: C901
         self,
         gameboard: Optional[SquareGameboard] = None,
         player_mark: Optional[PlayerMark] = None,
@@ -173,21 +174,24 @@ class Reversi(TwoPlayerBoardGame):
 
         grid: str = gameboard.grid_as_string
 
-        enemy_mark: PlayerMark = self.get_enemy_mark(player_mark)
         if (grid, player_mark) not in self._available_moves_cache:
-            actual_available_moves: Dict[Coordinate, Coordinates] = {}
-            for coordinate in gameboard.available_moves:
-                enemy_coordinates: Coordinates = self._check_directions(
+            self._available_moves_cache[grid, player_mark] = defaultdict(list)
+            enemy_mark: PlayerMark = self.get_enemy_mark(player_mark)
+            for cell in gameboard.cells:
+                if cell.mark == EMPTY:
+                    reverse: bool = False
+                elif cell.mark == player_mark:
+                    reverse = True
+                else:
+                    continue
+                self._fill_available_moves_cache(
                     gameboard=gameboard,
-                    start_coordinate=coordinate,
-                    enemy_mark=enemy_mark,
+                    start_coordinate=cell.coordinate,
+                    cache_key=(grid, player_mark),
                     player_mark=player_mark,
+                    enemy_mark=enemy_mark,
+                    reverse=reverse,
                 )
-                if enemy_coordinates:
-                    actual_available_moves[coordinate] = enemy_coordinates
-            self._available_moves_cache[
-                grid, player_mark
-            ] = actual_available_moves
         return tuple(self._available_moves_cache[grid, player_mark])
 
     def get_score(
@@ -213,9 +217,6 @@ class Reversi(TwoPlayerBoardGame):
     ) -> Tuple[PlayerMark, ...]:
         """Return players who have the maximum count of marks.
 
-        TODO: Use ``gameboard.counter`` except ``gameboard.count``,
-            this method should return player_mark, not Player.
-
         :param gameboard: The gameboard relative to which the winner(s)
             will be determined.
 
@@ -231,42 +232,49 @@ class Reversi(TwoPlayerBoardGame):
             return (self.players[1].mark,)
         return (self.players[0].mark, self.players[1].mark)
 
-    @staticmethod
-    def _check_directions(
+    def _fill_available_moves_cache(
+        self,
         gameboard: SquareGameboard,
-        *,
         start_coordinate: Coordinate,
-        enemy_mark: PlayerMark,
+        cache_key: Tuple[str, PlayerMark],
         player_mark: PlayerMark,
-    ) -> Coordinates:
-        """Determine coordinates of enemy occupied cell that should be marked.
+        enemy_mark: PlayerMark,
+        reverse: bool = False,
+    ) -> None:
+        """Fill cache with available moves.
 
         :param gameboard:  The gameboard that will be checked.
         :param start_coordinate:  The coordinate relative to which the
             directions will be checked.
+        :param cache_key:  The key of cache.
+        :param player_mark:  The current player mark.
         :param enemy_mark:  The mark to which all cells should have in
             checked directions between ``start_coordinate`` and cell
-            with ``player_mark``.
-        :param player_mark:  The mark of cell that should be behind
-            cells with ``enemy_mark`` in parsed direction.
-
-        :returns: A tuple of coordinates of available moves.
+            with ``player_mark`` (when ``reverse=False``) or ``EMPTY``
+            (when ``reverse=True``).
+        :param reverse: Optional.  ``False`` by default. If ``False``,
+            ``start_coordinate`` will be saved as an available move,
+            otherwise an empty cell in each direction where the rules of
+            the Reversi game are executed will be saved as an available
+            move.
 
         """
-        all_enemy_coordinates: List[Coordinate] = []
-        for offset in gameboard.get_offsets(start_coordinate=start_coordinate):
+        for offset in gameboard.get_offsets(start_coordinate):
             if gameboard[offset.coordinate].mark == enemy_mark:
                 enemy_coordinates: List[Coordinate] = [offset.coordinate]
                 next_coordinate, next_mark = gameboard.get_offset_cell(
-                    start_coordinate=offset.coordinate,
-                    direction=offset.direction,
+                    coordinate=offset.coordinate, direction=offset.direction,
                 )
                 while next_mark == enemy_mark:
                     enemy_coordinates.append(next_coordinate)
                     next_coordinate, next_mark = gameboard.get_offset_cell(
-                        start_coordinate=next_coordinate,
-                        direction=offset.direction,
+                        coordinate=next_coordinate, direction=offset.direction,
                     )
-                if next_mark == player_mark:
-                    all_enemy_coordinates.extend(enemy_coordinates)
-        return tuple(all_enemy_coordinates)
+                if reverse and next_mark == EMPTY:
+                    self._available_moves_cache[cache_key][
+                        next_coordinate
+                    ].extend(enemy_coordinates)
+                elif not reverse and next_mark == player_mark:
+                    self._available_moves_cache[cache_key][
+                        start_coordinate
+                    ].extend(enemy_coordinates)

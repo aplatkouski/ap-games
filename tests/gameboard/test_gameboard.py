@@ -67,7 +67,7 @@ def test_get_offset_cell(
     coordinate_1_1_empty: Coordinate,
 ) -> None:
     assert cell_2_2_o == square_gameboard_2x2.get_offset_cell(
-        start_coordinate=coordinate_1_1_empty, direction=coordinate_1_1_empty
+        coordinate=coordinate_1_1_empty, direction=coordinate_1_1_empty
     )
 
 

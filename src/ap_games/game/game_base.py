@@ -15,8 +15,10 @@ from ap_games.player.human_player import HumanPlayer
 
 if TYPE_CHECKING:
     from typing import ClassVar
+    from typing import DefaultDict
     from typing import Deque
     from typing import Dict
+    from typing import List
     from typing import Optional
     from typing import Tuple
 
@@ -63,10 +65,10 @@ class TwoPlayerBoardGame:
         * ``grid`` of the gameboard before considered move;
         * ``mark`` of player, who makes move on this turn.
 
-        Value of dict is a sub-dict.  Where keys are coordinates of all
-            available moves, and values of sub-dict are coordinates of
-            enemy marked cells which should be marked in considered
-            move.
+        Value of dict is a sub-dict.  Where the keys are the coordinates
+            of all available moves, and the sub-dict value are the tuple
+            of coordinates of the cells marked by the enemy, which
+            should be marked in the considered move.
 
     """
 
@@ -119,7 +121,7 @@ class TwoPlayerBoardGame:
         )
 
         self._available_moves_cache: Dict[
-            Tuple[str, PlayerMark], Dict[Coordinate, Coordinates]
+            Tuple[str, PlayerMark], DefaultDict[Coordinate, List[Coordinate]]
         ] = {}
 
     def play(self) -> None:

@@ -79,10 +79,6 @@ class _GameboardRegistry:
         Coordinate(1, 1),  # right-top
         Coordinate(1, 0),  # right and so on
         Coordinate(1, -1),
-        Coordinate(0, -1),
-        Coordinate(-1, -1),
-        Coordinate(-1, 0),
-        Coordinate(-1, 1),
     )
 
     def __init__(self, *, size: int) -> None:
@@ -399,11 +395,11 @@ class SquareGameboard:
         return 0
 
     def get_offset_cell(
-        self, *, start_coordinate: Coordinate, direction: Coordinate
+        self, *, coordinate: Coordinate, direction: Coordinate
     ) -> Cell:
         """Return cell by coordinate calculated as algebraic sum of parameters.
 
-        :param start_coordinate: Coordinate of starting cell;
+        :param coordinate: Coordinate of starting cell;
         :param direction: Shift as a coordinate with ``-1<=x<=1`` and
             ``-1<=y<=1``.
 
@@ -412,28 +408,25 @@ class SquareGameboard:
 
         """
         return self._cells_dict.get(
-            (
-                start_coordinate.x + direction.x,
-                start_coordinate.y + direction.y,
-            ),
+            (coordinate.x + direction.x, coordinate.y + direction.y,),
             self.undefined_cell,
         )
 
-    def get_offsets(self, start_coordinate: Coordinate) -> Tuple[Offset, ...]:
+    def get_offsets(self, coordinate: Coordinate) -> Tuple[Offset, ...]:
         """Return the offsets of the given coordinate.
 
-        :param start_coordinate:  The coordinate from which the offsets
+        :param coordinate:  The coordinate from which the offsets
             will be returned.
 
-        :raises ValueError: If ``start_coordinate`` out of range.
+        :raises ValueError: If ``coordinate`` out of range.
 
         :returns: Tuple of offsets, where each offset is an instance of
             namedtuple :class:`Offset`.
 
         """
-        if start_coordinate not in self.registry.all_coordinates:
-            raise ValueError(f'The {start_coordinate} out of range!')
-        return self.registry.offsets[start_coordinate]
+        if coordinate not in self.registry.all_coordinates:
+            raise ValueError(f'The {coordinate} out of range!')
+        return self.registry.offsets[coordinate]
 
     def count(self, mark: str) -> int:
         """Return the number of occurrences of ``mark`` on the gameboard.
