@@ -319,10 +319,10 @@ class SquareGameboard:
 
     @property
     def diagonals(self) -> Tuple[Side, Side]:
-        """Return main and reverse diagonals as a tuple."""
+        """Return main and reverse diagonals as tuples of cell."""
         main_diagonal: Side = tuple(
-            self._cells_dict[num + 1, self._size - num]
-            for num in range(self._size)
+            self._cells_dict[num, self._size - num + 1]
+            for num in range(1, self._size + 1)
         )
         reverse_diagonal: Side = tuple(
             self._cells_dict[num, num] for num in range(1, self._size + 1)
@@ -369,7 +369,7 @@ class SquareGameboard:
             Coordinate(x, y).
         :param mark:  New mark.  It will be set if ``force=True`` or
             cell with ``coordinate`` is **empty** (``EMPTY``).
-        :param force:  ``False`` by default.  When ``True`` it doesn't
+        :param force:  ``False`` by default.  If ``True`` it doesn't
             matter if cell is **empty** or not.
 
         :returns:  Count of marked cell with ``mark``.
