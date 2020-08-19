@@ -107,11 +107,11 @@ def read_argv() -> Tuple[str, OptionalPlayerTypes]:
     player_types: OptionalPlayerTypes = ()
     if len(sys.argv) >= 1:
         game_num = sys.argv[0]
-        game_num.title()
+        game_num = game_num.title()
         for num, game in supported_games.items():
             game_num = game_num.replace(game.name, num)
-        if len(sys.argv) >= 4:
-            player_types = (sys.argv[2], sys.argv[3])
+        if len(sys.argv) >= 3:
+            player_types = (sys.argv[1], sys.argv[2])
     return (game_num, player_types)
 
 
