@@ -21,7 +21,7 @@ Reversi is a strategy board game for two players who take
 turns marking the spaces in an 8x8 board.
 
 Each player must place the piece so that an opponent's piece, or a
-row of opponent's pieces, is flanked by your pieces.\nAll of
+row of opponent's pieces, is flanked by your pieces. All of
 the opponent's pieces between your pieces are then turned
 over to become your color. The object of the game is to own
 more pieces than your opponent when the game is over.
