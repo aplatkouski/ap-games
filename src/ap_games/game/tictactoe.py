@@ -57,8 +57,7 @@ class TicTacToe(TwoPlayerBoardGame):
             ``GameStatus.active == False`` if game cannot be continued.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
+        gameboard = gameboard or self.gameboard
 
         game_status: GameStatus = GameStatus(
             active=True, message='', must_skip=False
@@ -109,8 +108,7 @@ class TicTacToe(TwoPlayerBoardGame):
             winners.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
+        gameboard = gameboard or self.gameboard
 
         winners: List[PlayerMark] = []
         all_sides_as_strings: List[str] = [

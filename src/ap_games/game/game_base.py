@@ -169,10 +169,8 @@ class TwoPlayerBoardGame:
             cannot be continued.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player_mark is None:
-            player_mark = self.players[0].mark
+        gameboard = gameboard or self.gameboard
+        player_mark = player_mark or self.players[0].mark
 
         if self.get_available_moves(gameboard, player_mark):
             return GameStatus(active=True, message='', must_skip=False)
@@ -199,10 +197,8 @@ class TwoPlayerBoardGame:
             cells were marked.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player_mark is None:
-            player_mark = self.players[0].mark
+        gameboard = gameboard or self.gameboard
+        player_mark = player_mark or self.players[0].mark
 
         if coordinate not in self.get_available_moves(gameboard):
             logger.warning('You cannot go here!')
@@ -228,8 +224,7 @@ class TwoPlayerBoardGame:
             player with the ``player_mark`` can move.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
+        gameboard = gameboard or self.gameboard
         return gameboard.available_moves
 
     def get_score(

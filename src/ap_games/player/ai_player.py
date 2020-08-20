@@ -175,10 +175,8 @@ class AIPlayer(Player):
                 :class:`Move`.
 
         """
-        if gameboard is None:
-            gameboard = self.game.gameboard
-        if player_mark is None:
-            player_mark = self.mark
+        gameboard = gameboard or self.game.gameboard
+        player_mark = player_mark or self.mark
         if tree is None:
             self._unpack_tree()
             tree = self.tree

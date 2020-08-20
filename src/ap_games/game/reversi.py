@@ -73,10 +73,8 @@ class Reversi(TwoPlayerBoardGame):
             only be continued after the rotation of the players.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player_mark is None:
-            player_mark = self.players[0].mark
+        gameboard = gameboard or self.gameboard
+        player_mark = player_mark or self.players[0].mark
 
         if self.get_available_moves(gameboard, player_mark):
             return GameStatus(active=True, message='', must_skip=False)
@@ -126,10 +124,8 @@ class Reversi(TwoPlayerBoardGame):
             cells were marked.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player_mark is None:
-            player_mark = self.players[0].mark
+        gameboard = gameboard or self.gameboard
+        player_mark = player_mark or self.players[0].mark
 
         if coordinate not in self.get_available_moves(gameboard, player_mark):
             logger.warning('You cannot go here!')
@@ -167,10 +163,8 @@ class Reversi(TwoPlayerBoardGame):
             player with the ``player_mark`` can move.
 
         """
-        if gameboard is None:
-            gameboard = self.gameboard
-        if player_mark is None:
-            player_mark = self.players[0].mark
+        gameboard = gameboard or self.gameboard
+        player_mark = player_mark or self.players[0].mark
 
         grid: str = gameboard.grid_as_string
 
