@@ -97,7 +97,7 @@ class TwoPlayerBoardGame:
         if len(player_types) != 2:
             raise ValueError('The number of players should be 2!')
 
-        self.players: Deque[Player] = deque()
+        self.players: Deque[Player] = deque(maxlen=2)
         self._add_players(player_types=player_types)
 
         grid_without_underscore = grid.replace('_', EMPTY)
