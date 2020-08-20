@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog][], and this project adheres to
 
 ## [Unreleased]
 
+## [0.0.2] - 2020-08-20
+### Fixed
+- Broken command line arguments ``user-1`` and ``user-2``.
+
 ## [0.0.1] - 2020-08-19
 ### Changed
 - ``SquareGameboard.rows`` method doesn't return rows in reverse order;
@@ -99,7 +103,8 @@ The format is based on [Keep a Changelog][], and this project adheres to
 
 [Keep a Changelog]: https://keepachangelog.com/en/1.0.0/
 [PEP 440]: https://www.python.org/dev/peps/pep-0440/
-[Unreleased]: https://github.com/aplatkouski/ap-games/compare/v0.0.1...HEAD
+[Unreleased]: https://github.com/aplatkouski/ap-games/compare/v0.0.2...HEAD
+[0.0.2]: https://github.com/aplatkouski/ap-games/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/aplatkouski/ap-games/compare/v0.0.1rc0...v0.0.1
 [0.0.1rc0]: https://github.com/aplatkouski/ap-games/compare/v0.0.1b3...v0.0.1rc0
 [0.0.1b3]: https://github.com/aplatkouski/ap-games/compare/v0.0.1b2...v0.0.1b3
