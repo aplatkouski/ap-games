@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Tuple
 
+    from ap_games.ap_types import Cell
     from ap_games.ap_types import Coordinates
     from ap_games.ap_types import Directions
     from ap_games.ap_types import PlayerMark
@@ -176,11 +177,9 @@ class Reversi(TwoPlayerBoardGame):
             ):
                 self._fill_available_moves_cache(
                     gameboard=gameboard,
-                    start_coordinate=cell.coordinate,
-                    cache_key=(grid, player_mark),
+                    start_cell=cell,
                     player_mark=player_mark,
                     enemy_mark=enemy_mark,
-                    reverse=False if cell.mark == EMPTY else True,
                 )
         return tuple(self._available_moves_cache[grid, player_mark])
 
@@ -225,46 +224,42 @@ class Reversi(TwoPlayerBoardGame):
     def _fill_available_moves_cache(
         self,
         gameboard: SquareGameboard,
-        start_coordinate: Coordinate,
-        cache_key: Tuple[str, PlayerMark],
+        start_cell: Cell,
         player_mark: PlayerMark,
         enemy_mark: PlayerMark,
-        reverse: bool = False,
     ) -> None:
         """Fill cache with available moves.
 
         :param gameboard:  The gameboard that will be checked.
-        :param start_coordinate:  The coordinate relative to which the
-            directions will be checked.
-        :param cache_key:  The key of cache.
+        :param start_cell:  The cell relative to which the directions
+            will be checked.
         :param player_mark:  The current player mark.
         :param enemy_mark:  The mark to which all cells should have in
-            checked directions between ``start_coordinate`` and cell
-            with ``player_mark`` (when ``reverse=False``) or ``EMPTY``
-            (when ``reverse=True``).
-        :param reverse: Optional.  ``False`` by default. If ``False``,
-            ``start_coordinate`` will be saved as an available move,
-            otherwise an empty cell in each direction where the rules of
-            the Reversi game are executed will be saved as an available
-            move.
+            checked directions between ``start_cell.coordinate`` and
+            cell with ``player_mark`` (if ``start_cell.mark=EMPTY``) or
+            ``EMPTY`` (if ``start_cell.mark=player_mark``).
 
         """
-        for offset in gameboard.get_offsets(start_coordinate):
-            if gameboard[offset.coordinate].mark == enemy_mark:
-                enemy_coordinates: List[Coordinate] = [offset.coordinate]
-                next_coordinate, next_mark = gameboard.get_offset_cell(
-                    coordinate=offset.coordinate, direction=offset.direction,
+        for offset_coordinate, direction in gameboard.get_offsets(
+            start_cell.coordinate
+        ):
+            if gameboard[offset_coordinate].mark == enemy_mark:
+                enemy_coordinates: List[Coordinate] = [offset_coordinate]
+                next_cell: Cell = gameboard.get_offset_cell(
+                    coordinate=offset_coordinate, direction=direction,
                 )
-                while next_mark == enemy_mark:
-                    enemy_coordinates.append(next_coordinate)
-                    next_coordinate, next_mark = gameboard.get_offset_cell(
-                        coordinate=next_coordinate, direction=offset.direction,
+                while next_cell.mark == enemy_mark:
+                    enemy_coordinates.append(next_cell.coordinate)
+                    next_cell = gameboard.get_offset_cell(
+                        coordinate=next_cell.coordinate, direction=direction,
                     )
-                if reverse and next_mark == EMPTY:
-                    self._available_moves_cache[cache_key][
-                        next_coordinate
-                    ].extend(enemy_coordinates)
-                elif not reverse and next_mark == player_mark:
-                    self._available_moves_cache[cache_key][
-                        start_coordinate
-                    ].extend(enemy_coordinates)
+                if next_cell.mark == player_mark and start_cell.mark == EMPTY:
+                    self._available_moves_cache[
+                        (gameboard.grid_as_string, player_mark)
+                    ][start_cell.coordinate].extend(enemy_coordinates)
+                elif (
+                    next_cell.mark == EMPTY and start_cell.mark == player_mark
+                ):
+                    self._available_moves_cache[
+                        (gameboard.grid_as_string, player_mark)
+                    ][next_cell.coordinate].extend(enemy_coordinates)
