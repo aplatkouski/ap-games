@@ -57,7 +57,7 @@ def main() -> None:
     )
     message: str = (
         f'Please choose the game:\n\t{games}.\n'
-        'Print "exit" to exit the program.\n\nInput command: '
+        'Type "exit" to exit the program.\n\nInput command: '
     )
     while choice != 'exit':
         if choice in supported_games:

@@ -28,25 +28,31 @@ See [source][reversi rules source].
 The example below shows the game interface:
 ```txt
 Please choose the game:
-	0 - Tic-Tac-Toe;
-	1 - Reversi.
-Print 'exit' to exit the program.
+	1 - Tic-Tac-Toe;
+	2 - Reversi.
+Type "exit" to exit the program.
 
-Input command: 1
-Type 'start user1_type user2_type' to run the selected game,
-where user_X_type is one of the supported values:
-user, easy, hard and nightmare;
-Type 'rules' to get game rules or type 'exit' to return
-to the main menu.
+Input command:
+2
+Type "start user1_type user2_type" to run the game, where "user1_type"
+and "user2_type" is one of the supported values: user, easy, medium,
+hard, nightmare;
+Type "rules" to get game rules or type "exit" to exit from the game.
 
-Input command: rules
-You must place the piece so that an opponent's piece, or a row
-of opponent's pieces, is flanked by your pieces.
-All of the opponent's pieces between your pieces are then
-turned over to become your color. The object of the game is
-to own more pieces than your opponent when the game is over.
+Input command:
+rules
+You must place the piece so that an opponent's piece, or a row of
+opponent's pieces, is flanked by your pieces.
+All of the opponent's pieces between your pieces are then turned over to
+become your color. The object of the game is to own more pieces than
+your opponent when the game is over.
 
-Input command: start user hard
+Input command:
+start
+Bad parameters!
+
+Input command:
+start user hard
   -------------------
 8 |                 |
 7 |                 |
@@ -58,11 +64,14 @@ Input command: start user hard
 1 |                 |
   -------------------
     1 2 3 4 5 6 7 8
-Enter the coordinate [X]: 1 1
+Enter the coordinate [X]:
+1 1
 You cannot go here!
-Enter the coordinate [X]: 1
+Enter the coordinate [X]:
+1
 You should enter two numbers!
-Enter the coordinate [X]: 4 3
+Enter the coordinate [X]:
+4 3
   -------------------
 8 |                 |
 7 |                 |

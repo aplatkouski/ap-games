@@ -284,7 +284,7 @@ class TwoPlayerBoardGame:
                 'where "user1_type" and "user2_type" is one of the '
                 f'supported values: {", ".join(self.supported_players)}; '
                 'Type "rules" to get game rules or type "exit" to '
-                'exit from the game.\nInput command: '
+                'exit from the game.\n\nInput command: '
             )
             command = sys.stdin.readline().strip()
         logger.debug(f'{command=}')
