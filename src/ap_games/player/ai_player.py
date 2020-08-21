@@ -106,7 +106,7 @@ class AIPlayer(Player):
 
                 :class:`Node`.
 
-        ``Percentage``::
+        ``Potential``::
 
             .. note::
 
@@ -116,10 +116,10 @@ class AIPlayer(Player):
             In the minimax algorithm, it doesn't matter how many ways
             to win AI at the end of the game. Therefore, the AI
             'stops fighting' and is not trying to 'steal' one of them.
-            With the variable ``percentage``, the case with two
-            possible moves to lose are worse than case with one.
+            With the variable ``potential``, the case with two possible
+            moves to lose are worse than case with one.
 
-            Run example below with and without variable ``percentage``
+            Run example below with and without variable ``potential``
             once or twice::
 
                 >>> from ap_games.game.tictactoe import TicTacToe
@@ -131,7 +131,8 @@ class AIPlayer(Player):
             .. note::
 
                 "hard" select cell randomly from all empty cells and can
-                lose to "easy" without ``percentage``.
+                lose to "easy" without ``potential`` (or with
+                ``potentail=0`` by default).
 
         ``Factor``::
 
@@ -219,7 +220,7 @@ class AIPlayer(Player):
         return Move(
             coordinate=self.game.gameboard.undefined_coordinate,
             score=score * last_move_coefficient,
-            percentage=100,
+            potential=10_000,
             last=last,
         )
 
@@ -387,9 +388,9 @@ class AIPlayer(Player):
         )
 
         move: Move = random.choice(most_likely_moves)
-        # compute and replace ``percentage`` in the selected move
+        # compute and replace ``potential`` in the selected move
         move = move._replace(
-            percentage=int(len(desired_moves) / len(moves) * move.percentage)
+            potential=move.potential * len(desired_moves) // len(moves)
         )
 
         if logger.level == logging.DEBUG:
@@ -486,7 +487,7 @@ class AIPlayer(Player):
         :param depth:  Current depth of tree.
         :param moves:  Possible moves that should be checked.
         :param player_mark:  The mark of player who moves and relative
-            to which ``percentage_func`` will be determined.
+            to which ``potential_func`` will be determined.
 
         :return:  A new list of moves that is a subset of the input
             moves.
@@ -497,19 +498,19 @@ class AIPlayer(Player):
         if (desired_score > 0 and player_mark == self.mark) or (
             desired_score <= 0 and player_mark != self.mark
         ):
-            percentage_func = max
+            potential_func = max
         else:
-            percentage_func = min
-        desired_percentage: int = percentage_func(
-            move.percentage for move in moves
+            potential_func = min
+        desired_potential: int = potential_func(
+            move.potential for move in moves
         )
         most_likely_moves: List[Move] = [
-            move for move in moves if move.percentage == desired_percentage
+            move for move in moves if move.potential == desired_potential
         ]
         if logger.level == logging.DEBUG:
             indent: str = '\t' * depth
             logger.debug(
-                f'{indent}Desired percentage moves ({percentage_func}) -> '
+                f'{indent}Desired potential moves ({potential_func}) -> '
                 f'{str(most_likely_moves)}'
             )
         return most_likely_moves

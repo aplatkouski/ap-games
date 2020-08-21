@@ -53,13 +53,14 @@ class GameStatus(NamedTuple):
 
 
 class Move(NamedTuple):
-    """Move(coordinate: Coordinate, score: int, percentage: int, last: bool).
+    """Move(coordinate: Coordinate, score: int, potential: int, last: bool).
 
     :ivar coordinate:  The coordinate of selected cell or
         ``undefined_coordinate`` if game status is ``False``.
     :ivar score:  The terminal game score.
-    :ivar percentage:  The percentage to reach ``score`` as a number
-        greater 0 and less than or equal to 100.  See description above.
+    :ivar potential:  The potential to reach ``score`` as a number
+        between 0 and 10000.  See description in ``AIPlayer._minimax``
+        method.
     :ivar last:  ``True`` if current move finishes the game, ``False`` -
         otherwise.
 
@@ -67,7 +68,7 @@ class Move(NamedTuple):
 
     coordinate: Coordinate
     score: int
-    percentage: int
+    potential: int
     last: bool
 
 
@@ -79,7 +80,7 @@ class Node(NamedTuple):
     sub_tree: 'Tree'  # type: ignore
 
 
-UNDEFINED_MOVE = Move(Coordinate(x=0, y=0), score=0, percentage=0, last=False)
+UNDEFINED_MOVE = Move(Coordinate(x=0, y=0), score=0, potential=0, last=False)
 
 Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]
