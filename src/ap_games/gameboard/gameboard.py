@@ -96,7 +96,7 @@ class _GameboardRegistry:
         self._fill_offsets()
 
     def _fill_index_to_coordinate(self) -> None:
-        """Convert index of cell into coordinate of cell.
+        """Map index of cell to coordinate of that cell and save it.
 
         Where an example for a 3x3 grid::
 
