@@ -1,4 +1,8 @@
 # AP Games
+
+[![PyPI](https://img.shields.io/pypi/v/ap-games)][pypi ap-games]
+[![PyPI - License](https://img.shields.io/pypi/l/ap-games)][license.txt]
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ap-games)](https://www.python.org/downloads/release/python-380/)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/434f6c66b7c24320bf36b591b3c81e23)](https://app.codacy.com/manual/aplatkouski/ap-games?utm_source=github.com&utm_medium=referral&utm_content=aplatkouski/ap-games&utm_campaign=Badge_Grade_Dashboard)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
@@ -166,6 +170,7 @@ Copyright (c) 2020 Artsiom Platkouski.
 ``AP_games`` is licensed under the MIT License - see the
 [LICENSE.txt][license.txt] file for details.
 
+[pypi ap-games]: https://pypi.org/project/ap-games/
 [tic-tac-toe with ai]: https://hyperskill.org/projects/82
 [jetbrains academy]: https://hyperskill.org/join/0482410e
 [pypia]: https://pypi.org/project/realpython-reader/
