@@ -7,33 +7,33 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+### Describe the bug
 <!-- A clear and concise description of what the bug is. -->
 
-**Expected behavior**
+### Expected behavior
 <!-- A clear and concise description of what you expected to happen. -->
 
-**To Reproduce**
+### To Reproduce
 Please try to provide a [Minimal, Complete, and Verifiable][] example.
 
 ```python
 # Insert code here
 ```
 
-**Error**
+### Error
 
 ```
 # Copy error here. Please include the full stack trace.
 ```
 
-**Versions.**
-- OS:
-- Python:
-- AP_games:
+### Versions
+  - OS:
+  - Python:
+  - AP_games:
 
-**Additional context**
+### Additional context
 <!-- Add any other context about the problem here. -->
 
-**Have a nice day!**
+*Have a nice day!*
 
 [Minimal, Complete, and Verifiable]: http://stackoverflow.com/help/mcve

@@ -6,7 +6,7 @@ These guidelines attempt to make the process easier and more enjoyable.
 ## General guidelines
 
 Everyone interacting with this project is expected to follow the
-[Code of Conduct][].
+[Code of Conduct][code of conduct].
 
 Submit questions, bug reports, and feature requests in the [issue tracker][].
 Please be as descriptive as you can. For bug reports, please include
@@ -24,26 +24,26 @@ tests and checks will be merged.
 
 ## Setting up a development environment
 
-### [Fork and clone][GitHub Docs fork-a-repo] this repository
-1. Go to ``https://github.com/aplatkouski/ap-games`` and click the
-   "fork" to create own copy of the project.
+### [Fork and clone][github docs fork-a-repo] this repository
+  1. Go to ``https://github.com/aplatkouski/ap-games`` and click the "fork"
+     to create own copy of the project.
 
-2. Using [git][] clone the project to local computer and add the upstream
-   repository:
-   ```shell script
-   $ git clone https://github.com/your-username/ap-games.git
-   $ cd ap-games
-   $ git remote add upstream  https://github.com/aplatkouski/ap-games.git
-   $ git remote -v
-   ```
+  2. Using [git][] clone the project to local computer and add the upstream
+     repository:
+     ```shell script
+     $ git clone https://github.com/your-username/ap-games.git
+     $ cd ap-games
+     $ git remote add upstream  https://github.com/aplatkouski/ap-games.git
+     $ git remote -v
+     ```
 
 ### Create and activate a [virtual environment]
 
 **Note**: The minimum supported Python version is 3.8.
 
-To get multiple versions of Python installed on your system use
-[pyenv][] or [virtualenv][] tools for that. See short tutorial for
-details [Pipenv & Virtual Environments][].
+To get multiple versions of Python installed on your system use [pyenv][]
+or [virtualenv][] tools for that. See short tutorial for details
+[Pipenv & Virtual Environments][pipenv & virtual environments].
 
 ```shell script
 $ cd ap-games
@@ -57,77 +57,77 @@ $ source .venv/bin/activate
 ```
 
 ### Install this package
-1. Upgrade ``pip`` and ``setuptools``
-   ```shell script
-   (.venv) $ pip install --no-cache-dir --upgrade pip setuptools
-   ```
+  1. Upgrade ``pip`` and ``setuptools``
+     ```shell script
+     (.venv) $ pip install --no-cache-dir --upgrade pip setuptools
+     ```
 
-2. Install package, along with the tools you need to develop and run
-   tests, run the following in your virtual environment:
-   ```shell script
-   (.venv) $ pip install -e .[dev,test]
-   (.venv) $ pre-commit install --install-hooks
-   ```
+  2. Install package, along with the tools you need to develop and run
+     tests, run the following in your virtual environment:
+     ```shell script
+     (.venv) $ pip install -e .[dev,test]
+     (.venv) $ pre-commit install --install-hooks
+     ```
 
-   This will install:
-     - [pytest][] and [coverage.py][] to run the tests;
-     - [black][] to format the code;
-     - [flake8][] to identify coding errors and check code style;
-     - [pydocstyle][] to check docstring style;
-     - [pre-commit][] to run the formatters and linters on every commit;
-     - [tox][] to run common development tasks.
+     This will install:
+       - [pytest][] and [coverage.py][] to run the tests;
+       - [black][] to format the code;
+       - [flake8][] to identify coding errors and check code style;
+       - [pydocstyle][] to check docstring style;
+       - [pre-commit][] to run the formatters and linters on every commit;
+       - [tox][] to run common development tasks.
 
 **Congratulations!** You're now all set to begin development.
 
 ## During development
 
-- Activate your virtual environment
-  ```shell script
-  $ cd ap-games
-  $ source .venv/bin/activate
-  ```
+  - Activate your virtual environment
+    ```shell script
+    $ cd ap-games
+    $ source .venv/bin/activate
+    ```
 
-- Pull the last changes from ``upstream`` and create own
-  branch for the feature:
-  ```shell script
-  (.venv) $ git checkout master
-  (.venv) $ git pull upstream master
-  (.venv) $ git checkout -b new-feature
-  ```
+  - Pull the last changes from ``upstream`` and create own
+    branch for the feature:
+    ```shell script
+    (.venv) $ git checkout master
+    (.venv) $ git pull upstream master
+    (.venv) $ git checkout -b new-feature
+    ```
 
-- Your work here ...
+  - Your work here ...
 
-- Run the tests:
-  ```shell script
-  (.venv) $ pytest
-  ```
+  - Run the tests:
+    ```shell script
+    (.venv) $ pytest
+    ```
 
-- Run the tests and generate a coverage report:
-  ```shell script
-  (.venv) $ tox -e py,coverage
-  ```
+  - Run the tests and generate a coverage report:
+    ```shell script
+    (.venv) $ tox -e py,coverage
+    ```
 
-  Please add or update tests to ensure the coverage doesn't drop.
+    Please add or update tests to ensure the coverage doesn't drop.
 
-- Run the formatters and linters:
-  ```shell script
-  (.venv) $ tox -e check
-  ```
+  - Run the formatters and linters:
+    ```shell script
+    (.venv) $ tox -e check
+    ```
 
-  These checks are also run on every commit via [pre-commit hooks][].
-  Please fix any failures before committing.
+    These checks are also run on every commit via [pre-commit hooks][].
+    Please fix any failures before committing.
 
-- Run the tests in all supported Python versions, generate a coverage report,
-  and run the checks
-  ```shell script
-  (.venv) $ tox
-  ```
+  - Run the tests in all supported Python versions, generate a coverage
+    report, and run the checks
+    ```shell script
+    (.venv) $ tox
+    ```
 
-- Commit the changes
-  ```shell script
-  (.venv) $ git commit add .
-  (.venv) $ git commit -s -m "A brief description of changes"
-  ```
+  - Commit the changes
+    ```shell script
+    (.venv) $ git commit add .
+    (.venv) $ git commit -s -m "A brief description of changes"
+    ```
 
 ## To submit contribution
 
@@ -174,15 +174,15 @@ Or recovering from mess-ups if necessary:
 On ``https://github.com/your-username/ap-games`` click
 **Open pull request**.
 
-For details see [GitHub.com Help Documentation]
+For details see [GitHub.com Help Documentation][github.com help documentation]
 
 ## Making a release
 
-**Note**: This tutorial is only for contributors who have access to the
-main repository.
+**Note**: This tutorial is only for contributors who have access to the main
+repository.
 
-This project adheres to [PEP 440 - Version Identification][PEP 440] and
-uses [bump2version][]
+This project adheres to [PEP 440 - Version Identification][pep 440] and uses
+[bump2version][]
 
 ### Checkout and update `master`
 
@@ -213,12 +213,12 @@ For example:
 (.venv) $ git push origin master $version
 ```
 
-### Run the release pipeline to upload to [TestPyPI]
+### Run the release pipeline to upload to [TestPyPI][testpypi]
 ```shell script
 (.venv) $ tox -e release
 ```
 
-### If it looks good on TestPyPI, run the release pipeline to upload to [PyPI]
+### If it looks good on TestPyPI, run the release pipeline to upload to [PyPI][pypi]
 
 ```shell script
 (.venv) $ tox -e release pypi
@@ -226,8 +226,9 @@ For example:
 
 ### Create a new GitHub Release
 
-Using the [GitHub CLI][], with the version number
-as the title, the changelog as the description, and the distribution packages
+Using the [GitHub CLI][github cli], with the version number as the title,
+the changelog as the description, and the
+ distribution packages
 as assets
 
 ```shell script
@@ -237,18 +238,18 @@ as assets
 Add the ``-p`` flag for pre-releases.
 
 
-[Code of Conduct]: https://github.com/aplatkouski/ap-games/blob/master/CODE_OF_CONDUCT.md
+[code of conduct]: https://github.com/aplatkouski/ap-games/blob/master/CODE_OF_CONDUCT.md
 [issue tracker]: https://github.com/aplatkouski/ap-games/issues
 [pull requests]: https://github.com/aplatkouski/ap-games/pulls
-[GitHub Docs fork-a-repo]: https://docs.github.com/en/github/getting-started-with-github/fork-a-repo
+[github docs fork-a-repo]: https://docs.github.com/en/github/getting-started-with-github/fork-a-repo
 [git]: https://git-scm.com/
 [pyenv]: https://github.com/pyenv/pyenv
 [virtualenv]: https://virtualenv.pypa.io/en/latest/
-[Pipenv & Virtual Environments]: https://docs.python-guide.org/dev/virtualenvs/
+[pipenv & virtual environments]: https://docs.python-guide.org/dev/virtualenvs/
 [virtual environment]: https://docs.python.org/3/library/venv.html
 [pre-commit hooks]: ./.pre-commit-config.yaml
-[PEP 440]: https://www.python.org/dev/peps/pep-0440/
-[GitHub.com Help Documentation]: https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests
+[pep 440]: https://www.python.org/dev/peps/pep-0440/
+[github.com help documentation]: https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests
 [pytest]: https://docs.pytest.org/en/latest/
 [coverage.py]: https://coverage.readthedocs.io/en/latest/
 [black]: https://black.readthedocs.io/en/stable/
@@ -257,7 +258,7 @@ Add the ``-p`` flag for pre-releases.
 [pre-commit]: https://pre-commit.com/
 [tox]: https://tox.readthedocs.io/en/latest/
 [changelog]: ./CHANGELOG.md
-[TestPyPI]: https://test.pypi.org/project/ap-games/
-[PyPI]: https://pypi.org/project/ap-games/
+[testpypi]: https://test.pypi.org/project/ap-games/
+[pypi]: https://pypi.org/project/ap-games/
 [bump2version]: https://github.com/c4urself/bump2version
-[GitHub CLI]: https://hub.github.com/
+[github cli]: https://hub.github.com/

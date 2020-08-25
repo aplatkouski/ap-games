@@ -7,22 +7,21 @@ assignees: ''
 
 ---
 
-**Describe your question**
+### Describe your question
 
-**Example - please use the [Minimal, Complete, and Verifiable][] guidelines
-if possible**
+*Example - please use the [Minimal, Complete, and Verifiable][] guidelines
+if possible*
 
-**Complete stack trace, if applicable**
+### Complete stack trace, if applicable
 
-**Versions**
-- OS:
-- Python:
-- AP_games:
+### Versions
+  - OS:
+  - Python:
+  - AP_games:
 
-**Additional context**
+### Additional context
 Add any other context or screenshots about the feature request here.
 
-**Have a nice day!**
-
+*Have a nice day!*
 
 [Minimal, Complete, and Verifiable]: http://stackoverflow.com/help/mcve
