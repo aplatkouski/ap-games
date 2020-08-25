@@ -1,4 +1,5 @@
 # AP Games
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/434f6c66b7c24320bf36b591b3c81e23)](https://app.codacy.com/manual/aplatkouski/ap-games?utm_source=github.com&utm_medium=referral&utm_content=aplatkouski/ap-games&utm_campaign=Badge_Grade_Dashboard)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 The AP Games is the result of the completion of the project
