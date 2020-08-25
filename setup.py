@@ -20,7 +20,7 @@ setup(
             'keyring==21.3.0',
             'mypy==0.782',
             'mypy-extensions==0.4.3',
-            'pre-commit==2.6.0',
+            'pre-commit==2.7.1',
             'pre-commit-hooks==3.2.0',
             'pydocstyle==5.0.2',
             'pyupgrade==2.7.2',
