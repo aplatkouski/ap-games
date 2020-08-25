@@ -37,9 +37,8 @@ Type "exit" to exit the program.
 
 Input command:
 2
-Type "start user1_type user2_type" to run the game, where "user1_type"
-and "user2_type" is one of the supported values: user, easy, medium,
-hard, nightmare;
+Type "start user-1 user-2" to run the game, where "user-1" and "user-2"
+is one of the supported values: user, easy, medium, hard, nightmare;
 Type "rules" to get game rules or type "exit" to exit from the game.
 
 Input command:
@@ -125,8 +124,8 @@ python -m ap_games [game] [user-1 user-2]
 
 Where:
   - ``game`` is a value from the following set:
-    - ``0`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
-    - ``1`` or ``reversi`` for Reversi game.
+    - ``1`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
+    - ``2`` or ``reversi`` for Reversi game.
   - ``user-1`` and ``user-2`` are values from the following set:
     - ``user`` for human player;
     - ``easy``, ``medium``, ``hard`` and ``nightmare`` for AI player.
@@ -166,9 +165,8 @@ See also our [CONTRIBUTING.md][contributing.md].
 
 ## Copyright
 
-Copyright (c) 2020 Artsiom Platkouski.
-``AP_games`` is licensed under the MIT License - see the
-[LICENSE.txt][license.txt] file for details.
+Copyright (c) 2020 Artsiom Platkouski. ``AP_games`` is licensed under the
+MIT License - see the [LICENSE.txt][license.txt] file for details.
 
 [pypi ap-games]: https://pypi.org/project/ap-games/
 [tic-tac-toe with ai]: https://hyperskill.org/projects/82
