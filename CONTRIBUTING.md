@@ -191,7 +191,7 @@ This project adheres to [PEP 440 - Version Identification][pep 440] and uses
 (.venv) $ git pull upstream master
 ```
 
-### Update the [changelog]
+### Update the [CHANGELOG.md][]
 
 ### Change a version number, commit the changes, tag the release
 (e.g. ``0.0.1b3`)
@@ -236,7 +236,6 @@ as assets
 ```
 
 Add the ``-p`` flag for pre-releases.
-
 
 [code of conduct]: https://github.com/aplatkouski/ap-games/blob/master/CODE_OF_CONDUCT.md
 [issue tracker]: https://github.com/aplatkouski/ap-games/issues
