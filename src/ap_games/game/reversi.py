@@ -26,7 +26,7 @@ __all__ = ('Reversi',)
 
 
 class Reversi(TwoPlayerBoardGame):
-    """Reversi game supports human user and some types of AI.
+    """Reversi game supports human and some types of AI as players.
 
     For details see :class:`TwoPlayerBoardGame`.
 

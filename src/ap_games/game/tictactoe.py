@@ -19,7 +19,7 @@ __all__ = ('TicTacToe',)
 
 
 class TicTacToe(TwoPlayerBoardGame):
-    """Tic-Tac-Toe game supports human user and some types of AI.
+    """Tic-Tac-Toe game supports human and some types of AI as players.
 
     .. seealso::
 

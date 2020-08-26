@@ -37,7 +37,7 @@ Type "exit" to exit the program.
 
 Input command:
 2
-Type "start user-1 user-2" to run the game, where "user-1" and "user-2"
+Type "start player1 player2" to run the game, where "player1" and "player2"
 is one of the supported values: user, easy, medium, hard, nightmare;
 Type "rules" to get game rules or type "exit" to exit from the game.
 
@@ -119,14 +119,14 @@ See [aplatkouski/ap-games][] repository.
 
 Run module:
 ```shell script
-python -m ap_games [game] [user-1 user-2]
+python -m ap_games [game] [player1 player2]
 ```
 
 Where:
   - ``game`` is a value from the following set:
     - ``1`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
     - ``2`` or ``reversi`` for Reversi game.
-  - ``user-1`` and ``user-2`` are values from the following set:
+  - ``player1`` and ``player2`` are values from the following set:
     - ``user`` for human player;
     - ``easy``, ``medium``, ``hard`` and ``nightmare`` for AI player.
 

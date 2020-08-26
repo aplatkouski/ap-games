@@ -280,8 +280,8 @@ class TwoPlayerBoardGame:
             command: str = f'start {player_types[0]} {player_types[1]}'
         else:
             logger.info(
-                'Type "start user1_type user2_type" to run the game, '
-                'where "user1_type" and "user2_type" is one of the '
+                'Type "start player1 player2" to run the game, '
+                'where "player1" and "player2" is one of the '
                 f'supported values: {", ".join(self.supported_players)}; '
                 'Type "rules" to get game rules or type "exit" to '
                 'exit from the game.\n\nInput command: '
