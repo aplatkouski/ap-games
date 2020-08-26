@@ -120,6 +120,14 @@ class TwoPlayerBoardGame:
             Tuple[str, PlayerMark], DefaultDict[Coordinate, List[Coordinate]]
         ] = {}
 
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"grid='{self.gameboard.grid_as_string}', "
+            f"player_types=('{self.players[0].type_}', "
+            f"'{self.players[0].type_}'))"
+        )
+
     def play(self) -> None:
         """Start new game."""
         logger.info(self.gameboard)

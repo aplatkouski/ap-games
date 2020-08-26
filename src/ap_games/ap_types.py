@@ -80,7 +80,9 @@ class Node(NamedTuple):
     sub_tree: 'Tree'  # type: ignore
 
 
-UNDEFINED_MOVE = Move(Coordinate(x=0, y=0), score=0, potential=0, last=False)
+UNDEFINED_MOVE: Final[Move] = Move(
+    Coordinate(x=0, y=0), score=0, potential=0, last=False
+)
 
 Side = Tuple[Cell, ...]
 Directions = Tuple[Coordinate, ...]

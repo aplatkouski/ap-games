@@ -28,6 +28,12 @@ class Player:
         """Return mark."""
         return self._mark
 
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}('{self._type}', mark='{self._mark}', "
+            f"game={repr(self._game)})"
+        )
+
     @cached_property
     def type_(self) -> str:
         """Return type."""

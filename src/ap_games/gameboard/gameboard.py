@@ -269,6 +269,14 @@ class SquareGameboard:
             f'{self._column_axis}'
         )
 
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}(grid='{self.grid_as_string}', "
+            f"gap='{self._gap}', axis={self._axis}, "
+            f"colorized={self.colorized}, "
+            f"indent='{self.indent}')".replace('\t', '\\t')
+        )
+
     def __getitem__(self, coordinate: Coordinate) -> Cell:
         """Return Cell by coordinate."""
         return self._cells_dict[coordinate]
