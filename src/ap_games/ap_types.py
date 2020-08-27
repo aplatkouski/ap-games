@@ -5,22 +5,20 @@ from typing import Final
 from typing import Literal
 from typing import NamedTuple
 from typing import Tuple
-from typing import Type
-from typing import Union
 
-from ap_games.player.player import Player
 
-EMPTY: Final[Literal[' ']] = ' '
-O_MARK: Final[Literal['O']] = 'O'
-X_MARK: Final[Literal['X']] = 'X'
-UNDEFINED_MARK: Final[Literal['']] = ''
-
+Mark = Literal['X', 'O', ' ', '']
+Empty = Literal[' ']
 PlayerMark = Literal['X', 'O']
-Mark = Union[Literal['X'], Literal['O'], Literal[' '], Literal['']]
+UndefinedMark = Literal['']
 
-SupportedPlayers = Dict[str, Type[Player]]
-OptionalPlayerTypes = Union[Tuple[str, str], Tuple[()]]
-Size = int
+
+class GameStatus(NamedTuple):
+    """GameStatus(active: bool, message: str, must_skip: bool)."""
+
+    active: bool
+    message: str
+    must_skip: bool
 
 
 class Coordinate(NamedTuple):
@@ -35,21 +33,6 @@ class Cell(NamedTuple):
 
     coordinate: Coordinate
     mark: Mark
-
-
-class Offset(NamedTuple):
-    """Offset(coordinate: Coordinate, direction: Coordinate)."""
-
-    coordinate: Coordinate
-    direction: Coordinate
-
-
-class GameStatus(NamedTuple):
-    """GameStatus(active: bool, message: str, must_skip: bool)."""
-
-    active: bool
-    message: str
-    must_skip: bool
 
 
 class Move(NamedTuple):
@@ -80,11 +63,30 @@ class Node(NamedTuple):
     sub_tree: 'Tree'  # type: ignore
 
 
-UNDEFINED_MOVE: Final[Move] = Move(
-    Coordinate(x=0, y=0), score=0, potential=0, last=False
-)
+class Offset(NamedTuple):
+    """Offset(coordinate: Coordinate, direction: Coordinate)."""
 
-Side = Tuple[Cell, ...]
-Directions = Tuple[Coordinate, ...]
+    coordinate: Coordinate
+    direction: Coordinate
+
+
 Coordinates = Tuple[Coordinate, ...]
+Directions = Tuple[Coordinate, ...]
+Side = Tuple[Cell, ...]
+Size = int
 Tree = Dict[str, Node]  # type: ignore
+PlayerType = Literal['easy', 'hard', 'medium', 'nightmare', 'user']
+
+# Constants:
+
+EMPTY: Final[Empty] = ' '
+O_MARK: Final[PlayerMark] = 'O'
+X_MARK: Final[PlayerMark] = 'X'
+UNDEFINED_MARK: Final[UndefinedMark] = ''
+UNDEFINED_COORDINATE: Final[Coordinate] = Coordinate(x=0, y=0)
+UNDEFINED_CELL: Final[Cell] = Cell(
+    coordinate=UNDEFINED_COORDINATE, mark=UNDEFINED_MARK
+)
+UNDEFINED_MOVE: Final[Move] = Move(
+    coordinate=UNDEFINED_COORDINATE, score=0, potential=0, last=False
+)

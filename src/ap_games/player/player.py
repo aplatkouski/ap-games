@@ -4,11 +4,14 @@ from functools import cached_property
 import random
 from typing import TYPE_CHECKING
 
+from ap_games.ap_types import UNDEFINED_COORDINATE
+
 if TYPE_CHECKING:
     from typing import Tuple
 
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import PlayerMark
+    from ap_games.ap_types import PlayerType
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 __all__ = ('Player',)
@@ -18,9 +21,14 @@ class Player:
     """Class introduces the player in a board game."""
 
     def __init__(
-        self, type_: str, /, *, mark: PlayerMark, game: TwoPlayerBoardGame
+        self,
+        type_: PlayerType,
+        /,
+        *,
+        mark: PlayerMark,
+        game: TwoPlayerBoardGame,
     ):
-        self._type: str = type_
+        self._type: PlayerType = type_
         self._game: TwoPlayerBoardGame = game
         self._mark: PlayerMark = mark
 
@@ -75,5 +83,5 @@ class Player:
         return (
             random.choice(available_moves)
             if available_moves
-            else self.game.gameboard.undefined_coordinate
+            else UNDEFINED_COORDINATE
         )

@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from collections import deque
 import sys
+from typing import cast
+from typing import Type
 from typing import TYPE_CHECKING
 
 from ap_games.ap_types import EMPTY
 from ap_games.ap_types import GameStatus
 from ap_games.ap_types import O_MARK
+from ap_games.ap_types import UNDEFINED_COORDINATE
 from ap_games.ap_types import X_MARK
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
@@ -21,12 +24,12 @@ if TYPE_CHECKING:
     from typing import List
     from typing import Optional
     from typing import Tuple
+    from typing import Union
 
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import Coordinates
-    from ap_games.ap_types import OptionalPlayerTypes
     from ap_games.ap_types import PlayerMark
-    from ap_games.ap_types import SupportedPlayers
+    from ap_games.ap_types import PlayerType
     from ap_games.player.player import Player
 
 __all__ = ('TwoPlayerBoardGame',)
@@ -58,7 +61,8 @@ class TwoPlayerBoardGame:
     :ivar _available_moves_cache: Cache with available moves as dict.
         Where key of dict is a tuple with two fields:
 
-        * ``grid`` of the gameboard before considered move;
+        * ``grid`` of the gameboard as string of all marks before
+          considered move;
         * ``mark`` of player, who makes move on this turn.
 
         Value of dict is a sub-dict.  Where the keys are the coordinates
@@ -74,12 +78,12 @@ class TwoPlayerBoardGame:
     grid_axis: ClassVar[bool] = True
     grid_gap: ClassVar[str] = ' '
 
-    supported_players: ClassVar[SupportedPlayers] = {
-        'user': HumanPlayer,
+    supported_players: ClassVar[Dict[PlayerType, Type[Player]]] = {
         'easy': AIPlayer,
-        'medium': AIPlayer,
         'hard': AIPlayer,
+        'medium': AIPlayer,
         'nightmare': AIPlayer,
+        'user': HumanPlayer,
     }
 
     rules: ClassVar[str] = ''
@@ -89,7 +93,7 @@ class TwoPlayerBoardGame:
         self,
         *,
         grid: str = '',
-        player_types: Tuple[str, str] = ('user', 'user'),
+        player_types: Tuple[PlayerType, PlayerType] = ('user', 'user'),
     ):
         if not grid:
             grid = self.default_grid
@@ -134,9 +138,8 @@ class TwoPlayerBoardGame:
         self.status = self.get_status()
         while self.status.active:
             coordinate: Coordinate = self.players[0].move()
-            if (
-                coordinate != self.gameboard.undefined_coordinate
-                and self.place_mark(coordinate)
+            if coordinate != UNDEFINED_COORDINATE and self.place_mark(
+                coordinate
             ):
                 logger.info(self.gameboard)
                 self.players.rotate(1)
@@ -276,7 +279,9 @@ class TwoPlayerBoardGame:
             else self.players[0]
         )
 
-    def cli(self, player_types: OptionalPlayerTypes = ()) -> None:
+    def cli(
+        self, player_types: Union[Tuple[str, str], Tuple[()]] = ()
+    ) -> None:
         """Command line interface of the game.
 
         :param player_types: A tuple of strings with two elements from
@@ -284,16 +289,16 @@ class TwoPlayerBoardGame:
             determine the types of players.
 
         """
+        logger.info(
+            'Type "start player1 player2" to run the game, '
+            'where "player1" and "player2" is one of the '
+            f'supported values: {", ".join(self.supported_players)}; '
+            'Type "rules" to get game rules or type "exit" to '
+            'exit from the game.\n\nInput command: '
+        )
         if player_types and len(player_types) == 2:
             command: str = f'start {player_types[0]} {player_types[1]}'
         else:
-            logger.info(
-                'Type "start player1 player2" to run the game, '
-                'where "player1" and "player2" is one of the '
-                f'supported values: {", ".join(self.supported_players)}; '
-                'Type "rules" to get game rules or type "exit" to '
-                'exit from the game.\n\nInput command: '
-            )
             command = sys.stdin.readline().strip()
         logger.debug(f'{command=}')
         while command != 'exit':
@@ -304,7 +309,12 @@ class TwoPlayerBoardGame:
                 and parameters[1] in self.supported_players
                 and parameters[2] in self.supported_players
             ):
-                self._add_players(player_types=(parameters[1], parameters[2]))
+                self._add_players(
+                    player_types=(
+                        cast(PlayerType, parameters[1]),
+                        cast(PlayerType, parameters[2]),
+                    )
+                )
                 self.gameboard = SquareGameboard(
                     grid=self.default_grid,
                     gap=self.grid_gap,
@@ -319,7 +329,9 @@ class TwoPlayerBoardGame:
             command = sys.stdin.readline().strip()
             logger.debug(f'{command=}')
 
-    def _add_players(self, *, player_types: Tuple[str, str]) -> None:
+    def _add_players(
+        self, *, player_types: Tuple[PlayerType, PlayerType]
+    ) -> None:
         """Create instances of `Player` and add them to :attr:`.players`.
 
         :param player_types: A tuple of strings with two elements from

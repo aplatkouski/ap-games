@@ -12,6 +12,7 @@ from ap_games.ap_types import EMPTY
 from ap_games.ap_types import Mark
 from ap_games.ap_types import O_MARK
 from ap_games.ap_types import Offset
+from ap_games.ap_types import UNDEFINED_CELL
 from ap_games.ap_types import X_MARK
 from ap_games.log import logger
 
@@ -75,10 +76,10 @@ class _GameboardRegistry:
     """
 
     _directions: Final[ClassVar[Directions]] = (
-        Coordinate(0, 1),  # top
-        Coordinate(1, 1),  # right-top
-        Coordinate(1, 0),  # right and so on
-        Coordinate(1, -1),
+        Coordinate(0, 1),  # up
+        Coordinate(1, 1),  # right up
+        Coordinate(1, 0),  # right
+        Coordinate(1, -1),  # right down
     )
 
     def __init__(self, *, size: int) -> None:
@@ -162,12 +163,7 @@ class SquareGameboard:
 
     """
 
-    undefined_coordinate: Final[ClassVar[Coordinate]] = Coordinate(x=0, y=0)
-    undefined_cell: Final[ClassVar[Cell]] = Cell(
-        coordinate=undefined_coordinate, mark=''
-    )
-
-    mark_colors: ClassVar[Dict[str, str]] = {
+    mark_colors: Final[ClassVar[Dict[Mark, str]]] = {
         X_MARK: _Colors.blue,
         O_MARK: _Colors.green,
         EMPTY: _Colors.header,
@@ -178,7 +174,7 @@ class SquareGameboard:
     _registries: Dict[Size, _GameboardRegistry] = {}
 
     def __new__(cls, **kwargs: Any) -> Any:
-        """Create instance and set :attr:`._registries[size]` if necessary."""
+        """Create instance and add :attr:`._registries[size]` if necessary."""
         _safety: bool = kwargs.get('_safety', True)
         if _safety:
             grid: str = kwargs.get('grid', cls.default_grid)
@@ -390,8 +386,7 @@ class SquareGameboard:
         """
         if (
             force
-            or self._cells_dict.get(coordinate, self.undefined_cell).mark
-            == EMPTY
+            or self._cells_dict.get(coordinate, UNDEFINED_CELL).mark == EMPTY
         ):
             self._cells_dict[coordinate] = Cell(coordinate, mark)
             if self.colorized:
@@ -417,12 +412,12 @@ class SquareGameboard:
             ``-1<=y<=1``.
 
         :returns: adjacent cell as instance of :class:`Cell` if cell
-            exist on the gameboard else :attr:`.undefined_cell`.
+            exist on the gameboard else ``UNDEFINED_CELL``.
 
         """
         return self._cells_dict.get(
             (coordinate.x + direction.x, coordinate.y + direction.y,),
-            self.undefined_cell,
+            UNDEFINED_CELL,
         )
 
     def get_offsets(self, coordinate: Coordinate) -> Tuple[Offset, ...]:

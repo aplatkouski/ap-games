@@ -4,9 +4,11 @@ from configparser import ConfigParser
 from importlib import resources
 import random
 import sys
+from typing import cast
 from typing import NamedTuple
 from typing import TYPE_CHECKING
 
+from ap_games.ap_types import PlayerType
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
 from ap_games.log import logger
@@ -22,8 +24,8 @@ if TYPE_CHECKING:
     from typing import Dict
     from typing import Tuple
     from typing import Type
+    from typing import Union
 
-    from ap_games.ap_types import OptionalPlayerTypes
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 
@@ -46,7 +48,7 @@ supported_games: Dict[str, Game] = {
 def main() -> None:
     """Aks user about desired game and run it."""
     choice: str
-    player_types: OptionalPlayerTypes
+    player_types: Union[Tuple[str, str], Tuple[()]]
 
     read_config()
     if TEST_MODE:
@@ -84,14 +86,18 @@ def run_test_mode_and_exit() -> None:
     """Run the predefined configuration if ``TEST_MODE=True`` and exit."""
     random.seed(42)
     logger.debug(f'{TEST_MODE=}')
-    game: TwoPlayerBoardGame = Reversi(player_types=('medium', 'hard'))
+    game: TwoPlayerBoardGame = Reversi(
+        player_types=(cast(PlayerType, 'medium'), cast(PlayerType, 'hard'))
+    )
     game.play()
-    game = TicTacToe(player_types=('easy', 'hard'))
+    game = TicTacToe(
+        player_types=(cast(PlayerType, 'easy'), cast(PlayerType, 'hard'))
+    )
     game.play()
     sys.exit()
 
 
-def read_argv() -> Tuple[str, OptionalPlayerTypes]:
+def read_argv() -> Tuple[str, Union[Tuple[str, str], Tuple[()]]]:
     """Read command-line arguments and return them.
 
     :returns: Two-element tuple, where:
@@ -104,7 +110,7 @@ def read_argv() -> Tuple[str, OptionalPlayerTypes]:
     """
     sys.argv.pop(0)
     game_num: str = ''
-    player_types: OptionalPlayerTypes = ()
+    player_types: Union[Tuple[str, str], Tuple[()]] = ()
     if len(sys.argv) >= 1:
         game_num = sys.argv[0]
         game_num = game_num.title()

@@ -4,6 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from ap_games.ap_types import Coordinate
+from ap_games.ap_types import UNDEFINED_COORDINATE
 from ap_games.log import logger
 from ap_games.player.player import Player
 
@@ -19,8 +20,8 @@ class HumanPlayer(Player):
     def move(self) -> Coordinate:
         """Read coordinate of the next move from the input and return it.
 
-        :returns: Return :attr:`.SquareGameboard.undefined_coordinate`
-            if the coordinate is incorrect.
+        :returns: Return ``UNDEFINED_COORDINATE`` if the coordinate is
+            incorrect.
 
         """
         logger.info(f'Enter the coordinate [{self._mark}]: ')
@@ -31,4 +32,4 @@ class HumanPlayer(Player):
             if column.isdigit() and row.isdigit():
                 return Coordinate(int(column), int(row))
         logger.warning('You should enter two numbers!')
-        return self.game.gameboard.undefined_coordinate
+        return UNDEFINED_COORDINATE

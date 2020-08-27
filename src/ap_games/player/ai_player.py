@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from ap_games.ap_types import Move
 from ap_games.ap_types import Node
+from ap_games.ap_types import UNDEFINED_COORDINATE
 from ap_games.ap_types import UNDEFINED_MOVE
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
     from ap_games.ap_types import Coordinate
     from ap_games.ap_types import GameStatus
     from ap_games.ap_types import PlayerMark
+    from ap_games.ap_types import PlayerType
     from ap_games.ap_types import Tree
     from ap_games.game.game_base import TwoPlayerBoardGame
 
@@ -32,7 +34,7 @@ __all__ = ('AIPlayer',)
 class AIPlayer(Player):
     """AIPlayer in the game."""
 
-    _max_depth: ClassVar[Dict[str, int]] = {
+    _max_depth: ClassVar[Dict[PlayerType, int]] = {
         'easy': 0,
         'medium': 2,
         'hard': 4,
@@ -40,7 +42,12 @@ class AIPlayer(Player):
     }
 
     def __init__(
-        self, type_: str, /, *, mark: PlayerMark, game: TwoPlayerBoardGame
+        self,
+        type_: PlayerType,
+        /,
+        *,
+        mark: PlayerMark,
+        game: TwoPlayerBoardGame,
     ) -> None:
         super().__init__(type_, mark=mark, game=game)
         self.max_depth = self._max_depth[type_]
@@ -218,7 +225,7 @@ class AIPlayer(Player):
         # current (``self``) player
         score: int = self.game.get_score(gameboard, player_mark=self.mark)
         return Move(
-            coordinate=self.game.gameboard.undefined_coordinate,
+            coordinate=UNDEFINED_COORDINATE,
             score=score * last_move_coefficient,
             potential=10_000,
             last=last,
