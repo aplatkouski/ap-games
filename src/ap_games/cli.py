@@ -29,9 +29,6 @@ if TYPE_CHECKING:
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 
-TEST_MODE: bool = False
-
-
 class Game(NamedTuple):
     """Game(name: str, game_class: Type[TwoPlayerBoardGame])."""
 
@@ -39,10 +36,14 @@ class Game(NamedTuple):
     game_class: Type[TwoPlayerBoardGame]
 
 
-supported_games: Dict[str, Game] = {
-    '1': Game(name='Tic-Tac-Toe', game_class=TicTacToe),
-    '2': Game(name='Reversi', game_class=Reversi),
-}
+class Settings:
+    config_file: str = 'config.ini'
+    supported_games: Dict[str, Game] = {
+        '1': Game(name='Tic-Tac-Toe', game_class=TicTacToe),
+        '2': Game(name='Reversi', game_class=Reversi),
+    }
+    test_mode: bool = False
+    log_level: str = 'INFO'
 
 
 def main() -> None:
@@ -51,20 +52,24 @@ def main() -> None:
     player_types: Union[Tuple[str, str], Tuple[()]]
 
     read_config()
-    if TEST_MODE:
+    logger.setLevel(Settings.log_level)
+    if Settings.test_mode:
         run_test_mode_and_exit()
     choice, player_types = read_argv()
-    games: str = ";\n\t".join(
-        f'{num} - {game.name}' for num, game in supported_games.items()
+    games_menu: str = ";\n\t".join(
+        f'{num} - {game.name}'
+        for num, game in Settings.supported_games.items()
     )
     message: str = (
-        f'Please choose the game:\n\t{games}.\n'
+        f'Please choose the game:\n\t{games_menu}.\n'
         'Type "exit" to exit the program.\n\nInput command: '
     )
     while choice != 'exit':
-        if choice in supported_games:
+        if choice in Settings.supported_games:
             logger.debug(f'{choice=}')
-            game: TwoPlayerBoardGame = supported_games[choice].game_class()
+            game: TwoPlayerBoardGame = Settings.supported_games[
+                choice
+            ].game_class()
             game.cli(player_types=player_types)
         logger.info(message)
         choice = sys.stdin.readline().strip()
@@ -74,18 +79,17 @@ def read_config() -> None:
     """Read the log level from the config.ini and set it."""
     cfg = ConfigParser()
     cfg.read_string(
-        resources.read_text(package='ap_games', resource='config.ini')
+        resources.read_text(package='ap_games', resource=Settings.config_file)
     )
     log_level: str = cfg.get('ap-games', 'log_level').upper()
-    logger.setLevel(log_level if log_level == 'DEBUG' else 'INFO')
-    global TEST_MODE
-    TEST_MODE = cfg.getboolean('ap-games', 'test_mode')
+    Settings.log_level = log_level if log_level == 'DEBUG' else 'INFO'
+    Settings.test_mode = cfg.getboolean('ap-games', 'test_mode')
 
 
 def run_test_mode_and_exit() -> None:
-    """Run the predefined configuration if ``TEST_MODE=True`` and exit."""
+    """Run the predefined configuration when ``test_mode=True`` and exit."""
     random.seed(42)
-    logger.debug(f'{TEST_MODE=}')
+    logger.debug(f'{Settings.test_mode=}')
     game: TwoPlayerBoardGame = Reversi(
         player_types=(cast(PlayerType, 'medium'), cast(PlayerType, 'hard'))
     )
@@ -102,23 +106,23 @@ def read_argv() -> Tuple[str, Union[Tuple[str, str], Tuple[()]]]:
 
     :returns: Two-element tuple, where:
 
-        * ``game_num`` - a value from ``supported_games.keys()`` or
+        * ``selected_game`` - a value from ``supported_games.keys()`` or
           empty string;
-        * ``player_types`` - a two-element tuple, where each element is
-          a player-type string or empty tuple.
+        * ``player_types`` - an empty or two-element tuple, where each
+          element is the player's desired type.
 
     """
     sys.argv.pop(0)
-    game_num: str = ''
+    selected_game: str = ''
     player_types: Union[Tuple[str, str], Tuple[()]] = ()
     if len(sys.argv) >= 1:
-        game_num = sys.argv[0]
-        game_num = game_num.title()
-        for num, game in supported_games.items():
-            game_num = game_num.replace(game.name, num)
+        selected_game = sys.argv[0]
+        selected_game = selected_game.title()
+        for num, game in Settings.supported_games.items():
+            selected_game = selected_game.replace(game.name, num)
         if len(sys.argv) >= 3:
             player_types = (sys.argv[1], sys.argv[2])
-    return (game_num, player_types)
+    return (selected_game, player_types)
 
 
 if __name__ == '__main__':
