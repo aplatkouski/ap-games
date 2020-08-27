@@ -97,7 +97,7 @@ def read_argv() -> Tuple[str, OptionalPlayerTypes]:
     :returns: Two-element tuple, where:
 
         * ``game_num`` - a value from ``supported_games.keys()`` or
-            empty string;
+          empty string;
         * ``player_types`` - a two-element tuple, where each element is
           a player-type string or empty tuple.
 
