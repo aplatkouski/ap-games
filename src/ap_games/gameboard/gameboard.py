@@ -212,6 +212,11 @@ class SquareGameboard:
         self._colors_dict: Dict[Tuple[int, int], str] = {}
         self._grid_cache: str = ''
         if _safety:
+            if not set(grid).issubset(set(self.mark_colors.keys())):
+                raise ValueError(
+                    'The "grid" must include characters from the set: '
+                    f'{set(self.mark_colors.keys())}!'
+                )
             for index, mark in enumerate(grid):
                 coordinate = self.registry.index_to_coordinate[index]
                 mark = cast(Mark, mark)
