@@ -6,14 +6,14 @@ from platform import platform
 from typing import cast
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import Cell
-from ap_games.ap_types import Coordinate
-from ap_games.ap_types import EMPTY
-from ap_games.ap_types import Mark
-from ap_games.ap_types import O_MARK
-from ap_games.ap_types import Offset
-from ap_games.ap_types import UNDEFINED_CELL
-from ap_games.ap_types import X_MARK
+from ap_games.ap_constants import EMPTY
+from ap_games.ap_constants import O_MARK
+from ap_games.ap_constants import UNDEFINED_CELL
+from ap_games.ap_constants import X_MARK
+from ap_games.ap_typing import Cell
+from ap_games.ap_typing import Coordinate
+from ap_games.ap_typing import Mark
+from ap_games.ap_typing import Offset
 from ap_games.log import logger
 
 if TYPE_CHECKING:
@@ -24,11 +24,11 @@ if TYPE_CHECKING:
     from typing import List
     from typing import Tuple
 
-    from ap_games.ap_types import Coordinates
-    from ap_games.ap_types import Directions
-    from ap_games.ap_types import PlayerMark
-    from ap_games.ap_types import Side
-    from ap_games.ap_types import Size
+    from ap_games.ap_typing import Coordinates
+    from ap_games.ap_typing import Directions
+    from ap_games.ap_typing import PlayerMark
+    from ap_games.ap_typing import Side
+    from ap_games.ap_typing import Size
 
 __all__ = ('SquareGameboard',)
 

@@ -4,14 +4,14 @@ from functools import cached_property
 import random
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import UNDEFINED_COORDINATE
+from ap_games.ap_constants import UNDEFINED_COORDINATE
 
 if TYPE_CHECKING:
     from typing import Tuple
 
-    from ap_games.ap_types import Coordinate
-    from ap_games.ap_types import PlayerMark
-    from ap_games.ap_types import PlayerType
+    from ap_games.ap_typing import Coordinate
+    from ap_games.ap_typing import PlayerMark
+    from ap_games.ap_typing import PlayerType
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 __all__ = ('Player',)

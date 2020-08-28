@@ -6,11 +6,11 @@ from typing import cast
 from typing import Type
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import EMPTY
-from ap_games.ap_types import GameStatus
-from ap_games.ap_types import O_MARK
-from ap_games.ap_types import UNDEFINED_COORDINATE
-from ap_games.ap_types import X_MARK
+from ap_games.ap_constants import EMPTY
+from ap_games.ap_constants import O_MARK
+from ap_games.ap_constants import UNDEFINED_COORDINATE
+from ap_games.ap_constants import X_MARK
+from ap_games.ap_typing import GameStatus
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.ai_player import AIPlayer
@@ -26,10 +26,10 @@ if TYPE_CHECKING:
     from typing import Tuple
     from typing import Union
 
-    from ap_games.ap_types import Coordinate
-    from ap_games.ap_types import Coordinates
-    from ap_games.ap_types import PlayerMark
-    from ap_games.ap_types import PlayerType
+    from ap_games.ap_typing import Coordinate
+    from ap_games.ap_typing import Coordinates
+    from ap_games.ap_typing import PlayerMark
+    from ap_games.ap_typing import PlayerType
     from ap_games.player.player import Player
 
 __all__ = ('TwoPlayerBoardGame',)

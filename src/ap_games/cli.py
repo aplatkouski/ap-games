@@ -8,7 +8,7 @@ from typing import cast
 from typing import NamedTuple
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import PlayerType
+from ap_games.ap_typing import PlayerType
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
 from ap_games.log import logger

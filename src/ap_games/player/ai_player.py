@@ -6,10 +6,10 @@ from operator import sub
 import random
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import Move
-from ap_games.ap_types import Node
-from ap_games.ap_types import UNDEFINED_COORDINATE
-from ap_games.ap_types import UNDEFINED_MOVE
+from ap_games.ap_constants import UNDEFINED_COORDINATE
+from ap_games.ap_constants import UNDEFINED_MOVE
+from ap_games.ap_typing import Move
+from ap_games.ap_typing import Node
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.player import Player
@@ -17,22 +17,23 @@ from ap_games.player.player import Player
 if TYPE_CHECKING:
     from typing import ClassVar
     from typing import Dict
+    from typing import Final
     from typing import List
     from typing import Optional
     from typing import Set
 
-    from ap_games.ap_types import Coordinate
-    from ap_games.ap_types import GameStatus
-    from ap_games.ap_types import PlayerMark
-    from ap_games.ap_types import PlayerType
-    from ap_games.ap_types import Tree
+    from ap_games.ap_typing import Coordinate
+    from ap_games.ap_typing import GameStatus
+    from ap_games.ap_typing import PlayerMark
+    from ap_games.ap_typing import PlayerType
+    from ap_games.ap_typing import Tree
     from ap_games.game.game_base import TwoPlayerBoardGame
 
 __all__ = ('AIPlayer',)
 
 
 class AIPlayer(Player):
-    """AIPlayer in the game."""
+    """AIPlayer in a board game."""
 
     _max_depth: ClassVar[Dict[PlayerType, int]] = {
         'easy': 0,
@@ -50,7 +51,7 @@ class AIPlayer(Player):
         game: TwoPlayerBoardGame,
     ) -> None:
         super().__init__(type_, mark=mark, game=game)
-        self.max_depth = self._max_depth[type_]
+        self.max_depth: Final[int] = self._max_depth[type_]
         self.tree: Tree = {}
 
     def move(self) -> Coordinate:

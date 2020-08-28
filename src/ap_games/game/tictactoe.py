@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import GameStatus
+from ap_games.ap_typing import GameStatus
 from ap_games.game.game_base import TwoPlayerBoardGame
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Tuple
 
-    from ap_games.ap_types import PlayerMark
+    from ap_games.ap_typing import PlayerMark
     from ap_games.gameboard.gameboard import SquareGameboard
 
 __all__ = ('TicTacToe',)

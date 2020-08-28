@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+from typing import cast
 from typing import TYPE_CHECKING
 
-from ap_games.ap_types import Coordinate
-from ap_games.ap_types import GameStatus
+from ap_games.ap_typing import Coordinate
+from ap_games.ap_typing import GameStatus
+from ap_games.ap_typing import PlayerType
 from ap_games.game.reversi import Reversi
 
 if TYPE_CHECKING:
-    from ap_games.ap_types import Coordinates
+    from ap_games.ap_typing import Coordinates
 
 
 def test_construction() -> None:
-    reversi: Reversi = Reversi(grid=' ' * 64, player_types=('user', 'user'))
+    user: PlayerType = cast(PlayerType, 'user')
+    reversi: Reversi = Reversi(grid=' ' * 64, player_types=(user, user))
     assert ' ' * 64 == reversi.gameboard.grid_as_string
     assert 'user' == reversi.players[0].type_
     assert 'user' == reversi.players[1].type_
