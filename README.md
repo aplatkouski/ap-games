@@ -105,7 +105,7 @@ Enter the coordinate [X]:
 
 The project has been tested only with [python 3.8][python] on Ubuntu Linux
 and Windows 10. If you have python 3.8 and above installed in your machine,
-just install the AP Games from [PyPI][pypi]:
+just install the AP Games from [PyPI][pypi ap-games]:
 
 ```shell script
 python --version
