@@ -8,12 +8,15 @@ assignees: ''
 ---
 
 ### Describe the bug
+
 <!-- A clear and concise description of what the bug is. -->
 
 ### Expected behavior
+
 <!-- A clear and concise description of what you expected to happen. -->
 
 ### To Reproduce
+
 Please try to provide a [Minimal, Complete, and Verifiable][] example.
 
 ```python
@@ -27,11 +30,13 @@ Please try to provide a [Minimal, Complete, and Verifiable][] example.
 ```
 
 ### Versions
+
   - OS:
   - Python:
   - AP_games:
 
 ### Additional context
+
 <!-- Add any other context about the problem here. -->
 
 *Have a nice day!*

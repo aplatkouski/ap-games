@@ -21,21 +21,21 @@ community include:
   - Being respectful of differing opinions, viewpoints, and experiences
   - Giving and gracefully accepting constructive feedback
   - Accepting responsibility and apologizing to those affected by our mistakes,
-    and learning from the experience
+      and learning from the experience
   - Focusing on what is best not just for us as individuals, but for the
-    overall community
+      overall community
 
 Examples of unacceptable behavior include:
 
   - The use of sexualized language or imagery, and sexual attention or
-    advances of any kind
+      advances of any kind
   - Trolling, insulting or derogatory comments, and personal or political
-    attacks
+      attacks
   - Public or private harassment
   - Publishing others' private information, such as a physical or email
-    address, without their explicit permission
+      address, without their explicit permission
   - Other conduct which could reasonably be considered inappropriate in a
-    professional setting
+      professional setting
 
 ## Enforcement Responsibilities
 
@@ -60,15 +60,17 @@ appointed representative at an online or offline event.
 ## Attribution
 
 This Code of Conduct is adapted from the [Contributor Covenant][homepage],
-version 2.0, available at
-https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
+version 2.0, available at [www.contributor-covenant.org][]
 
 Community Impact Guidelines were inspired by [Mozilla's code of conduct
 enforcement ladder][mozilla's code of conduct].
 
-For answers to common questions about this code of conduct, see the FAQ at
-https://www.contributor-covenant.org/faq. Translations are available at
-https://www.contributor-covenant.org/translations.
+For answers to common questions about this code of conduct, see the
+[FAQ][contributor-covenant faq]. Translations are available at
+[contributor-covenant.org][contributor-covenant translations].
 
 [homepage]: https://www.contributor-covenant.org
+[www.contributor-covenant.org]: https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
 [mozilla's code of conduct]: https://github.com/mozilla/diversity
+[contributor-covenant faq]: https://www.contributor-covenant.org/faq
+[contributor-covenant translations]: https://www.contributor-covenant.org/translations

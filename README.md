@@ -29,6 +29,7 @@ the game is to own more pieces than your opponent when the game is over.
 See [source][reversi rules source].
 
 The example below shows the game interface:
+
 ```txt
 Please choose the game:
 	1 - Tic-Tac-Toe;
@@ -118,11 +119,13 @@ See [aplatkouski/ap-games][] repository.
 ## How to use
 
 Run module:
+
 ```shell script
 python -m ap_games [game] [player1 player2]
 ```
 
 Where:
+
   - ``game`` is a value from the following set:
     - ``1`` or ``tic-tac-toe`` for Tic-Tac-Toe game;
     - ``2`` or ``reversi`` for Reversi game.
@@ -133,6 +136,7 @@ Where:
 **Note**: Parameters in brackets are optional.
 
 Or open the python console and type:
+
 ```python
 # Python version 3.8+
 from ap_games import cli
@@ -143,6 +147,7 @@ cli.main()
 
 This package can be run as a console game or integrated into another
 application. This project provides the following basic structures:
+
   - ``SquareGameboard``
   - ``GameBase``
     - ``TicTacToe``

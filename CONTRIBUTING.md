@@ -25,19 +25,21 @@ tests and checks will be merged.
 ## Setting up a development environment
 
 ### [Fork and clone][github docs fork-a-repo] this repository
-  1. Go to ``https://github.com/aplatkouski/ap-games`` and click the "fork"
+
+1. Go to ``https://github.com/aplatkouski/ap-games`` and click the "fork"
      to create own copy of the project.
 
-  2. Using [git][] clone the project to local computer and add the upstream
+2. Using [git][] clone the project to local computer and add the upstream
      repository:
-     ```shell script
-     $ git clone https://github.com/your-username/ap-games.git
-     $ cd ap-games
-     $ git remote add upstream  https://github.com/aplatkouski/ap-games.git
-     $ git remote -v
-     ```
 
-### Create and activate a [virtual environment]
+   ```shell script
+   $ git clone https://github.com/your-username/ap-games.git
+   $ cd ap-games
+   $ git remote add upstream  https://github.com/aplatkouski/ap-games.git
+   $ git remote -v
+   ```
+
+### Create and activate a [virtual environment][]
 
 **Note**: The minimum supported Python version is 3.8.
 
@@ -52,57 +54,66 @@ $ source .venv/bin/activate
 ```
 
 ### Check python version
+
 ```shell script
 (.venv) $ python --version
 ```
 
 ### Install this package
-  1. Upgrade ``pip`` and ``setuptools``
-     ```shell script
-     (.venv) $ pip install --no-cache-dir --upgrade pip setuptools
-     ```
 
-  2. Install package, along with the tools you need to develop and run
+1. Upgrade ``pip`` and ``setuptools``:
+
+   ```shell script
+   (.venv) $ pip install --no-cache-dir --upgrade pip setuptools
+   ```
+
+2. Install package, along with the tools you need to develop and run
      tests, run the following in your virtual environment:
-     ```shell script
-     (.venv) $ pip install -e .[dev,test]
-     (.venv) $ pre-commit install --install-hooks
-     ```
 
-     This will install:
-       - [pytest][] and [coverage.py][] to run the tests;
-       - [black][] to format the code;
-       - [flake8][] to identify coding errors and check code style;
-       - [pydocstyle][] to check docstring style;
-       - [pre-commit][] to run the formatters and linters on every commit;
-       - [tox][] to run common development tasks.
+   ```shell script
+   (.venv) $ pip install -e .[dev,test]
+   (.venv) $ pre-commit install --install-hooks
+   ```
+
+   This will install:
+
+     - [pytest][] and [coverage.py][] to run the tests;
+     - [black][] to format the code;
+     - [flake8][] to identify coding errors and check code style;
+     - [pydocstyle][] to check docstring style;
+     - [pre-commit][] to run the formatters and linters on every commit;
+     - [tox][] to run common development tasks.
 
 **Congratulations!** You're now all set to begin development.
 
 ## During development
 
   - Activate your virtual environment
+
     ```shell script
     $ cd ap-games
     $ source .venv/bin/activate
     ```
 
   - Pull the last changes from ``upstream`` and create own
-    branch for the feature:
+      branch for the feature:
+
     ```shell script
     (.venv) $ git checkout master
     (.venv) $ git pull upstream master
     (.venv) $ git checkout -b new-feature
     ```
 
-  - Your work here ...
+  - **Your work here ...**
 
   - Run the tests:
+
     ```shell script
     (.venv) $ pytest
     ```
 
   - Run the tests and generate a coverage report:
+
     ```shell script
     (.venv) $ tox -e py,coverage
     ```
@@ -110,6 +121,7 @@ $ source .venv/bin/activate
     Please add or update tests to ensure the coverage doesn't drop.
 
   - Run the formatters and linters:
+
     ```shell script
     (.venv) $ tox -e check
     ```
@@ -118,12 +130,14 @@ $ source .venv/bin/activate
     Please fix any failures before committing.
 
   - Run the tests in all supported Python versions, generate a coverage
-    report, and run the checks
+      report, and run the checks
+
     ```shell script
     (.venv) $ tox
     ```
 
   - Commit the changes
+
     ```shell script
     (.venv) $ git commit add .
     (.venv) $ git commit -s -m "A brief description of changes"
@@ -132,6 +146,7 @@ $ source .venv/bin/activate
 ## To submit contribution
 
 ### To rebase on master
+
 ```shell script
 (.venv) $ git fetch upstream
 
@@ -150,6 +165,7 @@ $ source .venv/bin/activate
 ```
 
 Or recovering from mess-ups if necessary:
+
 ```shell script
 (.venv) $ git rebase --abort
 
@@ -191,29 +207,35 @@ This project adheres to [PEP 440 - Version Identification][pep 440] and uses
 (.venv) $ git pull upstream master
 ```
 
-### Update the [CHANGELOG.md][]
+### Update the [CHANGELOG.md][changelog]
 
 ### Change a version number, commit the changes, tag the release
-(e.g. ``0.0.1b3`)
+
+e.g. ``0.0.1b3``
+
 ```shell script
 (.venv) $ python setup.py --version
 0.0.1b3.dev1+gea9858a.d20200725
 (.venv) $ bump2version --dry-run --list [major|minor|maintenance|release|build]
 ```
+
 Run ``bump2version`` without ``--dry-run`` upon a correct output.
 
 For example:
+
 ```shell script
 (.venv) $ version=v`bump2version --dry-run --list maintenance | tail -n 1 | sed -r "s/^.*=//"`
 (.venv) $ bump2version --list maintenance
 ```
 
 ### Push origin
+
 ```shell script
 (.venv) $ git push origin master $version
 ```
 
 ### Run the release pipeline to upload to [TestPyPI][testpypi]
+
 ```shell script
 (.venv) $ tox -e release
 ```
@@ -227,9 +249,7 @@ For example:
 ### Create a new GitHub Release
 
 Using the [GitHub CLI][github cli], with the version number as the title,
-the changelog as the description, and the
- distribution packages
-as assets
+the changelog as the description, and the distribution packages as assets
 
 ```shell script
 (.venv) $ hub release create -m $version -e $(find dist/* -exec echo "-a {}" \;) $version
