@@ -161,6 +161,9 @@ Thanks to Gaurav Sen for his video
 Development of this happens on GitHub, patches including tests,
 documentation are very welcome, as well as bug reports!
 
+This project has a [code of conduct][]. By interacting with this
+repository, organization, or community you agree to abide by its terms.
+
 See also our [CONTRIBUTING.md][contributing.md].
 
 ## Copyright
@@ -176,6 +179,7 @@ MIT License - see the [LICENSE.txt][license.txt] file for details.
 [python]: https://www.python.org/
 [github]: https://github.com
 [aplatkouski/ap-games]: https://github.com/aplatkouski/ap-games
-[contributing.md]: https://github.com/aplatkouski/ap-games/blob/master/CONTRIBUTING.md
 [minimax algorithm video]: https://www.youtube.com/watch?v=KU9Ch59-4vw
+[code of conduct]: https://github.com/aplatkouski/ap-games/blob/master/CODE_OF_CONDUCT.md
+[contributing.md]: https://github.com/aplatkouski/ap-games/blob/master/CONTRIBUTING.md
 [license.txt]: https://github.com/aplatkouski/ap-games/blob/master/LICENSE.txt
