@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from functools import cached_property
-from platform import platform
+from platform import system
 from typing import cast
 from typing import TYPE_CHECKING
 
@@ -141,7 +141,7 @@ class SquareGameboard:
         .. warning::
 
             This attribute is always equal ``False`` on non-Linux
-            platforms.
+            systems.
 
     :param indent:  The indentation that will be added to the front of
         grid when printing the gameboard.
@@ -198,8 +198,8 @@ class SquareGameboard:
         _safety: bool = True,
     ) -> None:
 
-        self.colorized: bool = colorized if _safety and platform().startswith(
-            'Linux'
+        self.colorized: bool = colorized if (
+            _safety and system() == 'Linux'
         ) else False
         self.indent: str = indent
         size: int = int(len(grid) ** (1 / 2))
