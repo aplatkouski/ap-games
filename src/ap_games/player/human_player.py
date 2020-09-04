@@ -20,7 +20,7 @@ class HumanPlayer(Player):
     def move(self) -> Coordinate:
         """Read coordinate of the next move from the input and return it.
 
-        :returns: Return ``UNDEFINED_COORDINATE`` if the coordinate is
+        :returns: Return ``UNDEFINED_COORDINATE`` when the coordinate is
             incorrect.
 
         """

@@ -367,7 +367,7 @@ class SquareGameboard:
 
     @property
     def available_moves(self) -> Coordinates:
-        """Return coordinates of all ``EMPTY`` cells."""
+        """Return a tuple of coordinates of all ``EMPTY`` cells."""
         return tuple(
             cell.coordinate
             for cell in self._cells_dict.values()

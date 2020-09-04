@@ -153,7 +153,9 @@ class Reversi(TwoPlayerBoardGame):
         gameboard: Optional[SquareGameboard] = None,
         player_mark: Optional[PlayerMark] = None,
     ) -> Coordinates:
-        """Determine available cells, save their coordinates to cache.
+        """Return a tuple of coordinates of all the ``EMPTY`` cells.
+
+        The function saves coordinates of all available moves to cache.
 
         :param gameboard: Optional.  If undefined, use
             :attr:`.gameboard`.

@@ -221,7 +221,7 @@ class TwoPlayerBoardGame:
         gameboard: Optional[SquareGameboard] = None,
         player_mark: Optional[PlayerMark] = None,
     ) -> Coordinates:
-        """Return coordinates of all ``EMPTY`` cells on the gameboard.
+        """Return a tuple of coordinates of all the ``EMPTY`` cells.
 
         This method should be overridden by subclasses if there is a
         more complex rule for determining which cell is available.

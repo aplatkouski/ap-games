@@ -413,7 +413,7 @@ class AIPlayer(Player):
 
         .. note::
 
-            This function only makes sense if the minimax algorithm is
+            This function only makes sense when the minimax algorithm is
             limited in depth and cannot reach the end of the game.
 
         Function increases "score" of move if it is the move of the
