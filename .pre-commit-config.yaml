@@ -51,7 +51,7 @@ repos:
         args: [--strict]
         additional_dependencies: [mypy-extensions]
   - repo: https://github.com/PyCQA/pydocstyle
-    rev: 5.0.2
+    rev: 5.1.1
     hooks:
       - id: pydocstyle
   - repo: https://github.com/asottile/pyupgrade
