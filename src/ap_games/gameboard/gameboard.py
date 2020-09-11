@@ -35,13 +35,12 @@ __all__ = ('SquareGameboard',)
 
 @dataclass(frozen=True)
 class _Colors:
-    header: Final[str] = '\033[35m'
-    blue: Final[str] = '\033[34m'
-    green: Final[str] = '\033[32m'
-    yellow: Final[str] = '\033[33m'
-    turquoise: Final[str] = '\033[36m'
-    end: Final[str] = '\033[0m'
-    bold: Final[str] = '\033[1m'
+    NO_COLOR: Final[str] = '\033[0m'
+    BOLD: Final[str] = '\033[1m'
+    GREEN: Final[str] = '\033[32m'
+    BLUE: Final[str] = '\033[34m'
+    PURPLE: Final[str] = '\033[35m'
+    CYAN: Final[str] = '\033[36m'
 
 
 class _GameboardRegistry:
@@ -164,9 +163,9 @@ class SquareGameboard:
     """
 
     mark_colors: Final[ClassVar[Dict[Mark, str]]] = {
-        X_MARK: _Colors.blue,
-        O_MARK: _Colors.green,
-        EMPTY: _Colors.header,
+        X_MARK: _Colors.BLUE,
+        O_MARK: _Colors.GREEN,
+        EMPTY: _Colors.PURPLE,
     }
 
     default_grid: ClassVar[str] = EMPTY * 9
@@ -257,7 +256,7 @@ class SquareGameboard:
             + f'{self._gap}'.join(
                 (self._colors_dict[cell.coordinate] if self.colorized else '')
                 + cell.mark
-                + (_Colors.end if self.colorized else '')
+                + (_Colors.NO_COLOR if self.colorized else '')
                 for cell in row
             )
             + f'{self._gap}|'
@@ -396,12 +395,12 @@ class SquareGameboard:
             self._cells_dict[coordinate] = Cell(coordinate, mark)
             if self.colorized:
                 if force:
-                    self._colors_dict[coordinate] = _Colors.turquoise
+                    self._colors_dict[coordinate] = _Colors.CYAN
                 else:
                     self._default_paint()
                     self._colors_dict[
                         coordinate
-                    ] = f'{_Colors.bold}{_Colors.turquoise}'
+                    ] = f'{_Colors.BOLD}{_Colors.CYAN}'
             self._grid_cache = ''
             return 1
         logger.warning('This cell is occupied! Choose another one!')
