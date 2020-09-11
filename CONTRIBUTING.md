@@ -216,7 +216,7 @@ e.g. ``0.0.1b3``
 ```shell script
 (.venv) $ python setup.py --version
 0.0.1b3.dev1+gea9858a.d20200725
-(.venv) $ bump2version --dry-run --list [major|minor|maintenance|release|build]
+(.venv) $ bump2version --dry-run --list [major|minor|patch|prerelease|postrelease|devrelease]
 ```
 
 Run ``bump2version`` without ``--dry-run`` upon a correct output.
@@ -224,8 +224,8 @@ Run ``bump2version`` without ``--dry-run`` upon a correct output.
 For example:
 
 ```shell script
-(.venv) $ version=v`bump2version --dry-run --list maintenance | tail -n 1 | sed -r "s/^.*=//"`
-(.venv) $ bump2version --list maintenance
+(.venv) $ version=v`bump2version --dry-run --list patch | tail -n 1 | sed -r "s/^.*=//"`
+(.venv) $ bump2version --list patch
 ```
 
 ### Push origin
