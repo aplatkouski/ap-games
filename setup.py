@@ -17,6 +17,7 @@ setup(
             'flake8-pytest-style==1.3.0',
             'flake8-rst-docstrings==0.0.13',
             'flake8-typing-imports==1.9.0',
+            'gitlint==0.13.1',
             'keyring==21.4.0',
             'mypy==0.782',
             'mypy-extensions==0.4.3',

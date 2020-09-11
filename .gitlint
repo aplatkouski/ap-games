@@ -1,0 +1,11 @@
+[general]
+# https://jorisroovers.com/gitlint/contrib_rules/#ct1-contrib-title-conventional-commits
+contrib=contrib-title-conventional-commits,CT1
+
+[ignore-by-title]
+regex=^Release v(.*)
+ignore=all
+
+[contrib-title-conventional-commits]
+# Specify allowed commit types. For details see: https://www.conventionalcommits.org/
+types = fix,feat,build,chore,ci,docs,perf,refactor,revert,style,test

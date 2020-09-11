@@ -1,5 +1,6 @@
 exclude .bumpversion.cfg
 exclude .gitignore
+exclude .gitlint
 exclude .pre-commit-config.yaml
 exclude .travis.yml
 exclude requirements-dev.txt
