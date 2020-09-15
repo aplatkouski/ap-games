@@ -6,14 +6,14 @@ from platform import system
 from typing import cast
 from typing import TYPE_CHECKING
 
+from ap_games.ap_collections import Cell
+from ap_games.ap_collections import Coordinate
+from ap_games.ap_collections import Offset
 from ap_games.ap_constants import EMPTY
 from ap_games.ap_constants import O_MARK
 from ap_games.ap_constants import UNDEFINED_CELL
 from ap_games.ap_constants import X_MARK
-from ap_games.ap_typing import Cell
-from ap_games.ap_typing import Coordinate
 from ap_games.ap_typing import Mark
-from ap_games.ap_typing import Offset
 from ap_games.log import logger
 
 if TYPE_CHECKING:

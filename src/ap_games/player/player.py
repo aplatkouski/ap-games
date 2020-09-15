@@ -9,7 +9,7 @@ from ap_games.ap_constants import UNDEFINED_COORDINATE
 if TYPE_CHECKING:
     from typing import Tuple
 
-    from ap_games.ap_typing import Coordinate
+    from ap_games.ap_collections import Coordinate
     from ap_games.ap_typing import PlayerMark
     from ap_games.ap_typing import PlayerType
     from ap_games.game.game_base import TwoPlayerBoardGame

@@ -3,8 +3,8 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
+from ap_games.ap_collections import Coordinate
 from ap_games.ap_constants import UNDEFINED_COORDINATE
-from ap_games.ap_typing import Coordinate
 from ap_games.log import logger
 from ap_games.player.player import Player
 

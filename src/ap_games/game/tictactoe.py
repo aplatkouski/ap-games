@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ap_games.ap_typing import GameStatus
+from ap_games.ap_collections import GameStatus
 from ap_games.game.game_base import TwoPlayerBoardGame
 
 if TYPE_CHECKING:

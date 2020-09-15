@@ -2,16 +2,17 @@ from __future__ import annotations
 
 from configparser import ConfigParser
 from importlib import resources
+from pathlib import Path
 import random
 import sys
 from typing import cast
-from typing import NamedTuple
 from typing import TYPE_CHECKING
 
 from ap_games.ap_typing import PlayerType
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
 from ap_games.log import logger
+from ap_games.settings import Settings
 
 __all__ = ('main',)
 
@@ -21,29 +22,10 @@ if sys.version_info < (3, 8):
 
 
 if TYPE_CHECKING:
-    from typing import Dict
     from typing import Tuple
-    from typing import Type
     from typing import Union
 
     from ap_games.game.game_base import TwoPlayerBoardGame
-
-
-class Game(NamedTuple):
-    """Game(name: str, game_class: Type[TwoPlayerBoardGame])."""
-
-    name: str
-    game_class: Type[TwoPlayerBoardGame]
-
-
-class Settings:
-    config_file: str = 'config.ini'
-    supported_games: Dict[str, Game] = {
-        '1': Game(name='Tic-Tac-Toe', game_class=TicTacToe),
-        '2': Game(name='Reversi', game_class=Reversi),
-    }
-    test_mode: bool = False
-    log_level: str = 'INFO'
 
 
 def main() -> None:
@@ -76,14 +58,18 @@ def main() -> None:
 
 
 def read_config() -> None:
-    """Read the log level from the config.ini and set it."""
+    """Read the configuration from `config.ini` and set it."""
     cfg = ConfigParser()
-    cfg.read_string(
-        resources.read_text(package='ap_games', resource=Settings.config_file)
-    )
-    log_level: str = cfg.get('ap-games', 'log_level').upper()
-    Settings.log_level = log_level if log_level == 'DEBUG' else 'INFO'
-    Settings.test_mode = cfg.getboolean('ap-games', 'test_mode')
+    config_file_path: Path = Path('.') / Settings.config_file
+    if config_file_path.exists():
+        cfg.read_string(
+            resources.read_text(
+                package='ap_games', resource=Settings.config_file
+            )
+        )
+        log_level: str = cfg.get('ap-games', 'log_level').upper()
+        Settings.log_level = log_level if log_level == 'DEBUG' else 'INFO'
+        Settings.test_mode = cfg.getboolean('ap-games', 'test_mode')
 
 
 def run_test_mode_and_exit() -> None:

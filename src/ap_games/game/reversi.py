@@ -3,9 +3,9 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
+from ap_games.ap_collections import Coordinate
+from ap_games.ap_collections import GameStatus
 from ap_games.ap_constants import EMPTY
-from ap_games.ap_typing import Coordinate
-from ap_games.ap_typing import GameStatus
 from ap_games.game.game_base import TwoPlayerBoardGame
 from ap_games.log import logger
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Tuple
 
-    from ap_games.ap_typing import Cell
+    from ap_games.ap_collections import Cell
     from ap_games.ap_typing import Coordinates
     from ap_games.ap_typing import Directions
     from ap_games.ap_typing import PlayerMark

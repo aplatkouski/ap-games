@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ap_games.ap_typing import Cell
-from ap_games.ap_typing import Coordinate
-from ap_games.ap_typing import Move
+from ap_games.ap_collections import Cell
+from ap_games.ap_collections import Coordinate
+from ap_games.ap_collections import Move
 
 if TYPE_CHECKING:
     from typing import Final

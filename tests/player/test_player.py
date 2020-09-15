@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from ap_games.ap_typing import Coordinate
+from ap_games.ap_collections import Coordinate
 from ap_games.game.game_base import TwoPlayerBoardGame
 from ap_games.player.player import Player
 

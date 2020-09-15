@@ -4,17 +4,39 @@ from typing import TYPE_CHECKING
 
 import pytest  # type: ignore
 
+from ap_games.ap_collections import Cell
+from ap_games.ap_collections import Coordinate
 from ap_games.ap_constants import EMPTY
 from ap_games.ap_constants import O_MARK
 from ap_games.ap_constants import X_MARK
-from ap_games.ap_typing import Cell
-from ap_games.ap_typing import Coordinate
+from ap_games.gameboard.gameboard import _GameboardRegistry
 from ap_games.gameboard.gameboard import SquareGameboard
 
 if TYPE_CHECKING:
+    from typing import List
     from typing import Tuple
 
     from ap_games.ap_typing import Side
+
+
+@pytest.fixture(scope='session')
+def all_coordinates_2x2() -> List[Coordinate]:
+    return [
+        Coordinate(x=1, y=1),
+        Coordinate(x=1, y=2),
+        Coordinate(x=2, y=1),
+        Coordinate(x=2, y=2),
+    ]
+
+
+@pytest.fixture(scope='session')
+def gameboard_registry_2x2() -> _GameboardRegistry:
+    return _GameboardRegistry(size=2)
+
+
+@pytest.fixture(scope='session')
+def gameboard_registry_3x3() -> _GameboardRegistry:
+    return _GameboardRegistry(size=3)
 
 
 @pytest.fixture(scope='session')
@@ -54,9 +76,31 @@ def grid_2x2_as_string(cells: Tuple[Cell, ...]) -> str:
     return ''.join(cell.mark for cell in cells)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture()
 def gameboard_2x2(grid_2x2_as_string: str) -> SquareGameboard:
     return SquareGameboard(grid=grid_2x2_as_string)
+
+
+@pytest.fixture(scope='module')
+def grid_3x3_as_string(cells: Tuple[Cell, ...]) -> str:
+    return 'X O X O X'
+
+
+@pytest.fixture(scope='module')
+def grid_3x3_no_colorized(cells: Tuple[Cell, ...]) -> str:
+    return (
+        '  ---------\n'
+        '3 | X   O |\n'
+        '2 |   X   |\n'
+        '1 | O   X |\n'
+        '  ---------\n'
+        '    1 2 3 '
+    )
+
+
+@pytest.fixture()
+def gameboard_3x3_no_colorized(grid_3x3_as_string: str) -> SquareGameboard:
+    return SquareGameboard(grid=grid_3x3_as_string, axis=True, colorized=False)
 
 
 @pytest.fixture(scope='module')

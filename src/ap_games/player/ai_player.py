@@ -6,10 +6,10 @@ from operator import sub
 import random
 from typing import TYPE_CHECKING
 
+from ap_games.ap_collections import Move
+from ap_games.ap_collections import Node
 from ap_games.ap_constants import UNDEFINED_COORDINATE
 from ap_games.ap_constants import UNDEFINED_MOVE
-from ap_games.ap_typing import Move
-from ap_games.ap_typing import Node
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.player import Player
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Set
 
-    from ap_games.ap_typing import Coordinate
-    from ap_games.ap_typing import GameStatus
+    from ap_games.ap_collections import GameStatus
+    from ap_games.ap_collections import Coordinate
     from ap_games.ap_typing import PlayerMark
     from ap_games.ap_typing import PlayerType
     from ap_games.ap_typing import Tree

@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING
 
 import pytest  # type: ignore
 
+from ap_games.ap_collections import Coordinate
 from ap_games.ap_constants import EMPTY
 from ap_games.ap_constants import O_MARK
 from ap_games.ap_constants import X_MARK
-from ap_games.ap_typing import Coordinate
 from ap_games.gameboard.gameboard import SquareGameboard
 
 if TYPE_CHECKING:
     from typing import Tuple
 
-    from ap_games.ap_typing import Cell
+    from ap_games.ap_collections import Cell
     from ap_games.ap_typing import Mark
     from ap_games.ap_typing import Side
 

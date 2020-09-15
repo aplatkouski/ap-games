@@ -3,8 +3,8 @@ from __future__ import annotations
 from typing import cast
 from typing import TYPE_CHECKING
 
-from ap_games.ap_typing import Coordinate
-from ap_games.ap_typing import GameStatus
+from ap_games.ap_collections import Coordinate
+from ap_games.ap_collections import GameStatus
 from ap_games.ap_typing import PlayerType
 from ap_games.game.reversi import Reversi
 
