@@ -26,7 +26,7 @@ repos:
     hooks:
       - id: black
   - repo: https://github.com/mgedmin/check-manifest
-    rev: "0.42"
+    rev: "0.44"
     hooks:
       - id: check-manifest
   - repo: https://github.com/terrencepreilly/darglint
@@ -34,7 +34,7 @@ repos:
     hooks:
       - id: darglint
   - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.8.3
+    rev: 3.8.4
     hooks:
       - id: flake8
         additional_dependencies:
@@ -49,7 +49,7 @@ repos:
           - pydocstyle
           - pygments
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.782
+    rev: v0.790
     hooks:
       - id: mypy
         args: [--strict]
