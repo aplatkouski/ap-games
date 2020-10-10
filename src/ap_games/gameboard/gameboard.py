@@ -230,7 +230,7 @@ class SquareGameboard:
             map(str, range(1, self._size + 1))
         )
         self._column_axis: str = (
-            f'\n{self.indent}   {self._gap}{_column_nums}{self._gap}'
+            f'{self.indent}   {self._gap}{_column_nums}{self._gap}'
             if self._axis
             else ''
         )
@@ -265,7 +265,8 @@ class SquareGameboard:
 
         return (
             f'{self.indent}{self._horizontal_border}\n'
-            f'{grid}\n{self.indent}{self._horizontal_border}'
+            f'{grid}\n'
+            f'{self.indent}{self._horizontal_border}\n'
             f'{self._column_axis}'
         )
 
