@@ -147,8 +147,8 @@ class SquareGameboard:
 
     :ivar _size: The size of gameboard from 2 to 9.
     :ivar _cells_dict: Dict with cells of the gameboard.  Where key is
-        a tuple with two coordinates of the corresponding cell.  And the
-        value is an instance of :class:`Cell`.
+        a tuple with ``x`` and ``y`` coordinates of the corresponding
+        cell.  And the value is an instance of :class:`Cell`.
 
     :ivar _colors_dict: Dict with colors of each cell of the gameboard.
         Where key is a tuple with two coordinates of the corresponding

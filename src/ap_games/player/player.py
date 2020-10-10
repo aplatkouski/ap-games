@@ -44,7 +44,7 @@ class Player:
 
     @cached_property
     def type_(self) -> str:
-        """Return type."""
+        """Return type ot the player."""
         return self._type
 
     @cached_property
@@ -54,7 +54,7 @@ class Player:
 
     @cached_property
     def mark(self) -> PlayerMark:
-        """Return mark."""
+        """Return mark of the player."""
         return self._mark
 
     def move(self) -> Coordinate:
