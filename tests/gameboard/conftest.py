@@ -65,15 +65,45 @@ def cell_2_1_x() -> Cell:
 
 
 @pytest.fixture(scope='module')
-def cells(
+def gameboard_2x2_cells(
     cell_1_2_empty: Cell, cell_2_2_o: Cell, cell_1_1_x: Cell, cell_2_1_x: Cell,
 ) -> Tuple[Cell, ...]:
     return cell_1_2_empty, cell_2_2_o, cell_1_1_x, cell_2_1_x
 
 
 @pytest.fixture(scope='module')
-def grid_2x2_as_string(cells: Tuple[Cell, ...]) -> str:
-    return ''.join(cell.mark for cell in cells)
+def gameboard_2x2_columns(
+    gameboard_2x2_cells: Tuple[Cell, ...]
+) -> Tuple[Side, ...]:
+    return (
+        (gameboard_2x2_cells[0], gameboard_2x2_cells[2]),
+        (gameboard_2x2_cells[1], gameboard_2x2_cells[3]),
+    )
+
+
+@pytest.fixture(scope='module')
+def gameboard_2x2_rows(
+    gameboard_2x2_cells: Tuple[Cell, ...]
+) -> Tuple[Side, ...]:
+    return (
+        (gameboard_2x2_cells[2], gameboard_2x2_cells[3]),
+        (gameboard_2x2_cells[0], gameboard_2x2_cells[1]),
+    )
+
+
+@pytest.fixture(scope='module')
+def gameboard_2x2_diagonals(
+    gameboard_2x2_cells: Tuple[Cell, ...]
+) -> Tuple[Side, Side]:
+    return (
+        (gameboard_2x2_cells[0], gameboard_2x2_cells[3]),
+        (gameboard_2x2_cells[2], gameboard_2x2_cells[1]),
+    )
+
+
+@pytest.fixture(scope='module')
+def grid_2x2_as_string(gameboard_2x2_cells: Tuple[Cell, ...]) -> str:
+    return ''.join(cell.mark for cell in gameboard_2x2_cells)
 
 
 @pytest.fixture()
@@ -82,12 +112,12 @@ def gameboard_2x2(grid_2x2_as_string: str) -> SquareGameboard:
 
 
 @pytest.fixture(scope='module')
-def grid_3x3_as_string(cells: Tuple[Cell, ...]) -> str:
+def grid_3x3_as_string() -> str:
     return 'X O X O X'
 
 
 @pytest.fixture(scope='module')
-def grid_3x3_no_colorized(cells: Tuple[Cell, ...]) -> str:
+def grid_3x3_no_colorized() -> str:
     return (
         '  ---------\n'
         '3 | X   O |\n'
@@ -101,18 +131,3 @@ def grid_3x3_no_colorized(cells: Tuple[Cell, ...]) -> str:
 @pytest.fixture()
 def gameboard_3x3_no_colorized(grid_3x3_as_string: str) -> SquareGameboard:
     return SquareGameboard(grid=grid_3x3_as_string, axis=True, colorized=False)
-
-
-@pytest.fixture(scope='module')
-def columns(cells: Tuple[Cell, ...]) -> Tuple[Side, ...]:
-    return (cells[0], cells[2]), (cells[1], cells[3])
-
-
-@pytest.fixture(scope='module')
-def rows(cells: Tuple[Cell, ...]) -> Tuple[Side, ...]:
-    return (cells[2], cells[3]), (cells[0], cells[1])
-
-
-@pytest.fixture(scope='module')
-def diagonals(cells: Tuple[Cell, ...]) -> Tuple[Side, Side]:
-    return (cells[0], cells[3]), (cells[2], cells[1])
