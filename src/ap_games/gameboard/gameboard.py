@@ -188,8 +188,8 @@ class SquareGameboard:
 
     def __init__(
         self,
-        grid: str = default_grid,
         *,
+        grid: str = default_grid,
         gap: str = ' ',
         axis: bool = False,
         colorized: bool = True,
