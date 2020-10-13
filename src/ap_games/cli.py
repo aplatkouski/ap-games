@@ -54,6 +54,7 @@ def main() -> None:
             logger.debug(f'{choice=}')
             game: TwoPlayerBoardGame = supported_games[choice].game_class()
             game.cli(player_types=player_types)
+        player_types = ()
         logger.info(message)
         choice = sys.stdin.readline().strip()
 
