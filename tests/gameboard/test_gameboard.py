@@ -26,10 +26,9 @@ class TestGameboardRegistry:
     def test_correct_size(self, size: int) -> None:
         assert size == _GameboardRegistry(size=size).size
 
-    @pytest.mark.parametrize('size', [0, 1, 10], ids=lambda size: f'{size=}')
-    def test_wrong_size(self, size: int) -> None:
+    def test_wrong_size(self, wrong_size: int) -> None:
         with pytest.raises(ValueError, match='between 2 and 9') as e:
-            _GameboardRegistry(size=size)
+            _GameboardRegistry(size=wrong_size)
         assert 'The size of the gameboard must be between 2 and 9!' == str(
             e.value
         )
@@ -63,33 +62,16 @@ class TestGameboardRegistry:
 
 
 class TestSquareGameboard:
-    @pytest.mark.parametrize(
-        'public_interface',
-        [
-            'size',
-            'grid_as_string',
-            'columns',
-            'rows',
-            'diagonals',
-            'all_sides',
-            'cells',
-            'available_moves',
-            'place_mark',
-            'get_offset_cell',
-            'get_offsets',
-            'count',
-            'copy',
-        ],
-        ids=lambda interface: f'{interface=}',
-    )
     def test_gameboard_interface(
         self, gameboard_2x2: SquareGameboard, public_interface: str
     ) -> None:
         assert hasattr(gameboard_2x2, public_interface)
 
-    @pytest.mark.parametrize('size', [2, 9], ids=lambda size: f'{size=}')
-    def test_size(self, size: int) -> None:
-        assert size == SquareGameboard(grid=EMPTY * (size ** 2))._size
+    def test_size(self, allowed_size: int) -> None:
+        assert (
+            allowed_size
+            == SquareGameboard(grid=EMPTY * (allowed_size ** 2))._size
+        )
 
     def test_not_square_board(self) -> None:
         with pytest.raises(ValueError, match='must be square') as e:
@@ -99,19 +81,17 @@ class TestSquareGameboard:
     def test_default_grid(self) -> None:
         assert SquareGameboard.default_grid == SquareGameboard().grid_as_string
 
-    @pytest.mark.parametrize(
-        'indent', ['', '-', '*'], ids=lambda indent: f'{indent=}'
-    )
-    def test_indent(self, indent: str) -> None:
-        assert indent == SquareGameboard(indent=indent).indent
+    def test_indent(self, indent_symbol: str) -> None:
+        assert indent_symbol == SquareGameboard(indent=indent_symbol).indent
 
-    @pytest.mark.parametrize('size', [2, 5, 9], ids=lambda size: f'{size=}')
-    def test_registry_size(self, size: int) -> None:
-        assert size == SquareGameboard(grid=EMPTY * (size ** 2)).registry.size
+    def test_registry_size(self, allowed_size: int) -> None:
+        assert (
+            allowed_size
+            == SquareGameboard(grid=EMPTY * (allowed_size ** 2)).registry.size
+        )
 
-    @pytest.mark.parametrize('gap', ['', '-', '*'], ids=lambda gap: f'{gap=}')
-    def test_gap(self, gap: str) -> None:
-        assert gap == SquareGameboard(gap=gap)._gap
+    def test_gap(self, gap_symbol: str) -> None:
+        assert gap_symbol == SquareGameboard(gap=gap_symbol)._gap
 
     @pytest.mark.parametrize(
         'axis', [True, False], ids=lambda axis: f'{axis=}'

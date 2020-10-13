@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import cast
 from typing import TYPE_CHECKING
 
 import pytest  # type: ignore
@@ -13,10 +14,60 @@ from ap_games.gameboard.gameboard import _GameboardRegistry
 from ap_games.gameboard.gameboard import SquareGameboard
 
 if TYPE_CHECKING:
+    from typing import Any
     from typing import List
     from typing import Tuple
 
     from ap_games.ap_typing import Side
+
+
+@pytest.fixture(
+    scope='session', params=[0, 1, 10], ids=lambda size: f'{size=}'
+)
+def wrong_size(request: Any) -> int:
+    return cast(int, request.param)
+
+
+@pytest.fixture(scope='session', params=[2, 5, 9], ids=lambda size: f'{size=}')
+def allowed_size(request: Any) -> int:
+    return cast(int, request.param)
+
+
+@pytest.fixture(
+    scope='session',
+    params=[
+        'size',
+        'grid_as_string',
+        'columns',
+        'rows',
+        'diagonals',
+        'all_sides',
+        'cells',
+        'available_moves',
+        'place_mark',
+        'get_offset_cell',
+        'get_offsets',
+        'count',
+        'copy',
+    ],
+    ids=lambda interface: f'{interface=}',
+)
+def public_interface(request: Any) -> str:
+    return cast(str, request.param)
+
+
+@pytest.fixture(
+    scope='session', params=['', '-', '*'], ids=lambda indent: f'{indent=}'
+)
+def indent_symbol(request: Any) -> str:
+    return cast(str, request.param)
+
+
+@pytest.fixture(
+    scope='session', params=['', '-', '*'], ids=lambda gap: f'{gap=}'
+)
+def gap_symbol(request: Any) -> str:
+    return cast(str, request.param)
 
 
 @pytest.fixture(scope='session')
