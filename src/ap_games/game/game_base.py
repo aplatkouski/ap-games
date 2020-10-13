@@ -11,6 +11,7 @@ from ap_games.ap_constants import EMPTY
 from ap_games.ap_constants import O_MARK
 from ap_games.ap_constants import UNDEFINED_COORDINATE
 from ap_games.ap_constants import X_MARK
+from ap_games.ap_typing import PlayerType
 from ap_games.gameboard.gameboard import SquareGameboard
 from ap_games.log import logger
 from ap_games.player.ai_player import AIPlayer
@@ -29,7 +30,6 @@ if TYPE_CHECKING:
     from ap_games.ap_collections import Coordinate
     from ap_games.ap_typing import Coordinates
     from ap_games.ap_typing import PlayerMark
-    from ap_games.ap_typing import PlayerType
     from ap_games.player.player import Player
 
 __all__ = ('TwoPlayerBoardGame',)
@@ -95,8 +95,7 @@ class TwoPlayerBoardGame:
         grid: str = '',
         player_types: Tuple[PlayerType, PlayerType] = ('user', 'user'),
     ):
-        if not grid:
-            grid = self.default_grid
+        grid = grid or self.default_grid
 
         if len(player_types) != 2:
             raise ValueError('The number of players should be 2!')
@@ -104,7 +103,7 @@ class TwoPlayerBoardGame:
         self.players: Deque[Player] = deque(maxlen=2)
         self._add_players(player_types=player_types)
 
-        grid_without_underscore = grid.replace('_', EMPTY)
+        grid_without_underscore: str = grid.replace('_', EMPTY)
         if not set(grid_without_underscore).issubset({*self.marks, EMPTY}):
             raise ValueError(
                 'Gameboard must contain only " ", "_" and symbols '
