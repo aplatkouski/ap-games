@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from configparser import ConfigParser
-from importlib import resources
-from pathlib import Path
 import random
 import sys
 from typing import cast
 from typing import TYPE_CHECKING
 
+from ap_games.ap_collections import Game
 from ap_games.ap_typing import PlayerType
 from ap_games.game.reversi import Reversi
 from ap_games.game.tictactoe import TicTacToe
@@ -22,6 +20,7 @@ if sys.version_info < (3, 8):
 
 
 if TYPE_CHECKING:
+    from typing import Dict
     from typing import Tuple
     from typing import Union
 
@@ -33,49 +32,40 @@ def main() -> None:
     choice: str
     player_types: Union[Tuple[str, str], Tuple[()]]
 
-    read_config()
-    logger.setLevel(Settings.log_level)
-    if Settings.test_mode:
-        run_test_mode_and_exit()
-    choice, player_types = read_argv()
+    settings: Settings = Settings()
+    if settings.test_mode:
+        run_test_mode_and_exit(settings)
+
+    supported_games: Dict[str, Game] = {
+        '1': Game(name='Tic-Tac-Toe', game_class=TicTacToe),
+        '2': Game(name='Reversi', game_class=Reversi),
+    }
+    choice, player_types = read_argv(supported_games)
+
     games_menu: str = ";\n\t".join(
-        f'{num} - {game.name}'
-        for num, game in Settings.supported_games.items()
+        f'{num} - {game.name}' for num, game in supported_games.items()
     )
     message: str = (
         f'Please choose the game:\n\t{games_menu}.\n'
         'Type "exit" to exit the program.\n\nInput command: '
     )
     while choice != 'exit':
-        if choice in Settings.supported_games:
+        if choice in supported_games:
             logger.debug(f'{choice=}')
-            game: TwoPlayerBoardGame = Settings.supported_games[
-                choice
-            ].game_class()
+            game: TwoPlayerBoardGame = supported_games[choice].game_class()
             game.cli(player_types=player_types)
         logger.info(message)
         choice = sys.stdin.readline().strip()
 
 
-def read_config() -> None:
-    """Read the configuration from `config.ini` and set it."""
-    cfg = ConfigParser()
-    config_file_path: Path = Path('.') / Settings.config_file
-    if config_file_path.exists():
-        cfg.read_string(
-            resources.read_text(
-                package='ap_games', resource=Settings.config_file
-            )
-        )
-        log_level: str = cfg.get('ap-games', 'log_level').upper()
-        Settings.log_level = log_level if log_level == 'DEBUG' else 'INFO'
-        Settings.test_mode = cfg.getboolean('ap-games', 'test_mode')
+def run_test_mode_and_exit(settings: Settings) -> None:
+    """Run the predefined configuration when ``test_mode=True`` and exit.
 
+    :param settings: instance of :class:`Settings`.
 
-def run_test_mode_and_exit() -> None:
-    """Run the predefined configuration when ``test_mode=True`` and exit."""
+    """
     random.seed(42)
-    logger.debug(f'{Settings.test_mode=}')
+    logger.debug(f'{settings.test_mode=}')
     game: TwoPlayerBoardGame = Reversi(
         player_types=(cast(PlayerType, 'medium'), cast(PlayerType, 'hard'))
     )
@@ -87,8 +77,13 @@ def run_test_mode_and_exit() -> None:
     sys.exit()
 
 
-def read_argv() -> Tuple[str, Union[Tuple[str, str], Tuple[()]]]:
+def read_argv(
+    supported_games: Dict[str, Game]
+) -> Tuple[str, Union[Tuple[str, str], Tuple[()]]]:
     """Read command-line arguments and return them.
+
+    :param supported_games: A ``dict`` where the key is the game number
+        and the value is an instance of :class:`Game`
 
     :returns: Two-element tuple, where:
 
@@ -104,7 +99,7 @@ def read_argv() -> Tuple[str, Union[Tuple[str, str], Tuple[()]]]:
     if len(sys.argv) >= 1:
         selected_game = sys.argv[0]
         selected_game = selected_game.title()
-        for num, game in Settings.supported_games.items():
+        for num, game in supported_games.items():
             selected_game = selected_game.replace(game.name, num)
         if len(sys.argv) >= 3:
             player_types = (sys.argv[1], sys.argv[2])

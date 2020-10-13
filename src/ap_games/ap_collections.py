@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Dict
 from typing import NamedTuple
 from typing import TYPE_CHECKING
+from typing import TypedDict
 
 if TYPE_CHECKING:
     from typing import Type
@@ -11,6 +12,14 @@ if TYPE_CHECKING:
     from ap_games.ap_typing import Mark
     from ap_games.ap_typing import PlayerMark
     from ap_games.game.game_base import TwoPlayerBoardGame
+
+
+class Config(TypedDict, total=False):
+    """Config(log_level: str, log_file: str, test_mode: bool)."""
+
+    log_level: str
+    log_file: str
+    test_mode: bool
 
 
 class Coordinate(NamedTuple):

@@ -1,22 +1,20 @@
 import logging
-import os
-import pathlib
 import sys
+
+from ap_games.settings import Settings
 
 __all__ = ('logger',)
 
-BASE_DIR = pathlib.Path(__file__).parent.parent.parent.resolve(strict=True)
-LOG_LEVEL = os.environ.get('AP_GAMES_LOGLEVEL', 'ERROR')
-LOG_FILE = os.environ.get('AP_GAMES_LOGFILE', f'{BASE_DIR}/ap_games.log')
 
+settings: Settings = Settings()
 
-file_handler = logging.FileHandler(LOG_FILE)
+file_handler = logging.FileHandler(settings.path_to_log_file)
 console_handler = logging.StreamHandler(sys.stdout)
 handlers = [file_handler, console_handler]
 file_handler.setLevel(logging.WARNING)
 console_handler.setLevel(logging.DEBUG)
 logging.basicConfig(
-    format='%(message)s', level=logging.INFO, handlers=handlers,
+    format='%(message)s', level=settings.log_level, handlers=handlers,
 )
 
 logger = logging.getLogger()
