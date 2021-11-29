@@ -40,7 +40,7 @@ class Game(NamedTuple):
     """Game(name: str, game_class: Type[TwoPlayerBoardGame])."""
 
     name: str
-    game_class: Type[TwoPlayerBoardGame]
+    game_class: type[TwoPlayerBoardGame]
 
 
 class GameStatus(NamedTuple):
@@ -76,7 +76,7 @@ class Node(NamedTuple):
 
     player_mark: PlayerMark
     move: Move
-    sub_tree: Dict[str, Any]
+    sub_tree: dict[str, Any]
 
 
 class Offset(NamedTuple):

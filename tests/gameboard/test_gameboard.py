@@ -53,7 +53,7 @@ class TestGameboardRegistry:
 
     def test_all_coordinates(
         self,
-        all_coordinates_2x2: List[Coordinate],
+        all_coordinates_2x2: list[Coordinate],
         gameboard_registry_2x2: _GameboardRegistry,
     ) -> None:
         assert all_coordinates_2x2 == sorted(
@@ -118,7 +118,7 @@ class TestSquareGameboard:
     def test_cells(
         self,
         gameboard_2x2: SquareGameboard,
-        gameboard_2x2_cells: Tuple[Cell, ...],
+        gameboard_2x2_cells: tuple[Cell, ...],
     ) -> None:
         assert gameboard_2x2_cells == gameboard_2x2.cells
 
@@ -130,7 +130,10 @@ class TestSquareGameboard:
     ) -> None:
         assert cell_1_2_empty == gameboard_2x2[coordinate_1_2_empty]
 
-    def test_property_size(self, gameboard_2x2: SquareGameboard,) -> None:
+    def test_property_size(
+        self,
+        gameboard_2x2: SquareGameboard,
+    ) -> None:
         assert 2 == gameboard_2x2.size
 
     def test_grid_as_string(
@@ -141,30 +144,30 @@ class TestSquareGameboard:
     def test_columns(
         self,
         gameboard_2x2: SquareGameboard,
-        gameboard_2x2_columns: Tuple[Side, ...],
+        gameboard_2x2_columns: tuple[Side, ...],
     ) -> None:
         assert gameboard_2x2_columns == gameboard_2x2.columns
 
     def test_rows(
         self,
         gameboard_2x2: SquareGameboard,
-        gameboard_2x2_rows: Tuple[Side, ...],
+        gameboard_2x2_rows: tuple[Side, ...],
     ) -> None:
         assert gameboard_2x2_rows == gameboard_2x2.rows
 
     def test_diagonals(
         self,
         gameboard_2x2: SquareGameboard,
-        gameboard_2x2_diagonals: Tuple[Side, Side],
+        gameboard_2x2_diagonals: tuple[Side, Side],
     ) -> None:
         assert gameboard_2x2_diagonals == gameboard_2x2.diagonals
 
     def test_all_sides(
         self,
         gameboard_2x2: SquareGameboard,
-        gameboard_2x2_rows: Tuple[Side, ...],
-        gameboard_2x2_columns: Tuple[Side, ...],
-        gameboard_2x2_diagonals: Tuple[Side, Side],
+        gameboard_2x2_rows: tuple[Side, ...],
+        gameboard_2x2_columns: tuple[Side, ...],
+        gameboard_2x2_diagonals: tuple[Side, Side],
     ) -> None:
         assert (
             gameboard_2x2_rows
@@ -247,20 +250,35 @@ class TestSquareGameboard:
             (
                 Coordinate(x=2, y=2),
                 [
-                    Offset(Coordinate(x=2, y=3), Coordinate(x=0, y=1),),
-                    Offset(Coordinate(x=3, y=1), Coordinate(x=1, y=-1),),
-                    Offset(Coordinate(x=3, y=2), Coordinate(x=1, y=0),),
-                    Offset(Coordinate(x=3, y=3), Coordinate(x=1, y=1),),
+                    Offset(
+                        Coordinate(x=2, y=3),
+                        Coordinate(x=0, y=1),
+                    ),
+                    Offset(
+                        Coordinate(x=3, y=1),
+                        Coordinate(x=1, y=-1),
+                    ),
+                    Offset(
+                        Coordinate(x=3, y=2),
+                        Coordinate(x=1, y=0),
+                    ),
+                    Offset(
+                        Coordinate(x=3, y=3),
+                        Coordinate(x=1, y=1),
+                    ),
                 ],
             ),
-            (Coordinate(x=3, y=3), [],),
+            (
+                Coordinate(x=3, y=3),
+                [],
+            ),
         ],
         ids=lambda arg: f'{arg}',
     )
     def test_get_offsets(
         self,
         coordinate: Coordinate,
-        offsets: List[Offset],
+        offsets: list[Offset],
         gameboard_3x3_no_colorized: SquareGameboard,
     ) -> None:
         assert offsets == sorted(

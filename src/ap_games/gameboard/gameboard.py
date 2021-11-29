@@ -87,8 +87,8 @@ class _GameboardRegistry:
                 'The size of the gameboard must be between 2 and 9!'
             )
         self.size = size
-        self.index_to_coordinate: Dict[int, Coordinate] = {}
-        self.offsets: Dict[Coordinate, Tuple[Offset, ...]] = {}
+        self.index_to_coordinate: dict[int, Coordinate] = {}
+        self.offsets: dict[Coordinate, tuple[Offset, ...]] = {}
         self._fill_index_to_coordinate()
         self.all_coordinates: Final[Coordinates] = tuple(
             self.index_to_coordinate.values()
@@ -114,7 +114,7 @@ class _GameboardRegistry:
     def _fill_offsets(self) -> None:
         """Fill up :attr:`.offsets` for all coordinates of gameboard."""
         for coordinate in self.all_coordinates:
-            offsets: List[Offset] = []
+            offsets: list[Offset] = []
             for shift in self._directions:
                 offset_coordinate = Coordinate(
                     x=coordinate.x + shift.x, y=coordinate.y + shift.y
@@ -162,7 +162,7 @@ class SquareGameboard:
 
     """
 
-    mark_colors: Final[ClassVar[Dict[Mark, str]]] = {
+    mark_colors: Final[ClassVar[dict[Mark, str]]] = {
         X_MARK: _Colors.BLUE,
         O_MARK: _Colors.GREEN,
         EMPTY: _Colors.PURPLE,
@@ -170,7 +170,7 @@ class SquareGameboard:
 
     default_grid: ClassVar[str] = EMPTY * 9
 
-    _registries: Dict[Size, _GameboardRegistry] = {}
+    _registries: dict[Size, _GameboardRegistry] = {}
 
     def __new__(cls, **kwargs: Any) -> Any:
         """Create instance and add :attr:`._registries[size]` if necessary."""
@@ -197,9 +197,9 @@ class SquareGameboard:
         _safety: bool = True,
     ) -> None:
 
-        self.colorized: bool = colorized if (
-            _safety and system() == 'Linux'
-        ) else False
+        self.colorized: bool = (
+            colorized if (_safety and system() == 'Linux') else False
+        )
         self.indent: str = indent
         size: int = int(len(grid) ** (1 / 2))
         self.registry: _GameboardRegistry = self._registries[size]
@@ -207,8 +207,8 @@ class SquareGameboard:
         self._gap: Final[str] = gap
         self._axis: Final[bool] = axis
 
-        self._cells_dict: Dict[Tuple[int, int], Cell] = {}
-        self._colors_dict: Dict[Tuple[int, int], str] = {}
+        self._cells_dict: dict[tuple[int, int], Cell] = {}
+        self._colors_dict: dict[tuple[int, int], str] = {}
         self._grid_cache: str = ''
         if _safety:
             if not set(grid).issubset(set(self.mark_colors.keys())):
@@ -222,9 +222,8 @@ class SquareGameboard:
                 self._cells_dict[coordinate] = Cell(coordinate, mark)
             self._default_paint()
 
-        self._horizontal_border: str = (
-            ('  ' if self._axis else '')
-            + '-' * (self._size + len(self._gap) * (self._size + 1) + 2)
+        self._horizontal_border: str = ('  ' if self._axis else '') + '-' * (
+            self._size + len(self._gap) * (self._size + 1) + 2
         )
         _column_nums: str = f'{self._gap}'.join(
             map(str, range(1, self._size + 1))
@@ -306,7 +305,7 @@ class SquareGameboard:
         return self._grid_cache
 
     @property
-    def columns(self) -> Tuple[Side, ...]:
+    def columns(self) -> tuple[Side, ...]:
         """Return all columns of gameboard as a tuple."""
         return tuple(
             tuple(
@@ -319,7 +318,7 @@ class SquareGameboard:
         )
 
     @property
-    def rows(self) -> Tuple[Side, ...]:
+    def rows(self) -> tuple[Side, ...]:
         """Return all rows of gameboard as a tuple."""
         return tuple(
             tuple(
@@ -332,7 +331,7 @@ class SquareGameboard:
         )
 
     @property
-    def diagonals(self) -> Tuple[Side, Side]:
+    def diagonals(self) -> tuple[Side, Side]:
         """Return main and reverse diagonals as tuples of cell."""
         main_diagonal: Side = tuple(
             self._cells_dict[num, self._size - num + 1]
@@ -344,7 +343,7 @@ class SquareGameboard:
         return main_diagonal, reverse_diagonal
 
     @property
-    def all_sides(self) -> Tuple[Side, ...]:
+    def all_sides(self) -> tuple[Side, ...]:
         """Return all rows, columns and diagonals as tuple of all sides.
 
         Where each side is a tuple of cells of the corresponding side.
@@ -353,7 +352,7 @@ class SquareGameboard:
         return self.rows + self.columns + self.diagonals
 
     @property
-    def cells(self) -> Tuple[Cell, ...]:
+    def cells(self) -> tuple[Cell, ...]:
         """Return all cells of the gameboard.
 
         Where each cell is a namedtuple with two fields:
@@ -375,7 +374,11 @@ class SquareGameboard:
         )
 
     def place_mark(
-        self, coordinate: Coordinate, mark: PlayerMark, *, force: bool = False,
+        self,
+        coordinate: Coordinate,
+        mark: PlayerMark,
+        *,
+        force: bool = False,
     ) -> int:
         """Mark cell of the gameboard with the ``coordinate``.
 
@@ -421,11 +424,14 @@ class SquareGameboard:
 
         """
         return self._cells_dict.get(
-            (coordinate.x + direction.x, coordinate.y + direction.y,),
+            (
+                coordinate.x + direction.x,
+                coordinate.y + direction.y,
+            ),
             UNDEFINED_CELL,
         )
 
-    def get_offsets(self, coordinate: Coordinate) -> Tuple[Offset, ...]:
+    def get_offsets(self, coordinate: Coordinate) -> tuple[Offset, ...]:
         """Return the offsets of the given coordinate.
 
         :param coordinate:  The coordinate from which the offsets

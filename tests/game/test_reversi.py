@@ -40,7 +40,7 @@ class TestReversi:
 
     def test_wrong_players_number(self, wrong_players_number: int) -> None:
         user: PlayerType = 'user'
-        player_types: Tuple[PlayerType, ...] = (user,) * wrong_players_number
+        player_types: tuple[PlayerType, ...] = (user,) * wrong_players_number
         with pytest.raises(ValueError, match='number of players') as e:
             Reversi(player_types=player_types)  # type: ignore
         assert 'The number of players should be 2!' == str(e.value)
@@ -94,7 +94,11 @@ class TestReversi:
             ),
             ('   OXOXXX', 'X', (Coordinate(1, 3), Coordinate(3, 3))),
             ('   OXXXXX', 'X', (Coordinate(1, 3),)),
-            ('   XXXOOO', 'X', (),),
+            (
+                '   XXXOOO',
+                'X',
+                (),
+            ),
         ],
         ids=lambda arg: f'{arg}',
     )
@@ -130,17 +134,29 @@ class TestReversi:
             (
                 'XXXXXXOOO',
                 'X',
-                GameStatus(active=False, message='X wins\n', must_skip=False,),
+                GameStatus(
+                    active=False,
+                    message='X wins\n',
+                    must_skip=False,
+                ),
             ),
             (
                 'XXXOOOOOO',
                 'X',
-                GameStatus(active=False, message='O wins\n', must_skip=False,),
+                GameStatus(
+                    active=False,
+                    message='O wins\n',
+                    must_skip=False,
+                ),
             ),
             (
                 ' OOOXXOXX',
                 'X',
-                GameStatus(active=False, message='Draw\n', must_skip=False,),
+                GameStatus(
+                    active=False,
+                    message='Draw\n',
+                    must_skip=False,
+                ),
             ),
         ],
     )
@@ -159,10 +175,30 @@ class TestReversi:
     @pytest.mark.parametrize(
         ('coordinate', 'player_mark', 'gameboard_grid', 'score'),
         [
-            (Coordinate(1, 3), 'X', '   OOOXXX', 3,),
-            (Coordinate(2, 3), 'X', '   OOOXXX', 2,),
-            (Coordinate(1, 1), 'X', '   OOOXXX', 0,),
-            (Coordinate(1, 3), 'X', '   XXXOOO', 0,),
+            (
+                Coordinate(1, 3),
+                'X',
+                '   OOOXXX',
+                3,
+            ),
+            (
+                Coordinate(2, 3),
+                'X',
+                '   OOOXXX',
+                2,
+            ),
+            (
+                Coordinate(1, 1),
+                'X',
+                '   OOOXXX',
+                0,
+            ),
+            (
+                Coordinate(1, 3),
+                'X',
+                '   XXXOOO',
+                0,
+            ),
         ],
         ids=lambda arg: f'{arg}',
     )
@@ -191,14 +227,14 @@ class TestReversi:
             player_mark=player_mark,
             gameboard=SquareGameboard(grid=grid),
         )
-        assert (
-            [Coordinate(x=5, y=5)]
-            == reversi_user_user._available_moves_cache[grid, player_mark][
-                coordinate
-            ]
-        )
+        assert [
+            Coordinate(x=5, y=5)
+        ] == reversi_user_user._available_moves_cache[grid, player_mark][
+            coordinate
+        ]
         reversi_user_user.place_mark(
-            coordinate=coordinate, player_mark=player_mark,
+            coordinate=coordinate,
+            player_mark=player_mark,
         )
         assert (
             grid,

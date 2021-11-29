@@ -34,7 +34,7 @@ class Reversi(TwoPlayerBoardGame):
 
     default_grid: ClassVar[str] = f'{EMPTY * 27}XO{EMPTY * 6}OX{EMPTY * 27}'
     # coordinates with additional score
-    priority_coordinates: ClassVar[Dict[Coordinate, int]] = {
+    priority_coordinates: ClassVar[dict[Coordinate, int]] = {
         Coordinate(1, 1): 10,
         Coordinate(1, 8): 10,
         Coordinate(8, 8): 10,
@@ -53,8 +53,8 @@ class Reversi(TwoPlayerBoardGame):
 
     def get_status(
         self,
-        gameboard: Optional[SquareGameboard] = None,
-        player_mark: Optional[PlayerMark] = None,
+        gameboard: SquareGameboard | None = None,
+        player_mark: PlayerMark | None = None,
     ) -> GameStatus:
         """Return game status calculated in accordance with game rules.
 
@@ -90,7 +90,7 @@ class Reversi(TwoPlayerBoardGame):
                 must_skip=True,
             )
         else:
-            winners: Tuple[PlayerMark, ...] = self._get_winners(
+            winners: tuple[PlayerMark, ...] = self._get_winners(
                 gameboard=gameboard
             )
             if len(winners) == 1:
@@ -108,8 +108,8 @@ class Reversi(TwoPlayerBoardGame):
     def place_mark(
         self,
         coordinate: Coordinate,
-        player_mark: Optional[PlayerMark] = None,
-        gameboard: Optional[SquareGameboard] = None,
+        player_mark: PlayerMark | None = None,
+        gameboard: SquareGameboard | None = None,
     ) -> int:
         """Player's move at given coordinate on the gameboard.
 
@@ -141,7 +141,9 @@ class Reversi(TwoPlayerBoardGame):
 
         for enemy_coordinate in enemy_coordinates:
             score += gameboard.place_mark(
-                coordinate=enemy_coordinate, mark=player_mark, force=True,
+                coordinate=enemy_coordinate,
+                mark=player_mark,
+                force=True,
             )
         if gameboard is self.gameboard:
             # if gameboard is not fake
@@ -150,8 +152,8 @@ class Reversi(TwoPlayerBoardGame):
 
     def get_available_moves(
         self,
-        gameboard: Optional[SquareGameboard] = None,
-        player_mark: Optional[PlayerMark] = None,
+        gameboard: SquareGameboard | None = None,
+        player_mark: PlayerMark | None = None,
     ) -> Coordinates:
         """Return a tuple of coordinates of all the ``EMPTY`` cells.
 
@@ -205,7 +207,7 @@ class Reversi(TwoPlayerBoardGame):
 
     def _get_winners(
         self, *, gameboard: SquareGameboard
-    ) -> Tuple[PlayerMark, ...]:
+    ) -> tuple[PlayerMark, ...]:
         """Return players who have the maximum count of marks.
 
         :param gameboard: The gameboard relative to which the winner(s)
@@ -246,14 +248,16 @@ class Reversi(TwoPlayerBoardGame):
             start_cell.coordinate
         ):
             if gameboard[offset_coordinate].mark == enemy_mark:
-                enemy_coordinates: List[Coordinate] = [offset_coordinate]
+                enemy_coordinates: list[Coordinate] = [offset_coordinate]
                 next_cell: Cell = gameboard.get_offset_cell(
-                    coordinate=offset_coordinate, direction=direction,
+                    coordinate=offset_coordinate,
+                    direction=direction,
                 )
                 while next_cell.mark == enemy_mark:
                     enemy_coordinates.append(next_cell.coordinate)
                     next_cell = gameboard.get_offset_cell(
-                        coordinate=next_cell.coordinate, direction=direction,
+                        coordinate=next_cell.coordinate,
+                        direction=direction,
                     )
                 if next_cell.mark == player_mark and start_cell.mark == EMPTY:
                     self._available_moves_cache[

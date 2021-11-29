@@ -72,13 +72,13 @@ class TwoPlayerBoardGame:
 
     """
 
-    marks: ClassVar[Tuple[PlayerMark, PlayerMark]] = (X_MARK, O_MARK)
+    marks: ClassVar[tuple[PlayerMark, PlayerMark]] = (X_MARK, O_MARK)
 
     default_grid: ClassVar[str] = EMPTY * 9
     grid_axis: ClassVar[bool] = True
     grid_gap: ClassVar[str] = ' '
 
-    supported_players: ClassVar[Dict[PlayerType, Type[Player]]] = {
+    supported_players: ClassVar[dict[PlayerType, type[Player]]] = {
         'easy': AIPlayer,
         'hard': AIPlayer,
         'medium': AIPlayer,
@@ -87,13 +87,13 @@ class TwoPlayerBoardGame:
     }
 
     rules: ClassVar[str] = ''
-    priority_coordinates: ClassVar[Dict[Coordinate, int]] = {}
+    priority_coordinates: ClassVar[dict[Coordinate, int]] = {}
 
     def __init__(
         self,
         *,
         grid: str = '',
-        player_types: Tuple[PlayerType, PlayerType] = ('user', 'user'),
+        player_types: tuple[PlayerType, PlayerType] = ('user', 'user'),
     ):
         grid = grid or self.default_grid
 
@@ -119,8 +119,8 @@ class TwoPlayerBoardGame:
             axis=self.grid_axis,
         )
 
-        self._available_moves_cache: Dict[
-            Tuple[str, PlayerMark], DefaultDict[Coordinate, List[Coordinate]]
+        self._available_moves_cache: dict[
+            tuple[str, PlayerMark], DefaultDict[Coordinate, list[Coordinate]]
         ] = {}
 
     def __repr__(self) -> str:
@@ -152,8 +152,8 @@ class TwoPlayerBoardGame:
 
     def get_status(
         self,
-        gameboard: Optional[SquareGameboard] = None,
-        player_mark: Optional[PlayerMark] = None,
+        gameboard: SquareGameboard | None = None,
+        player_mark: PlayerMark | None = None,
     ) -> GameStatus:
         """Return game status calculated in accordance with game rules.
 
@@ -189,8 +189,8 @@ class TwoPlayerBoardGame:
     def place_mark(
         self,
         coordinate: Coordinate,
-        player_mark: Optional[PlayerMark] = None,
-        gameboard: Optional[SquareGameboard] = None,
+        player_mark: PlayerMark | None = None,
+        gameboard: SquareGameboard | None = None,
     ) -> int:
         """Change the mark of the cell with coordinate on the gameboard.
 
@@ -217,8 +217,8 @@ class TwoPlayerBoardGame:
 
     def get_available_moves(
         self,
-        gameboard: Optional[SquareGameboard] = None,
-        player_mark: Optional[PlayerMark] = None,
+        gameboard: SquareGameboard | None = None,
+        player_mark: PlayerMark | None = None,
     ) -> Coordinates:
         """Return a tuple of coordinates of all the ``EMPTY`` cells.
 
@@ -252,7 +252,7 @@ class TwoPlayerBoardGame:
             draw and ``1`` corresponds to win of ``player``.
 
         """
-        winners: Tuple[PlayerMark, ...] = self._get_winners(
+        winners: tuple[PlayerMark, ...] = self._get_winners(
             gameboard=gameboard
         )
         if len(winners) == 1:
@@ -279,7 +279,7 @@ class TwoPlayerBoardGame:
         )
 
     def cli(
-        self, player_types: Union[Tuple[str, str], Tuple[()]] = ()
+        self, player_types: tuple[str, str] | tuple[()] = ()
     ) -> None:
         """Command line interface of the game.
 
@@ -329,7 +329,7 @@ class TwoPlayerBoardGame:
             logger.debug(f'{command=}')
 
     def _add_players(
-        self, *, player_types: Tuple[PlayerType, PlayerType]
+        self, *, player_types: tuple[PlayerType, PlayerType]
     ) -> None:
         """Create instances of `Player` and add them to :attr:`.players`.
 
@@ -348,7 +348,7 @@ class TwoPlayerBoardGame:
 
     def _get_winners(
         self, *, gameboard: SquareGameboard
-    ) -> Tuple[PlayerMark, ...]:
+    ) -> tuple[PlayerMark, ...]:
         """Return a tuple of :class:`Player` instances defined as winner(s).
 
         .. warning::

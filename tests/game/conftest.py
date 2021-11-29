@@ -64,7 +64,9 @@ def wrong_players_number(request: Any) -> int:
 
 
 @pytest.fixture(
-    scope='session', params=['0', 'A', '/'], ids=lambda symbol: f'{symbol=}',
+    scope='session',
+    params=['0', 'A', '/'],
+    ids=lambda symbol: f'{symbol=}',
 )
 def wrong_grid_symbol(request: Any) -> str:
     return cast(str, request.param)

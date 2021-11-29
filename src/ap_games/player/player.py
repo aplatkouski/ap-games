@@ -77,7 +77,7 @@ class Player:
             available coordinates, else ``undefined_coordinate``.
 
         """
-        available_moves: Tuple[
+        available_moves: tuple[
             Coordinate, ...
         ] = self.game.get_available_moves()
         return (

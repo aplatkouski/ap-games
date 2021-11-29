@@ -42,8 +42,8 @@ class TicTacToe(TwoPlayerBoardGame):
 
     def get_status(
         self,
-        gameboard: Optional[SquareGameboard] = None,
-        player_mark: Optional[PlayerMark] = None,
+        gameboard: SquareGameboard | None = None,
+        player_mark: PlayerMark | None = None,
     ) -> GameStatus:
         """Return difference in number of marks between players.
 
@@ -73,7 +73,7 @@ class TicTacToe(TwoPlayerBoardGame):
                 active=False, message='Impossible\n', must_skip=False
             )
         else:
-            winners: Tuple[PlayerMark, ...] = self._get_winners(
+            winners: tuple[PlayerMark, ...] = self._get_winners(
                 gameboard=gameboard
             )
             if (not winners) and not self.get_available_moves(gameboard):
@@ -94,7 +94,7 @@ class TicTacToe(TwoPlayerBoardGame):
 
     def _get_winners(
         self, *, gameboard: SquareGameboard
-    ) -> Tuple[PlayerMark, ...]:
+    ) -> tuple[PlayerMark, ...]:
         """Return players who draw solid line.
 
         If all characters on a 'side' are the same and equal to the
@@ -110,8 +110,8 @@ class TicTacToe(TwoPlayerBoardGame):
         """
         gameboard = gameboard or self.gameboard
 
-        winners: List[PlayerMark] = []
-        all_sides_as_strings: List[str] = [
+        winners: list[PlayerMark] = []
+        all_sides_as_strings: list[str] = [
             ''.join(cell.mark for cell in side) for side in gameboard.all_sides
         ]
         first_player_side: str = self.players[0].mark * gameboard.size
