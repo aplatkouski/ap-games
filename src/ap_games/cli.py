@@ -30,13 +30,13 @@ if TYPE_CHECKING:
 def main() -> None:
     """Aks user about desired game and run it."""
     choice: str
-    player_types: Union[Tuple[str, str], Tuple[()]]
+    player_types: tuple[str, str] | tuple[()]
 
     settings: Settings = Settings()
     if settings.test_mode:
         run_test_mode_and_exit(settings)
 
-    supported_games: Dict[str, Game] = {
+    supported_games: dict[str, Game] = {
         '1': Game(name='Tic-Tac-Toe', game_class=TicTacToe),
         '2': Game(name='Reversi', game_class=Reversi),
     }
@@ -79,8 +79,8 @@ def run_test_mode_and_exit(settings: Settings) -> None:
 
 
 def read_argv(
-    supported_games: Dict[str, Game]
-) -> Tuple[str, Union[Tuple[str, str], Tuple[()]]]:
+    supported_games: dict[str, Game]
+) -> tuple[str, tuple[str, str] | tuple[()]]:
     """Read command-line arguments and return them.
 
     :param supported_games: A ``dict`` where the key is the game number
@@ -96,7 +96,7 @@ def read_argv(
     """
     sys.argv.pop(0)
     selected_game: str = ''
-    player_types: Union[Tuple[str, str], Tuple[()]] = ()
+    player_types: tuple[str, str] | tuple[()] = ()
     if len(sys.argv) >= 1:
         selected_game = sys.argv[0]
         selected_game = selected_game.title()

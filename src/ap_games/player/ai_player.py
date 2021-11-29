@@ -35,7 +35,7 @@ __all__ = ('AIPlayer',)
 class AIPlayer(Player):
     """AIPlayer in a board game."""
 
-    _max_depth: ClassVar[Dict[PlayerType, int]] = {
+    _max_depth: ClassVar[dict[PlayerType, int]] = {
         'easy': 0,
         'medium': 2,
         'hard': 4,
@@ -69,10 +69,10 @@ class AIPlayer(Player):
 
     def _minimax(  # noqa: C901
         self,
-        gameboard: Optional[SquareGameboard] = None,
-        player_mark: Optional[PlayerMark] = None,
+        gameboard: SquareGameboard | None = None,
+        player_mark: PlayerMark | None = None,
         depth: int = 0,
-        tree: Optional[Tree] = None,
+        tree: Tree | None = None,
     ) -> Move:
         """Return the move selected by the minimax algorithm.
 
@@ -192,7 +192,11 @@ class AIPlayer(Player):
 
         node: Node = tree.setdefault(
             gameboard.grid_as_string,
-            Node(player_mark=player_mark, move=UNDEFINED_MOVE, sub_tree={},),
+            Node(
+                player_mark=player_mark,
+                move=UNDEFINED_MOVE,
+                sub_tree={},
+            ),
         )
         last_move_coefficient: int = 1
         last: bool = False
@@ -208,7 +212,8 @@ class AIPlayer(Player):
             if depth < self.max_depth:
                 if node.sub_tree:
                     return self._go_through_subtree(
-                        depth=depth + 1, tree=node.sub_tree,
+                        depth=depth + 1,
+                        tree=node.sub_tree,
                     )
                 else:  # node.sub_tree == {}
                     return self._go_through_available_moves(
@@ -256,7 +261,7 @@ class AIPlayer(Player):
             instance of namedtuple :class:`Move`.
 
         """
-        moves: List[Move] = []
+        moves: list[Move] = []
         for coordinate in self.game.get_available_moves(
             gameboard, player_mark
         ):
@@ -290,8 +295,8 @@ class AIPlayer(Player):
             instance of namedtuple :class:`Move`.
 
         """
-        player_marks: Set[PlayerMark] = set()
-        moves: List[Move] = []
+        player_marks: set[PlayerMark] = set()
+        moves: list[Move] = []
         for grid, node in tree.items():
             if node.move.last:
                 moves.append(node.move)
@@ -319,7 +324,9 @@ class AIPlayer(Player):
                     # Therefore cached ``tree`` will never be deeper
                     # than ``max_depth``.
                     fake_gameboard: SquareGameboard = SquareGameboard(
-                        grid=grid, indent=indent, colorized=False,
+                        grid=grid,
+                        indent=indent,
+                        colorized=False,
                     )
 
                     move = self._get_terminal_score(
@@ -374,7 +381,10 @@ class AIPlayer(Player):
             self.tree = new_tree
 
     def _choose_best_move(
-        self, moves: List[Move], player_mark: PlayerMark, depth: int,
+        self,
+        moves: list[Move],
+        player_mark: PlayerMark,
+        depth: int,
     ) -> Move:
         indent: str = '\t' * depth
 
@@ -383,15 +393,15 @@ class AIPlayer(Player):
                 f'{indent}Choose the best move from moves -> ' f'{str(moves)}'
             )
 
-        corrected_moves: List[Move] = self._correct_priority_coordinates(
+        corrected_moves: list[Move] = self._correct_priority_coordinates(
             moves=moves, player_mark=player_mark, depth=depth
         )
 
-        desired_moves: List[Move] = self._extract_desired_moves(
+        desired_moves: list[Move] = self._extract_desired_moves(
             moves=corrected_moves, player_mark=player_mark, depth=depth
         )
 
-        most_likely_moves: List[Move] = self._extract_most_likely_moves(
+        most_likely_moves: list[Move] = self._extract_most_likely_moves(
             moves=desired_moves, player_mark=player_mark, depth=depth
         )
 
@@ -407,8 +417,11 @@ class AIPlayer(Player):
         return move
 
     def _correct_priority_coordinates(
-        self, moves: List[Move], player_mark: PlayerMark, depth: int,
-    ) -> List[Move]:
+        self,
+        moves: list[Move],
+        player_mark: PlayerMark,
+        depth: int,
+    ) -> list[Move]:
         """Change score of moves from with high priority coordinates.
 
         .. note::
@@ -435,7 +448,7 @@ class AIPlayer(Player):
             op = add
         else:
             op = sub
-        corrected_moves: List[Move] = []
+        corrected_moves: list[Move] = []
         for move in moves:
             if move.coordinate in self.game.priority_coordinates:
                 corrected_moves.append(
@@ -451,8 +464,8 @@ class AIPlayer(Player):
         return corrected_moves
 
     def _extract_desired_moves(
-        self, moves: List[Move], player_mark: PlayerMark, depth: int
-    ) -> List[Move]:
+        self, moves: list[Move], player_mark: PlayerMark, depth: int
+    ) -> list[Move]:
         """Calculate min-max score and returning moves with that score.
 
         Maximize score of self own move or minimize score of enemy
@@ -472,7 +485,7 @@ class AIPlayer(Player):
             score_func = min
 
         desired_score: int = score_func(move.score for move in moves)
-        desired_moves: List[Move] = [
+        desired_moves: list[Move] = [
             move for move in moves if move.score == desired_score
         ]
         if logger.level == logging.DEBUG:
@@ -484,8 +497,8 @@ class AIPlayer(Player):
         return desired_moves
 
     def _extract_most_likely_moves(
-        self, moves: List[Move], player_mark: PlayerMark, depth: int
-    ) -> List[Move]:
+        self, moves: list[Move], player_mark: PlayerMark, depth: int
+    ) -> list[Move]:
         """Maximize probability of self own winning or enemy losing.
 
         .. warning::
@@ -512,7 +525,7 @@ class AIPlayer(Player):
         desired_potential: int = potential_func(
             move.potential for move in moves
         )
-        most_likely_moves: List[Move] = [
+        most_likely_moves: list[Move] = [
             move for move in moves if move.potential == desired_potential
         ]
         if logger.level == logging.DEBUG:

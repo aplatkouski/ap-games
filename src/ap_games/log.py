@@ -14,7 +14,9 @@ handlers = [file_handler, console_handler]
 file_handler.setLevel(logging.WARNING)
 console_handler.setLevel(logging.DEBUG)
 logging.basicConfig(
-    format='%(message)s', level=settings.log_level, handlers=handlers,
+    format='%(message)s',
+    level=settings.log_level,
+    handlers=handlers,
 )
 
 logger = logging.getLogger()

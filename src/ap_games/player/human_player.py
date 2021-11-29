@@ -25,7 +25,7 @@ class HumanPlayer(Player):
 
         """
         logger.info(f'Enter the coordinate [{self._mark}]: ')
-        input_list: List[str] = sys.stdin.readline().strip().split()
+        input_list: list[str] = sys.stdin.readline().strip().split()
         logger.debug(f'{input_list=}')
         if len(input_list) >= 2:
             column, row = input_list[:2]

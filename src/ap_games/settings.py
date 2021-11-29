@@ -19,7 +19,7 @@ __all__ = ('Settings',)
 class Settings:
     """Class introduces the settings of the `ap_games` module."""
 
-    _singleton: Optional[Settings] = None
+    _singleton: Settings | None = None
 
     def __new__(cls, **kwargs: Any) -> Any:
         """Return one "single" instance of current class.
@@ -37,7 +37,7 @@ class Settings:
         config_file: str = '',
         log_file: str = '',
         log_level: str = '',
-        test_mode: Optional[bool] = None,
+        test_mode: bool | None = None,
     ) -> None:
         self.base_dir: Path = Path(__file__).parent.resolve(strict=True)
 
@@ -55,13 +55,17 @@ class Settings:
         )
         self.path_to_log_file: Path = self.base_dir / log_file
 
-        self.log_level: str = log_level or os.environ.get(
-            'AP_GAMES_LOGLEVEL'
-        ) or self.config_ini['log_level']
+        self.log_level: str = (
+            log_level
+            or os.environ.get('AP_GAMES_LOGLEVEL')
+            or self.config_ini['log_level']
+        )
 
-        self.test_mode: bool = test_mode if (
-            test_mode is not None
-        ) else self.config_ini['test_mode']
+        self.test_mode: bool = (
+            test_mode
+            if (test_mode is not None)
+            else self.config_ini['test_mode']
+        )
 
     def read_config(self) -> None:
         """Read the configuration from `config.ini` and set it."""

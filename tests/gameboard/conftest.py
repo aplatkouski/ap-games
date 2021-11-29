@@ -71,7 +71,7 @@ def gap_symbol(request: Any) -> str:
 
 
 @pytest.fixture(scope='session')
-def all_coordinates_2x2() -> List[Coordinate]:
+def all_coordinates_2x2() -> list[Coordinate]:
     return [
         Coordinate(x=1, y=1),
         Coordinate(x=1, y=2),
@@ -117,15 +117,18 @@ def cell_2_1_x() -> Cell:
 
 @pytest.fixture(scope='module')
 def gameboard_2x2_cells(
-    cell_1_2_empty: Cell, cell_2_2_o: Cell, cell_1_1_x: Cell, cell_2_1_x: Cell,
-) -> Tuple[Cell, ...]:
+    cell_1_2_empty: Cell,
+    cell_2_2_o: Cell,
+    cell_1_1_x: Cell,
+    cell_2_1_x: Cell,
+) -> tuple[Cell, ...]:
     return cell_1_2_empty, cell_2_2_o, cell_1_1_x, cell_2_1_x
 
 
 @pytest.fixture(scope='module')
 def gameboard_2x2_columns(
-    gameboard_2x2_cells: Tuple[Cell, ...]
-) -> Tuple[Side, ...]:
+    gameboard_2x2_cells: tuple[Cell, ...]
+) -> tuple[Side, ...]:
     return (
         (gameboard_2x2_cells[0], gameboard_2x2_cells[2]),
         (gameboard_2x2_cells[1], gameboard_2x2_cells[3]),
@@ -134,8 +137,8 @@ def gameboard_2x2_columns(
 
 @pytest.fixture(scope='module')
 def gameboard_2x2_rows(
-    gameboard_2x2_cells: Tuple[Cell, ...]
-) -> Tuple[Side, ...]:
+    gameboard_2x2_cells: tuple[Cell, ...]
+) -> tuple[Side, ...]:
     return (
         (gameboard_2x2_cells[2], gameboard_2x2_cells[3]),
         (gameboard_2x2_cells[0], gameboard_2x2_cells[1]),
@@ -144,8 +147,8 @@ def gameboard_2x2_rows(
 
 @pytest.fixture(scope='module')
 def gameboard_2x2_diagonals(
-    gameboard_2x2_cells: Tuple[Cell, ...]
-) -> Tuple[Side, Side]:
+    gameboard_2x2_cells: tuple[Cell, ...]
+) -> tuple[Side, Side]:
     return (
         (gameboard_2x2_cells[0], gameboard_2x2_cells[3]),
         (gameboard_2x2_cells[2], gameboard_2x2_cells[1]),
@@ -153,7 +156,7 @@ def gameboard_2x2_diagonals(
 
 
 @pytest.fixture(scope='module')
-def grid_2x2_as_string(gameboard_2x2_cells: Tuple[Cell, ...]) -> str:
+def grid_2x2_as_string(gameboard_2x2_cells: tuple[Cell, ...]) -> str:
     return ''.join(cell.mark for cell in gameboard_2x2_cells)
 
 
