@@ -24,3 +24,4 @@ pytest-cov==2.10.1
 pyupgrade==2.7.2
 tox==3.20.1
 twine==3.2.0
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
