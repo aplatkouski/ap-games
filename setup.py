@@ -4,7 +4,7 @@ setup(
     extras_require=dict(
         test=['coverage==5.3', 'pytest==6.1.1', 'pytest-cov==2.10.1'],
         dev=[
-            'black==19.10b0',
+            'black==24.3.0',
             'bump2version==1.0.1',
             'check-manifest==0.44',
             'darglint==1.5.5',
